@@ -104,6 +104,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -501,20 +502,57 @@ public class PublicationService extends AbstractPublicationService {
 		return this.authorshipRepository.findByPublicationId(publicationId);
 	}
 
-	/** Link a person and a publication.
-	 * The person is added at the given position in the list of the authors.
-	 * If this list contains authors with a rank greater than or equals to the given rank,
-	 * the ranks of these authors is incremented.
+	/** Replies the count of the publication per year.
 	 *
-	 * @param personId the identifier of the person.
-	 * @param publicationId the identifier of the publication.
-	 * @param rank the position of the person in the list of authors. To be sure to add the authorship at the end,
-	 *     pass {@link Integer#MAX_VALUE}.
-	 * @param updateOtherAuthorshipRanks indicates if the authorships ranks are re-arranged in order to be consistent.
-	 *     If it is {@code false}, the given rank as argument is put into the authorship without change.
-	 * @return the added authorship
+	 * @return the years.
+	 *
+	 * */
+	public List<Long> getCountPublicationsByYear(){
+		return this.publicationRepository.countPublicationsByYear();
+	}
+
+	/** Replies the years.
+	 *
+	 * @return the years.
+	 *
+	 *
+	 * */
+	public List<Integer> getAllYears(){
+		return this.publicationRepository.findDistinctPublicationYears();
+	}
+
+	/** Replies the count of the publication per year.
+	 *
+	 * @return the years.
+	 *
+	 *
 	 */
-	public Authorship addAuthorship(long personId, long publicationId, int rank, boolean updateOtherAuthorshipRanks) {
+	public List<Map<String,Long>> getCountPublicationByTypeByYear(PublicationType type){
+		return this.publicationRepository.countPublicationsByYearForTypeOrdered(type);
+	}
+
+	public List<String> getAllType(){
+		return this.publicationRepository.findAllDistinctPublicationTypes();
+	}
+
+
+    /**
+     * Link a person and a publication.
+     * The person is added at the given position in the list of the authors.
+     * If this list contains authors with a rank greater than or equals to the given rank,
+     * the ranks of these authors is incremented.
+     *
+     * @param personId                   the identifier of the person.
+     * @param publicationId              the identifier of the publication.
+     * @param rank                       the position of the person in the list of authors. To be sure to add the authorship at the end,
+     *                                   pass {@link Integer#MAX_VALUE}.
+     * @param updateOtherAuthorshipRanks indicates if the authorships ranks are re-arranged in order to be consistent.
+     *                                   If it is {@code false}, the given rank as argument is put into the authorship without change.
+     * @return the added authorship
+     */
+
+
+    public Authorship addAuthorship(long personId, long publicationId, int rank, boolean updateOtherAuthorshipRanks) {
 		final var optPerson = this.personRepository.findById(Long.valueOf(personId));
 		if (optPerson.isPresent()) {
 			final var optPub = this.publicationRepository.findById(Long.valueOf(publicationId));

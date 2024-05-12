@@ -19,14 +19,13 @@
 
 package fr.utbm.ciad.labmanager.data.publication;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 /** JPA repository for a publication.
  * 
@@ -44,9 +43,6 @@ public interface PublicationRepository extends JpaRepository<Publication, Long>,
 	 * @return the list of publications.
 	 */
 	List<Publication> findAllByAuthorshipsPersonId(long personId);
-
-	@Query("SELECT p FROM Publication p LEFT JOIN FETCH p.authorships a WHERE p.id = :id")
-	Optional<Publication> findByIdJoinAuthorships(long id);
 
 	/** Replies the list of publications for the person with the given webpage identifier.
 	 *
@@ -83,6 +79,27 @@ public interface PublicationRepository extends JpaRepository<Publication, Long>,
 	 * @return the set of publications for the given year.
 	 * @since 3.6
 	 */
-	List<Publication> findAllByPublicationYear(Integer year);
+	List<Publication> findAllByPublicationYear(Integer publicationYear);
+
+	/** Replies the list of year.
+	 *
+	 * @return the set of years.
+	 * @since 3.6
+	 */
+	@Query("SELECT COUNT(p) AS publicationCount FROM Publication p GROUP BY p.publicationYear")
+	List<Long> countPublicationsByYear();
+
+	// Méthode pour obtenir les années des publications
+	@Query("SELECT DISTINCT p.publicationYear FROM Publication p")
+	List<Integer> findDistinctPublicationYears();
+
+	@Query("SELECT p.type AS publicationType, COUNT(p) AS publicationCount FROM Publication p WHERE p.publicationYear = :year GROUP BY p.type ORDER BY p.type ASC")
+	List<Map<String, Long>> countPublicationsByTypeForYear(@Param("year") int year);
+
+	@Query("SELECT COUNT(p) AS publicationCount FROM Publication p WHERE p.type = :type GROUP BY p.publicationYear ORDER BY p.publicationYear ASC")
+	List<Map<String, Long>> countPublicationsByYearForTypeOrdered(@Param("type") PublicationType type);
+
+	@Query("SELECT DISTINCT p.type FROM Publication p")
+	List<String> findAllDistinctPublicationTypes();
 
 }

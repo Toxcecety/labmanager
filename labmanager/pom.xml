@@ -218,6 +218,11 @@
             <artifactId>vaadin-testbench-junit5</artifactId>
             <scope>test</scope>
           </dependency>
+		  <dependency>
+			<groupId>com.storedobject.chart</groupId>
+			<artifactId>so-charts</artifactId>
+			<version>3.2.6</version>
+		  </dependency>
     </dependencies>
 
     <build>
