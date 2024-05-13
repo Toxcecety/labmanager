@@ -535,6 +535,9 @@ public class PublicationService extends AbstractPublicationService {
 		return this.publicationRepository.findAllDistinctPublicationTypes();
 	}
 
+	public Integer getCountPublicationByTypeByYearV2(PublicationType type, Integer year){
+		return this.publicationRepository.countPublicationsForTypeAndYearV2(type,year);
+	}
 
     /**
      * Link a person and a publication.

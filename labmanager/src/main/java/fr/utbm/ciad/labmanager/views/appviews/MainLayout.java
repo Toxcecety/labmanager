@@ -55,7 +55,6 @@ import fr.utbm.ciad.labmanager.utils.country.CountryCode;
 import fr.utbm.ciad.labmanager.views.ViewConstants;
 import fr.utbm.ciad.labmanager.views.appviews.about.AboutView;
 import fr.utbm.ciad.labmanager.views.appviews.assocstructures.AssociatedStructuresListView;
-import fr.utbm.ciad.labmanager.views.appviews.charts.ChartViewTest;
 import fr.utbm.ciad.labmanager.views.appviews.charts.ChartsView;
 import fr.utbm.ciad.labmanager.views.appviews.conferences.ConferencesListView;
 import fr.utbm.ciad.labmanager.views.appviews.culture.ScientificCultureActionsListView;
