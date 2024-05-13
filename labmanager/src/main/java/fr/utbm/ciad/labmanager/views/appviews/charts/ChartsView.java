@@ -24,7 +24,7 @@ public class ChartsView extends HorizontalLayout {
         this.publicationService = publicationService;
 
         SOChart soChart = new SOChart();
-        soChart.setSize("1200px", "500px");
+        soChart.setSize("1300px", "550px");
 
 
         BarChartPublication barChartPublication = new BarChartPublication(this.publicationService);
@@ -41,7 +41,7 @@ public class ChartsView extends HorizontalLayout {
             yValuesLine.add(countPublication.get(i));
         }
         LineChart lineChart = new LineChart(categoryData, yValuesLine);
-        lineChart.setName("Line #1");
+        lineChart.setName("Total of publications");
 
         YAxis yAxis = new YAxis(DataType.NUMBER);
         XAxis xAxis = new XAxis(categoryData);
@@ -49,7 +49,7 @@ public class ChartsView extends HorizontalLayout {
         xAxis.setName("Years");
 
         RectangularCoordinate rc = new RectangularCoordinate(xAxis, yAxis);
-
+        rc.getPosition(true).setTop(Size.percentage(30));
         for(BarChart br: barChartList){
             br.plotOn(rc);
         }
@@ -57,15 +57,13 @@ public class ChartsView extends HorizontalLayout {
         lineChart.plotOn(rc);
 
         Title title = new Title("Number of publications per years");
-        title.setSubtext("MO50");
-        title.getPosition(true).setLeft(Size.percentage(60));
+        title.getPosition(true).setLeft(Size.percentage(10));
 
 
         soChart.disableDefaultLegend();
         Legend legend = new Legend();
-        legend.showVertically();
         legend.getPosition(true).setLeft(Size.percentage(1));
-
+        legend.getPosition(true).setTop(Size.percentage(6));
         soChart.add(legend, title,rc );
         add(soChart);
     }
