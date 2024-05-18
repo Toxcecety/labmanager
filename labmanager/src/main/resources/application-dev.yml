@@ -89,6 +89,7 @@ vaadin:
   whitelisted-packages: com.vaadin,org.vaadin,dev.hilla,com.example.application
 
 labmanager:
+  debug: true
   application-name: CIAD Lab Manager
   application-image: /images/ciadpicture.svg
   application-copyright: Copyright CIAD Laboratory, Université de Technologie de Belfort Montbéliard 2019-2024. This program is under the terms of the GNU Affero General Public License.

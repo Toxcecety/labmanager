@@ -26,9 +26,12 @@ import java.util.function.Supplier;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.provider.SortDirection;
@@ -57,6 +60,7 @@ import jakarta.persistence.criteria.Root;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.springframework.context.support.MessageSourceAccessor;
+import org.vaadin.lineawesome.LineAwesomeIcon;
 
 /** List all the organization memberships.
  * 
@@ -81,6 +85,8 @@ public class StandardMembershipListView extends AbstractTwoLevelTreeListView<Per
 	private final OrganizationAddressService addressService;
 
 	private final ScientificAxisService axisService;
+
+	private MenuItem extendsContractButton;
 
 	private Column<TreeListEntity<Person, Membership>> periodColumn;
 
@@ -143,6 +149,50 @@ public class StandardMembershipListView extends AbstractTwoLevelTreeListView<Per
 			return SortDirection.DESCENDING;
 		}
 		return SortDirection.ASCENDING;
+	}
+	@Override
+	protected MenuBar createMenuBar() {
+		var menu = super.createMenuBar();
+		if (menu == null) {
+			menu = new MenuBar();
+			menu.addThemeVariants(MenuBarVariant.LUMO_ICON);
+		}
+
+		this.extendsContractButton = ComponentFactory.addIconItem(menu, LineAwesomeIcon.EXPAND_SOLID, null, null, it -> extendContractSelection());
+		this.extendsContractButton.setEnabled(false);
+
+		return menu;
+	}
+
+	private void extendContractSelection() {
+		final var selection = this.getGrid().getSelectionModel().getFirstSelectedItem();
+		if (selection.isPresent()) {
+			final TreeListEntity<Person, Membership> entity = selection.get();
+			extendContract(entity);
+		}
+	}
+
+	protected final void extendContract(TreeListEntity<Person, Membership> entity) {
+		final var membership = entity.getChildEntity();
+		// Membership may be null because the user has clicked on the person name (the root).
+		if (membership != null) {
+			editChildEntity(membership);
+		}
+	}
+
+	protected void extendContractChildEntity(Membership membership) {
+		openExtendContractEditor(membership, getTranslation("views.membership.extend_contract_membership", membership.getPerson().getFullName())); //$NON-NLS-1$
+	}
+
+	protected void openExtendContractEditor(Membership membership, String title) {
+
+	}
+
+	@Override
+	protected void onSelectionChange(Set<?> selection) {
+		final int size = selection.size();
+		super.onSelectionChange(selection);
+		this.extendsContractButton.setEnabled(size == 1);
 	}
 
 	@Override
@@ -291,6 +341,11 @@ public class StandardMembershipListView extends AbstractTwoLevelTreeListView<Per
 	@Override
 	public void localeChange(LocaleChangeEvent event) {
 		super.localeChange(event);
+
+		if (this.extendsContractButton != null) {
+			ComponentFactory.setIconItemText(this.extendsContractButton, getTranslation("views.extend_contract")); //$NON-NLS-1$
+		}
+
 		getFirstColumn().setHeader(getTranslation("views.person")); //$NON-NLS-1$
 		this.periodColumn.setHeader(getTranslation("views.period")); //$NON-NLS-1$
 		this.serviceColumn.setHeader(getTranslation("views.service")); //$NON-NLS-1$
