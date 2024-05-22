@@ -176,16 +176,22 @@ public class StandardMembershipListView extends AbstractTwoLevelTreeListView<Per
 		final var membership = entity.getChildEntity();
 		// Membership may be null because the user has clicked on the person name (the root).
 		if (membership != null) {
-			editChildEntity(membership);
+			openExtendContractEditor(membership, getTranslation("views.membership.extend_contract_membership", membership.getPerson().getFullName())); //$NON-NLS-1$;
 		}
 	}
 
-	protected void extendContractChildEntity(Membership membership) {
-		openExtendContractEditor(membership, getTranslation("views.membership.extend_contract_membership", membership.getPerson().getFullName())); //$NON-NLS-1$
-	}
-
 	protected void openExtendContractEditor(Membership membership, String title) {
-
+		final var editor = new EmbeddedContractEditor(
+				this.membershipService.startEditing(membership),
+				membership.getPerson() == null,
+				getAuthenticatedUser(), getMessageSourceAccessor());
+		final var newEntity = editor.isNewEntity();
+		final SerializableBiConsumer<Dialog, Membership> refreshAll = (dialog, entity) -> refreshGrid();
+		final SerializableBiConsumer<Dialog, Membership> refreshOne = (dialog, entity) -> refreshItem(TreeListEntity.child(entity));
+		ComponentFactory.openEditionModalDialog(title, editor, false,
+				// Refresh the "old" item, even if its has been changed in the JPA database
+				newEntity ? refreshAll : refreshOne,
+				newEntity ? null : refreshAll);
 	}
 
 	@Override
