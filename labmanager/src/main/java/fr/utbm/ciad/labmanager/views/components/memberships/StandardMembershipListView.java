@@ -150,6 +150,7 @@ public class StandardMembershipListView extends AbstractTwoLevelTreeListView<Per
 		}
 		return SortDirection.ASCENDING;
 	}
+
 	@Override
 	protected MenuBar createMenuBar() {
 		var menu = super.createMenuBar();
@@ -180,6 +181,11 @@ public class StandardMembershipListView extends AbstractTwoLevelTreeListView<Per
 		}
 	}
 
+	/** Show the editor of the contract extension.
+	 *
+	 * @param membership the membership whose contract is to be extended.
+	 * @param title the title of the editor.
+	 */
 	protected void openExtendContractEditor(Membership membership, String title) {
 		final var editor = new EmbeddedContractEditor(
 				this.membershipService.startEditing(membership),
