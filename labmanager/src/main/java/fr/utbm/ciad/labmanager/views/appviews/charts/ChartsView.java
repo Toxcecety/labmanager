@@ -2,70 +2,131 @@ package fr.utbm.ciad.labmanager.views.appviews.charts;
 
 import com.storedobject.chart.*;
 
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import fr.utbm.ciad.labmanager.services.publication.PublicationService;
 import fr.utbm.ciad.labmanager.views.appviews.MainLayout;
 import fr.utbm.ciad.labmanager.views.components.charts.barchart.BarChartPublication;
+import fr.utbm.ciad.labmanager.views.components.publications.MultiPublicationTypeField;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 
+import static com.storedobject.chart.Color.TRANSPARENT;
+
 @Route(value = "charts", layout = MainLayout.class)
 @PermitAll
-public class ChartsView extends HorizontalLayout {
+public class ChartsView extends VerticalLayout {
 
     private PublicationService publicationService;
 
+    private SOChart soChart;
+
+    private List<BarChart> barChartList;
+
+    private Button buttonValidate;
+
+    private Button buttonDelete;
+
+    private BarChartPublication barChartPublication;
+
+    private MultiSelectComboBox<String> multiSelectComboBox;
 
     public ChartsView(@Autowired PublicationService publicationService) {
 
         this.publicationService = publicationService;
 
-        SOChart soChart = new SOChart();
-        soChart.setSize("1300px", "550px");
 
 
-        BarChartPublication barChartPublication = new BarChartPublication(this.publicationService);
-        List<BarChart> barChartList = barChartPublication.getBarChartList();
+
+
+        barChartPublication = new BarChartPublication(this.publicationService);
 
         CategoryData categoryData = barChartPublication.getCategoryData();
-        Data xValues = barChartPublication.getXValues();
         List<Integer> years = barChartPublication.getYears();
+        List<String> nameType = this.publicationService.getAllType();
+
+
 
         List<Long> countPublication = this.publicationService.getCountPublicationsByYear();
-        Data yValuesLine = new Data();
-        for(int i=0; i < years.size(); i++){
 
-            yValuesLine.add(countPublication.get(i));
-        }
+        /*
         LineChart lineChart = new LineChart(categoryData, yValuesLine);
         lineChart.setName("Total of publications");
 
-        YAxis yAxis = new YAxis(DataType.NUMBER);
-        XAxis xAxis = new XAxis(categoryData);
 
-        xAxis.setName("Years");
+        lineChart.getAreaStyle(true).setColors(TRANSPARENT);
+        lineChart.plotOn(barChartPublication.getRectangularCoordinate());
+        */
 
-        RectangularCoordinate rc = new RectangularCoordinate(xAxis, yAxis);
-        rc.getPosition(true).setTop(Size.percentage(30));
-        for(BarChart br: barChartList){
-            br.plotOn(rc);
-        }
+        multiSelectComboBox = new MultiSelectComboBox<>("Select Publication Types");
+        multiSelectComboBox.setItems(nameType);
+        multiSelectComboBox.setSizeFull();
+        multiSelectComboBox.addValueChangeListener(e -> {
+            Set<String> oldValue = e.getOldValue();
+            Set<String> newValue = e.getValue();
 
-        lineChart.plotOn(rc);
+            Set<String> addedItems = new HashSet<>(newValue);
+            addedItems.removeAll(oldValue);
 
-        Title title = new Title("Number of publications per years");
-        title.getPosition(true).setLeft(Size.percentage(10));
+            Set<String> removedItems = new HashSet<>(oldValue);
+            removedItems.removeAll(newValue);
+
+            if (!addedItems.isEmpty()) {
+                for (String item : addedItems) {
+                    barChartPublication.addData(item);
+                    buttonValidate.setEnabled(true);
+                }
+            }
+
+            if (!removedItems.isEmpty()) {
+                for (String item : removedItems) {
+                    barChartPublication.removeData(item);
+                }
+
+                if(multiSelectComboBox.getSelectedItems().isEmpty()){
+                    buttonValidate.setEnabled(false);
+                }
+            }
 
 
-        soChart.disableDefaultLegend();
-        Legend legend = new Legend();
-        legend.getPosition(true).setLeft(Size.percentage(1));
-        legend.getPosition(true).setTop(Size.percentage(6));
-        soChart.add(legend, title,rc );
-        add(soChart);
+        });
+
+        add(multiSelectComboBox);
+
+        buttonValidate = new Button("Create Chart");
+        buttonValidate.setEnabled(false);
+        buttonValidate.addClickListener(e -> {
+            barChartPublication.plot();
+            add(buttonDelete);
+            remove(buttonValidate);
+            add(barChartPublication.getSoChart());
+
+        });
+
+        buttonDelete = new Button("Delete Chart");
+        buttonDelete.addClickListener(e -> {
+            remove(barChartPublication.getSoChart());
+            barChartPublication.emptyChart();
+            multiSelectComboBox.clear();
+            barChartPublication = new BarChartPublication(this.publicationService);
+            remove(buttonDelete);
+            add(buttonValidate);
+        });
+        buttonDelete.addThemeVariants(ButtonVariant.LUMO_ERROR);
+
+
+        add(buttonValidate);
+
+
+
     }
 
 }

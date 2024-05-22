@@ -1,108 +1,211 @@
 package fr.utbm.ciad.labmanager.views.components.charts.barchart;
 
 import com.storedobject.chart.*;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import fr.utbm.ciad.labmanager.data.publication.PublicationType;
 import fr.utbm.ciad.labmanager.services.publication.PublicationService;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public class BarChartPublication extends BarChart{
+import static com.storedobject.chart.Color.TRANSPARENT;
+
+public class BarChartPublication {
 
     private PublicationService publicationService;
-
     private Data xValues;
-
     private List<BarChart> barChartList;
-
     private CategoryData categoryData;
-
     private List<Integer> years;
+    private MultiSelectComboBox<String> multiSelectComboBox;
+    private CoordinateSystem rectangularCoordinate;
+    private SOChart soChart;
+    private XAxis xAxis;
+    private YAxis yAxis;
+    private DataChannel dataChannel;
+    private Legend legend;
+    private Button button;
+    private LineChart lineChart;
+    private List<Integer> totalPublication;
 
 
-    public BarChartPublication(@Autowired PublicationService publicationService){
+    public BarChartPublication(@Autowired PublicationService publicationService) {
+        soChart = new SOChart();
+        soChart.setSize("1300px", "550px");
+        legend = new Legend();
+
 
         this.publicationService = publicationService;
 
+        // xValues
         xValues = new Data();
-        ArrayList<Data> yValues = new ArrayList<>();
-
-        years = this.publicationService.getAllYears();
-        List<String> nameType = this.publicationService.getAllType();
-        List<Map<String, Long>> countTypePublication;
-        Integer countTypePublicationV2;
-
         categoryData = new CategoryData();
-        xValues = new Data();
+        years = this.publicationService.getAllYears();
 
         for (Integer year : years) {
-            xValues.add(Integer.valueOf(year));
+            xValues.add(year);
             categoryData.add(year.toString());
         }
-
-        /*
-        for(int i=0; i < nameType.size(); i++){
-            countTypePublication = this.publicationService.getCountPublicationByTypeByYear(PublicationType.valueOf(nameType.get(i)));
-            yValues.add(new Data());
-            for(Map<String,Long> map : countTypePublication ){
-                for(Map.Entry<String, Long> entry : map.entrySet()){
-                    yValues.get(i).add(entry.getValue());
-                }
-            }
-        }
-        */
-        barChartList = new ArrayList<>(nameType.size());
-
-        for(int i=0; i < nameType.size(); i++){
-            yValues.add(new Data());
-            for(int x=0; x < years.size(); x++){
-                countTypePublicationV2 = this.publicationService.getCountPublicationByTypeByYearV2(PublicationType.valueOf(nameType.get(i)),years.get(x));
-                yValues.get(i).add(countTypePublicationV2);
-            }
-
-            BarChart barChart = new BarChart(categoryData,yValues.get(i));
-            barChart.setName(nameType.get(i));
-            barChart.setStackName("BC");
-
-            barChartList.add(barChart);
-        }
-
-
         xValues.setName("Years");
 
-        this.setXData(xValues);
+        // yValues
+        List<String> nameType = this.publicationService.getAllType();
+        barChartList = new ArrayList<>(nameType.size());
+
+        totalPublication = new ArrayList<>();
+        for(int i = 0; i < years.size(); i++){
+            totalPublication.add(0);
+        }
+        System.out.println(totalPublication);
+
+
+        // Rectangular coordinates
+        rectangularCoordinate = new RectangularCoordinate();
+        yAxis = new YAxis(DataType.NUMBER);
+        xAxis = new XAxis(categoryData);
+        xAxis.setName("Years");
+
+        rectangularCoordinate.addAxis(xAxis, yAxis);
+        rectangularCoordinate.getPosition(true).setTop(Size.percentage(15));
+
+        /*
+        for(String type : nameType) {
+            addData(type);
+        }
+        */
+
+
+        
+
+        // MultiSelectComboBox for user input
+
+
+
+
+
+        // Chart title, toolbox, and legend
+        Title title = new Title("Number of publications per years");
+        title.getPosition(true).setLeft(Size.percentage(10));
+
+        Toolbox toolbox = new Toolbox();
+        Toolbox.Download toolboxDownload = new Toolbox.Download();
+        toolboxDownload.setResolution(15);
+        toolbox.addButton(toolboxDownload, new Toolbox.Zoom());
+        toolbox.getPosition(true).setLeft(Size.percentage(80));
+
+        DataZoom dataZoom = new DataZoom(rectangularCoordinate, xAxis);
+
+        soChart.disableDefaultLegend();
+        legend.getPosition(true).setLeft(Size.percentage(1));
+        legend.getPosition(true).setTop(Size.percentage(6));
+        soChart.add(legend, title, rectangularCoordinate, toolbox, dataZoom);
+        soChart.setSVGRendering();
+        soChart.setDefaultBackground(TRANSPARENT);
     }
 
-    public Data getXValues(){
+    public Data getXValues() {
         return xValues;
     }
 
-    public Data getYValues(){
+    public Data getYValues() {
         Data data = new Data();
-        for(Number value : xValues){
+        for (Number value : xValues) {
             data.add(300);
         }
         return data;
     }
 
-    public List<BarChart> getBarChartList(){
+    public List<BarChart> getBarChartList() {
         return barChartList;
     }
 
-    public int getTypeSize(){
+    public int getTypeSize() {
         List<String> nameType = this.publicationService.getAllType();
         return nameType.size();
     }
 
-    public List<Integer> getYears(){
+    public List<Integer> getYears() {
         return years;
     }
 
-    public CategoryData getCategoryData(){
+    public CategoryData getCategoryData() {
         return categoryData;
     }
 
+    public MultiSelectComboBox<String> getMultiSelectComboBox() {
+        return multiSelectComboBox;
+    }
+
+    public CoordinateSystem getRectangularCoordinate() {
+        return rectangularCoordinate;
+    }
+
+    public SOChart getSoChart() {
+        return soChart;
+    }
+
+    public void addData(String chosenNameType) {
+        Data data = new Data();
+        Integer countTypePublicationV2;
+        for (int x = 0; x < years.size(); x++) {
+            countTypePublicationV2 = this.publicationService.getCountPublicationByTypeByYearV2(PublicationType.valueOf(chosenNameType), years.get(x));
+            totalPublication.set(x, countTypePublicationV2 + totalPublication.get(x));
+            data.add(countTypePublicationV2);
+        }
+
+        BarChart barChart = new BarChart(categoryData, data);
+        barChart.setName(chosenNameType);
+        barChart.setStackName("BC");
+
+        System.out.println(totalPublication);
+
+        barChartList.add(barChart);
+
+    }
+
+    public void removeData(String chosenNameType) {
+        BarChart barChart = findBarChart(chosenNameType);
+        Integer countTypePublicationV2;
+        for (int x = 0; x < years.size(); x++) {
+            countTypePublicationV2 = this.publicationService.getCountPublicationByTypeByYearV2(PublicationType.valueOf(chosenNameType), years.get(x));
+            totalPublication.set(x,totalPublication.get(x) - countTypePublicationV2);
+        }
+        barChartList.remove(barChart);
+    }
+
+    public void plot() {
+        for (BarChart b : barChartList) {
+            b.plotOn(rectangularCoordinate);
+        }
+
+        Data data = new Data();
+        data.addAll(totalPublication);
+
+        lineChart = new LineChart(categoryData,data);
+        lineChart.setName("Total of publications");
+        lineChart.plotOn(rectangularCoordinate);
+    }
+
+    public void emptyChart(){
+        barChartList.clear();
+    }
+
+    public DataChannel getDataChannel(){
+        return dataChannel;
+    }
+
+    protected BarChart findBarChart(String item){
+        for (BarChart barChart : barChartList) {
+            if (item.equals(barChart.getName())) {
+                System.out.println(item);
+                return barChart;
+            }
+        }
+        return null;
+    }
+
+    public Button getButton() {
+        return button;
+    }
 }
