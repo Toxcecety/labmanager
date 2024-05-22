@@ -25,6 +25,9 @@ import fr.utbm.ciad.labmanager.views.components.persons.EmbeddedPersonEditor;
 import jakarta.annotation.security.RolesAllowed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.MessageSourceAccessor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Objects;
@@ -37,11 +40,10 @@ public class PersonsCardView extends Main implements HasDynamicTitle, HasCompone
 
     public PersonsCardView(@Autowired PersonService personService, @Autowired UserService userService, @Autowired AuthenticatedUser authenticatedUser, @Autowired MessageSourceAccessor messages, @Autowired MembershipService membershipService, @Autowired ChronoMembershipComparator chronoMembershipComparator) {
         constructUI();
-        List<Person> persons = personService.getAllPersons();
-        for (int i = 0; i < 8; i++) {
-            if (i < persons.size()){
-                    imageContainer.add(new PersonCardView(persons.get(i), personService, userService, authenticatedUser, messages, membershipService, chronoMembershipComparator));
-            }
+        Pageable pageable = PageRequest.of(0, 8);
+        Page<Person> persons = personService.getAllPersons(pageable);
+        for (Person person : persons) {
+            imageContainer.add(new PersonCardView(person, personService, userService, authenticatedUser, messages, membershipService, chronoMembershipComparator));
         }
     }
 
