@@ -261,6 +261,11 @@ public abstract class AbstractPublicationEditor extends AbstractEntityEditor<Pub
 		this.fieldBuilder = createDynamicFieldBuilder();
 	}
 
+	@Override
+	public boolean isValidData() {
+		return super.isValidData();
+	}
+
 	/** Create the instance of the dynamic field builder.
 	 *
 	 * @return the dynamic field builder.

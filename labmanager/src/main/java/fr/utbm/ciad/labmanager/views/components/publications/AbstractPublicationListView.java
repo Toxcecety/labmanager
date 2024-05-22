@@ -791,10 +791,6 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
 		openPublicationEditor(emptyPublication, getTranslation("views.publication.add_publication")); //$NON-NLS-1$
 	}
 
-    protected void addEntity(Publication entity) {
-        openPublicationEditor(entity, getTranslation("views.publication.add_publication")); //$NON-NLS-1$
-    }
-
     protected void addEntity(Publication entity,String fileName, int index, int size) {
         openPublicationEditor(entity, getTranslation("views.publication.import_publication", index, size, fileName)); //$NON-NLS-1$
     }

@@ -748,8 +748,8 @@ public final class ComponentFactory {
 			SerializableConsumer<Dialog> deleteCallback) {
 		final var dialog = new Dialog();
 		dialog.setModal(true);
-		dialog.setCloseOnEsc(true);
-		dialog.setCloseOnOutsideClick(true);
+		dialog.setCloseOnEsc(false);
+		dialog.setCloseOnOutsideClick(false);
 		dialog.setDraggable(true);
 		dialog.setResizable(true);			
 		dialog.setWidthFull();
