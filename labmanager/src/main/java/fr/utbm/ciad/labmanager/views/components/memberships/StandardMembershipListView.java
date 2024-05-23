@@ -191,13 +191,12 @@ public class StandardMembershipListView extends AbstractTwoLevelTreeListView<Per
 				this.membershipService.startEditing(membership),
 				membership.getPerson() == null,
 				getAuthenticatedUser(), getMessageSourceAccessor());
-		final var newEntity = editor.isNewEntity();
 		final SerializableBiConsumer<Dialog, Membership> refreshAll = (dialog, entity) -> refreshGrid();
 		final SerializableBiConsumer<Dialog, Membership> refreshOne = (dialog, entity) -> refreshItem(TreeListEntity.child(entity));
 		ComponentFactory.openEditionModalDialog(title, editor, false,
 				// Refresh the "old" item, even if its has been changed in the JPA database
-				newEntity ? refreshAll : refreshOne,
-				newEntity ? null : refreshAll);
+				refreshAll,
+				null);
 	}
 
 	@Override
