@@ -198,8 +198,8 @@ public abstract class AbstractContractEditor extends AbstractEntityEditor<Member
 	public void localeChange(LocaleChangeEvent event) {
 		super.localeChange(event);
 
-		this.positionDetails.setSummaryText(getTranslation("views.membership.position_details")); //$NON-NLS-1$
-		this.to.setLabel(getTranslation("views.membership.to")); //$NON-NLS-1$
+		this.positionDetails.setSummaryText(getTranslation("views.date.end.contract")); //$NON-NLS-1$
+		this.to.setLabel(getTranslation("views.membership.edit_end_date")); //$NON-NLS-1$
 	}
 
 	/** A validator for the super organization in organization memberships.
