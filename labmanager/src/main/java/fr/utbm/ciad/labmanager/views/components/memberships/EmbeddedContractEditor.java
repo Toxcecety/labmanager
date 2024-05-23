@@ -43,7 +43,7 @@ import org.springframework.context.support.MessageSourceAccessor;
  */
 public final class EmbeddedContractEditor extends AbstractContractEditor {
 
-	private static final long serialVersionUID = 5271631470481314239L;
+	private static final long serialVersionUID = 5271631470481314240L;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(EmbeddedContractEditor.class);
 
