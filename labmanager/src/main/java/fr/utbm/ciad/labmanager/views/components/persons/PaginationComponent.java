@@ -1,6 +1,7 @@
 package fr.utbm.ciad.labmanager.views.components.persons;
 
 import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
@@ -10,11 +11,20 @@ public class PaginationComponent extends Div {
     private Button nextButton;
     private Button prevButton;
     private Span pageLabel;
+    private long totalPages;
 
-    public PaginationComponent() {
+    public PaginationComponent(long totalPages) {
+        this.totalPages = totalPages;
         nextButton = new Button("Next", click -> nextPage());
         prevButton = new Button("Previous", click -> prevPage());
         pageLabel = new Span("Page: " + (currentPage + 1));
+        if (totalPages <= 1) {
+            setVisible(false);
+        }
+        if (currentPage == totalPages) {
+            nextButton.setEnabled(false);
+        }
+        prevButton.setEnabled(false);
         add(prevButton, pageLabel, nextButton);
     }
 
@@ -28,6 +38,21 @@ public class PaginationComponent extends Div {
             currentPage--;
             fireEvent(new PageChangeEvent(this, currentPage));
         }
+    }
+
+    public int getCurrentPage() {
+        return currentPage;
+    }
+
+    public void setCurrentPage(int pageNumber) {
+        this.currentPage = pageNumber;
+        pageLabel.setText("Page: " + (currentPage + 1));
+        nextButton.setEnabled(currentPage != totalPages);
+        prevButton.setEnabled(currentPage != 0);
+    }
+
+    public void addPageChangeListener(ComponentEventListener<PageChangeEvent> listener) {
+        addListener(PageChangeEvent.class, listener);
     }
 
     public static class PageChangeEvent extends ComponentEvent<PaginationComponent> {

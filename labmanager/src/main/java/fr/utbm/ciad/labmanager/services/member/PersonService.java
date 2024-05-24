@@ -142,6 +142,10 @@ public class PersonService extends AbstractEntityService<Person> {
 		this.nameComparator = nameComparator;
 	}
 
+	public Long countAllPersons() {
+		return this.personRepository.count();
+	}
+
 	/** Replies the name parser that is used by this service.
 	 *
 	 * @return the name parser.
