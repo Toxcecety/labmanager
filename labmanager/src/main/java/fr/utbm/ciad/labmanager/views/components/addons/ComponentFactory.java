@@ -655,11 +655,28 @@ public final class ComponentFactory {
 		final SerializableBiConsumer<Dialog, T> validateCallback;
 		if (content.isBaseAdmin()) {
 			validateCallback = (dialog, entity) -> {
-				content.validateByOrganizationalStructureManager();
-				if (content.isValidData()) {
-					content.save();
+				if (content.isNewEntity()) {
+					if (content.isValidData()) {
+						if (!content.isNotSimilar()) {
+							content.notifySimilarity();
+						} else {
+							content.validateByOrganizationalStructureManager();
+							if (!content.isValidData()) {
+								content.notifyInvalidity();
+							}
+						}
+					} else {
+						content.notifyInvalidity();
+					}
 				} else {
-					content.notifyInvalidity();
+					if (content.isValidData()) {
+						content.validateByOrganizationalStructureManager();
+						if (!content.isValidData()) {
+							content.notifyInvalidity();
+						}
+					} else {
+						content.notifyInvalidity();
+					}
 				}
 			};
 		} else {
@@ -717,15 +734,32 @@ public final class ComponentFactory {
 		}
 		doOpenEditionModalDialog(title, content, mapEnterKeyToSave,
 				dialog -> {
-					if (content.isValidData()) {
-						if (content.save()) {
-							dialog.close();
-							if (saveDoneCallback != null) {
-								saveDoneCallback.accept(dialog, content.getEditedEntity());
+					if (content.isNewEntity()) {
+						if (content.isValidData()) {
+							if (content.isNotSimilar()) {
+								if (content.save()) {
+									dialog.close();
+									if (saveDoneCallback != null) {
+										saveDoneCallback.accept(dialog, content.getEditedEntity());
+									}
+								}
+							} else {
+								content.notifySimilarity();
 							}
+						} else {
+							content.notifyInvalidity();
 						}
 					} else {
-						content.notifyInvalidity();
+						if (content.isValidData()) {
+							if (content.save()) {
+								dialog.close();
+								if (saveDoneCallback != null) {
+									saveDoneCallback.accept(dialog, content.getEditedEntity());
+								}
+							}
+						} else {
+							content.notifyInvalidity();
+						}
 					}
 				},
 				validateCallback0,

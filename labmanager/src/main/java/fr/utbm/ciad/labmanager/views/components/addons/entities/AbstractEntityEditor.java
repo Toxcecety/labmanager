@@ -148,6 +148,10 @@ public abstract class AbstractEntityEditor<T extends IdentifiableEntity> extends
 	public boolean isValidData() {
 		return getEntityDataBinder().validate().isOk();
 	}
+
+	public boolean isNotSimilar() {
+		return true;
+	}
 	
 	/** Replies if the editor is launched by an user with base administration rights.
 	 * 
@@ -361,6 +365,10 @@ public abstract class AbstractEntityEditor<T extends IdentifiableEntity> extends
 	 */
 	public void notifyInvalidity() {
 		ComponentFactory.showWarningNotification(getTranslation("views.save_invalid_data")); //$NON-NLS-1$
+	}
+
+	public void notifySimilarity() {
+		ComponentFactory.showWarningNotification(getTranslation("views.save_similar_data")); //$NON-NLS-1$
 	}
 
 	/** Notify the user that the entity cannot be validated.
