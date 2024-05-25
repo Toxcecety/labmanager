@@ -66,6 +66,7 @@ import fr.utbm.ciad.labmanager.data.member.WebPageNaming;
 import fr.utbm.ciad.labmanager.data.user.User;
 import fr.utbm.ciad.labmanager.data.user.UserRole;
 import fr.utbm.ciad.labmanager.services.AbstractEntityService.EntityDeletingContext;
+import fr.utbm.ciad.labmanager.services.member.PersonService;
 import fr.utbm.ciad.labmanager.services.user.UserService.UserEditingContext;
 import fr.utbm.ciad.labmanager.utils.country.CountryCode;
 import fr.utbm.ciad.labmanager.views.ViewConstants;
@@ -94,6 +95,8 @@ import org.springframework.context.support.MessageSourceAccessor;
 public abstract class AbstractPersonEditor extends AbstractEntityEditor<Person> {
 
 	private static final long serialVersionUID = 4532244485914692596L;
+
+	private final PersonService personService;
 
 	private DetailsWithErrorMark personalInformationDetails;
 
@@ -187,18 +190,32 @@ public abstract class AbstractPersonEditor extends AbstractEntityEditor<Person> 
 	 * @param logger the logger to be used by this view.
 	 */
 	public AbstractPersonEditor(
-			UserEditingContext userContext, boolean relinkEntityWhenSaving,
+			UserEditingContext userContext, PersonService personService, boolean relinkEntityWhenSaving,
 			AuthenticatedUser authenticatedUser, MessageSourceAccessor messages, Logger logger) {
 		super(Person.class, authenticatedUser, messages, logger,
 				"views.persons.administration_details", //$NON-NLS-1$
 				"views.persons.administration.validated_person", //$NON-NLS-1$
 				userContext.getPersonContext(), relinkEntityWhenSaving);
 		this.userContext = userContext;
+		this.personService = personService;
 	}
 
 	@Override
 	public boolean isValidData() {
 		return super.isValidData() && getUserDataBinder().validate().isOk();
+	}
+
+	@Override
+	public boolean isNotSimilar() {
+		var user = getEditedUser();
+		if (user != null) {
+			var person = user.getPerson();
+			if (person != null) {
+				long id = this.personService.getPersonIdBySimilarName(person.getLastName(), person.getFirstName());
+                return id == 0;
+			}
+		}
+		return true;
 	}
 
 	@Override

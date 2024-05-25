@@ -146,6 +146,17 @@ public abstract class AbstractOrganizationEditor extends AbstractEntityEditor<Re
 	}
 
 	@Override
+	public boolean isNotSimilar() {
+		var organisation = getEditedEntity();
+		if (organisation == null) {
+			return true;
+		} else {
+			long id = this.organizationService.getResearchOrganizationIdBySimilarAcronymOrName(organisation.getAcronym(), organisation.getName());
+			return id == 0;
+		}
+	}
+
+	@Override
 	protected void createEditorContent(VerticalLayout rootContainer) {
 		createDescriptionDetails(rootContainer);
 		createGeographicalDetails(rootContainer);

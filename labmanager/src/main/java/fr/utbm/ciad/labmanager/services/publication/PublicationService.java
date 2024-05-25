@@ -90,6 +90,7 @@ import fr.utbm.ciad.labmanager.utils.io.json.JsonExporter;
 import fr.utbm.ciad.labmanager.utils.io.od.OpenDocumentTextPublicationExporter;
 import fr.utbm.ciad.labmanager.utils.io.ris.RIS;
 import fr.utbm.ciad.labmanager.utils.names.PersonNameParser;
+import fr.utbm.ciad.labmanager.utils.names.PublicationNameComparator;
 import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.arakhne.afc.progress.DefaultProgression;
@@ -170,6 +171,8 @@ public class PublicationService extends AbstractPublicationService {
 
 	private ThesisService thesisService;
 
+	private PublicationNameComparator titleComparator;
+
 	/** Constructor for injector.
 	 * This constructor is defined for being invoked by the IOC injector.
 	 *
@@ -211,6 +214,7 @@ public class PublicationService extends AbstractPublicationService {
 			@Autowired JournalRepository journalRepository,
 			@Autowired ConferenceRepository conferenceRepository,
 			@Autowired PersonNameParser nameParser,
+			@Autowired PublicationNameComparator titleComparator,
 			@Autowired BibTeX bibtex,
 			@Autowired RIS ris,
 			@Autowired HtmlDocumentExporter html,
@@ -240,6 +244,7 @@ public class PublicationService extends AbstractPublicationService {
 		this.journalRepository = journalRepository;
 		this.conferenceRepository = conferenceRepository;
 		this.nameParser = nameParser;
+		this.titleComparator = titleComparator;
 		this.bibtex = bibtex;
 		this.ris = ris;
 		this.html = html;
@@ -471,6 +476,61 @@ public class PublicationService extends AbstractPublicationService {
 			return Collections.emptyList();
 		}
 		return this.publicationRepository.findAllByTitleIgnoreCase(title);
+	}
+
+	/** Replies the database identifier for the publication with a similar title to the given title.
+	 * If there is multiple publications with similar titles, the first one is replied.
+	 * <p>The title matching is based on similarity of titles.
+	 * For using a strict equality test on names, see {@link #getPublicationsByTitle(String)}.
+	 *
+	 * @param title the title of the publication.
+	 * @return the identifier of the publication, or {@code 0} if not found.
+	 */
+	public long getPublicationIdBySimilarTitle(String title) {
+		final var publication = getPublicationBySimilarTitle(title);
+		if (publication != null) {
+			return publication.getId();
+		}
+		return 0;
+	}
+
+	/** Replies the publication with a similar title to the given title.
+	 * If there is multiple publications with similar titles, the first one is replied.
+	 * <p>The title matching is based on similarity of titles.
+	 * For using a strict equality test on names, see {@link #getPublicationsByTitle(String)}.
+	 *
+	 * @param title the title of the publication.
+	 * @return the publication, or {@code null} if not found.
+	 */
+	public Publication getPublicationBySimilarTitle(String title) {
+		if (!Strings.isNullOrEmpty(title)) {
+			for (final var publication : this.publicationRepository.findAll()) {
+				if (this.titleComparator.isSimilar(title, publication.getTitle())) {
+					return publication;
+				}
+			}
+		}
+		return null;
+	}
+
+	public List<Long> getPublicationsIdBySimilarTitle(String title) {
+		var publications = getPublicationsBySimilarTitle(title);
+		if (publications.isEmpty()) {
+			return null;
+		}
+		return publications.stream().map(Publication::getId).collect(Collectors.toList());
+	}
+
+	public List<Publication> getPublicationsBySimilarTitle(String title) {
+		List<Publication> publications = new ArrayList<>();
+		if (!Strings.isNullOrEmpty(title)) {
+			for (final var publication : this.publicationRepository.findAll()) {
+				if (this.titleComparator.isSimilar(title, publication.getTitle())) {
+					publications.add(publication);
+				}
+			}
+		}
+		return publications;
 	}
 
 	/** Replies the publications for the given year.
