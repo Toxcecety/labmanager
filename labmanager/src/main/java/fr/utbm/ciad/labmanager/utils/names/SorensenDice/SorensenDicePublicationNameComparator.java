@@ -1,13 +1,15 @@
-package fr.utbm.ciad.labmanager.utils.names;
+package fr.utbm.ciad.labmanager.utils.names.SorensenDice;
 
+import fr.utbm.ciad.labmanager.utils.names.AbstractPublicationNameComparator;
 import info.debatty.java.stringsimilarity.SorensenDice;
 import info.debatty.java.stringsimilarity.interfaces.NormalizedStringSimilarity;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
-/** Utilities for comparing journal names and publishers using the Sorensen Dice algorithm.
+/**
+ * Utilities for comparing publication names using the Sorensen Dice algorithm.
  *
- * @author $Author: sgalland$
+ * @author $Author: jferlin$
  * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
@@ -15,15 +17,15 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Primary
-public class SorensenDiceJournalNameAndPublisherComparator extends AbstractJournalNameAndPublisherComparator {
+public class SorensenDicePublicationNameComparator extends AbstractPublicationNameComparator {
 
-    private static final double DEFAULT_SIMILARITY_LEVEL = 0.7;
+    private static final double SIMILARITY_LEVEL = 0.7;
 
     /**
      * Constructor.
      */
-    public SorensenDiceJournalNameAndPublisherComparator() {
-        setSimilarityLevel(DEFAULT_SIMILARITY_LEVEL);
+    public SorensenDicePublicationNameComparator() {
+        setSimilarityLevel(SIMILARITY_LEVEL);
     }
 
     @Override

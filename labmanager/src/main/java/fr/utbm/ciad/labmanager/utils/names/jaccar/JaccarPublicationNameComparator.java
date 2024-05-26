@@ -1,8 +1,8 @@
-package fr.utbm.ciad.labmanager.utils.names;
+package fr.utbm.ciad.labmanager.utils.names.jaccar;
 
+import fr.utbm.ciad.labmanager.utils.names.AbstractPublicationNameComparator;
 import info.debatty.java.stringsimilarity.Jaccard;
 import info.debatty.java.stringsimilarity.interfaces.NormalizedStringSimilarity;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 /**

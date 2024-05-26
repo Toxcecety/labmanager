@@ -17,8 +17,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package fr.utbm.ciad.labmanager.utils.names;
+package fr.utbm.ciad.labmanager.utils.names.SorensenDice;
 
+import fr.utbm.ciad.labmanager.utils.names.AbstractOrganizationNameComparator;
 import info.debatty.java.stringsimilarity.SorensenDice;
 import info.debatty.java.stringsimilarity.interfaces.NormalizedStringSimilarity;
 import org.springframework.context.annotation.Primary;
