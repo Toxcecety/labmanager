@@ -50,6 +50,7 @@ import fr.utbm.ciad.labmanager.utils.io.json.JsonUtils;
 import fr.utbm.ciad.labmanager.utils.io.network.NetConnection;
 import fr.utbm.ciad.labmanager.utils.io.scimago.ScimagoPlatform;
 import fr.utbm.ciad.labmanager.utils.io.wos.WebOfSciencePlatform;
+import fr.utbm.ciad.labmanager.utils.names.JournalNameAndPublisherComparator;
 import fr.utbm.ciad.labmanager.utils.ranking.QuartileRanking;
 import org.arakhne.afc.progress.DefaultProgression;
 import org.arakhne.afc.progress.Progression;
@@ -86,6 +87,8 @@ public class JournalService extends AbstractEntityService<Journal> {
 
 	private final NetConnection netConnection;
 
+	private final JournalNameAndPublisherComparator journalNameAndPublisherComparator;
+
 	private final ScimagoPlatform scimago;
 
 	private final WebOfSciencePlatform wos;
@@ -110,6 +113,7 @@ public class JournalService extends AbstractEntityService<Journal> {
 			@Autowired ScimagoPlatform scimago,
 			@Autowired WebOfSciencePlatform wos,
 			@Autowired NetConnection netConnection,
+			@Autowired JournalNameAndPublisherComparator journalNameAndPublisherComparator,
 			@Autowired MessageSourceAccessor messages,
 			@Autowired Constants constants,
 			@Autowired SessionFactory sessionFactory) {
@@ -120,6 +124,7 @@ public class JournalService extends AbstractEntityService<Journal> {
 		this.scimago = scimago;
 		this.wos = wos;
 		this.netConnection = netConnection;
+		this.journalNameAndPublisherComparator = journalNameAndPublisherComparator;
 	}
 
 	/** Replies all the journals for the database.
@@ -279,6 +284,25 @@ public class JournalService extends AbstractEntityService<Journal> {
 			}
 		}
 		return 0;
+	}
+
+	public long getJournalIdBySimilarNameAndSimilarPublisher(String name, String publisher) {
+		var res = this.getJournalBySimilarNameAndSimilarPublisher(name, publisher);
+		if (res != null) {
+			return res.getId();
+		}
+		return 0;
+	}
+
+	public Journal getJournalBySimilarNameAndSimilarPublisher(String name, String publisher) {
+		if (!Strings.isNullOrEmpty(name) || !Strings.isNullOrEmpty(publisher)) {
+			for (final var journal : this.journalRepository.findAll()) {
+				if (this.journalNameAndPublisherComparator.isSimilar(name, publisher, journal.getJournalName(), journal.getPublisher())) {
+					return journal;
+				}
+			}
+		}
+		return null;
 	}
 
 	/** Create a journal into the database.
