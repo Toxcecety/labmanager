@@ -203,6 +203,7 @@ public class StandardConferenceListView extends AbstractEntityListView<Conferenc
 	protected void openConferenceEditor(Conference conference, String title) {
 		final var editor = new EmbeddedConferenceEditor(
 				this.conferenceService.startEditing(conference),
+				this.conferenceService,
 				getAuthenticatedUser(), getMessageSourceAccessor());
 		final var newEntity = editor.isNewEntity();
 		final SerializableBiConsumer<Dialog, Conference> refreshAll = (dialog, entity) -> {

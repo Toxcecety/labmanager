@@ -4,35 +4,33 @@ import info.debatty.java.stringsimilarity.interfaces.NormalizedStringSimilarity;
 
 public abstract class AbstractJournalNameAndPublisherComparator implements JournalNameAndPublisherComparator {
 
-        private double similarityLevel;
+    private double similarityLevel;
 
-        @Override
-        public double getSimilarityLevel() {
-            return this.similarityLevel;
+    @Override
+    public double getSimilarityLevel() {
+        return this.similarityLevel;
+    }
+
+    @Override
+    public void setSimilarityLevel(double similarityLevel) {
+        if (similarityLevel < 0.0) {
+            this.similarityLevel = 0.0;
+        } else {
+            this.similarityLevel = Math.min(similarityLevel, 1.0);
         }
+    }
 
-        @Override
-        public void setSimilarityLevel(double similarityLevel) {
-            if (similarityLevel < 0.0) {
-                this.similarityLevel = 0.0;
-            } else if (similarityLevel > 1.0) {
-                this.similarityLevel = 1.0;
-            } else {
-                this.similarityLevel = similarityLevel;
-            }
-        }
+    protected abstract NormalizedStringSimilarity createStringSimilarityComputer();
 
-        protected abstract NormalizedStringSimilarity createStringSimilarityComputer();
+    @Override
+    public double getSimilarity(String name1, String publisher1, String name2, String publisher2) {
+        final var similarityComputer = createStringSimilarityComputer();
+        final var s1 = similarityComputer.similarity(name1, name2);
+        final var s2 = similarityComputer.similarity(publisher1, publisher2);
+        return Math.max(s1, s2);
+    }
 
-        @Override
-        public double getSimilarity(String name1, String publisher1, String name2, String publisher2) {
-            final var similarityComputer = createStringSimilarityComputer();
-            final var s1 = similarityComputer.similarity(name1, name2);
-            final var s2 = similarityComputer.similarity(publisher1, publisher2);
-            return Math.max(s1, s2);
-        }
-
-        protected double getSimilarity(NormalizedStringSimilarity matcher, String str1, String str2) {
-            return matcher.similarity(str1, str2);
-        }
+    protected double getSimilarity(NormalizedStringSimilarity matcher, String str1, String str2) {
+        return matcher.similarity(str1, str2);
+    }
 }

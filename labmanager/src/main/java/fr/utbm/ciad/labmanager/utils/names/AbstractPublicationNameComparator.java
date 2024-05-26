@@ -28,10 +28,8 @@ public abstract class AbstractPublicationNameComparator implements PublicationNa
     public void setSimilarityLevel(double similarityLevel) {
         if (similarityLevel < 0.0) {
             this.similarityLevel = 0.0;
-        } else if (similarityLevel > 1.0) {
-            this.similarityLevel = 1.0;
         } else {
-            this.similarityLevel = similarityLevel;
+            this.similarityLevel = Math.min(similarityLevel, 1.0);
         }
     }
 
