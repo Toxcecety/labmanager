@@ -589,7 +589,6 @@ public final class ComponentFactory {
 	 * @param title the title of the box.
 	 * @param message the message in the box.
 	 * @param confirmText the text of the confirm button.
-	 * @param confirmHandler the handler invoked when the confirm button is pushed.
 	 * @return the dialog.
 	 */
 	public static ConfirmDialog newCriticalQuestionDialog(String title, String message, String confirmText) {
@@ -646,7 +645,6 @@ public final class ComponentFactory {
 	 * @param content the content of the dialog, where the editing fields are located.
 	 * @param mapEnterKeyToSave if {@code true}, the "save" button is activated when the {@code Enter}
 	 *     is pushed. If {@code false}, the {@code Enter} is not mapped to a component.
-	 * @param enableValidationButton indicates if the 'Validate' button is enabled or not.
 	 * @param saveDoneCallback the callback that is invoked after saving
 	 * @param deleteDoneCallback the callback that is invoked after deleting
 	 */
@@ -697,7 +695,6 @@ public final class ComponentFactory {
 	 * @param content the content of the dialog, where the editing fields are located.
 	 * @param mapEnterKeyToSave if {@code true}, the "save" button is activated when the {@code Enter}
 	 *     is pushed. If {@code false}, the {@code Enter} is not mapped to a component.
-	 * @param enableValidationButton indicates if the 'Validate' button is enabled or not.
 	 * @param saveDoneCallback the callback that is invoked after saving
 	 * @param validateCallback the callback for validating the information.
 	 * @param deleteDoneCallback the callback that is invoked after deleting

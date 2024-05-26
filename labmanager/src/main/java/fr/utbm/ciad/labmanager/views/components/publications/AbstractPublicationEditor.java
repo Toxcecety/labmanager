@@ -834,8 +834,6 @@ public abstract class AbstractPublicationEditor extends AbstractEntityEditor<Pub
 		}
 
 		/** Change the localized text according to the given locale
-		 *
-		 * @param locale the locale to use.
 		 */
 		public void localeChange() {
 			if (this.journal != null) {

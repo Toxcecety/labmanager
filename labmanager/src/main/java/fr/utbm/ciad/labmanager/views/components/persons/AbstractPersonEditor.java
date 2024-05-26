@@ -276,7 +276,8 @@ public abstract class AbstractPersonEditor extends AbstractEntityEditor<Person> 
 	/** Replies the binder of user data to the fields.
 	 *
 	 * @return the user data binder.
-	 * @see #getPersonDataBinder()
+	 * @see #getUserDataBinder()
+	 * @see #getEntityDataBinder()
 	 */
 	protected Binder<User> getUserDataBinder() {
 		return this.userBinder;
