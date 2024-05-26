@@ -2,6 +2,15 @@ package fr.utbm.ciad.labmanager.utils.names;
 
 import info.debatty.java.stringsimilarity.interfaces.NormalizedStringSimilarity;
 
+/**
+ * Abstract implementation of utilities for comparing journal names and publishers.
+ *
+ * @author $Author: jferlin$
+ * @version $Name$ $Revision$ $Date$
+ * @mavengroupid $GroupId$
+ * @mavenartifactid $ArtifactId$
+ * @since 4.1
+ */
 public abstract class AbstractJournalNameAndPublisherComparator implements JournalNameAndPublisherComparator {
 
     private double similarityLevel;

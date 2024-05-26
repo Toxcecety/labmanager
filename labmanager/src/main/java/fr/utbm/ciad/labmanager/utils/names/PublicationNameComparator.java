@@ -1,5 +1,14 @@
 package fr.utbm.ciad.labmanager.utils.names;
 
+/**
+ * Utilities for comparing publication names.
+ *
+ * @author $Author: jferlin$
+ * @version $Name$ $Revision$ $Date$
+ * @mavengroupid $GroupId$
+ * @mavenartifactid $ArtifactId$
+ * @since 4.1
+ */
 public interface PublicationNameComparator {
 
     /**
