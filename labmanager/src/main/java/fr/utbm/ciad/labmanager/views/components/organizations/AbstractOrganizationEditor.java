@@ -146,13 +146,13 @@ public abstract class AbstractOrganizationEditor extends AbstractEntityEditor<Re
 	}
 
 	@Override
-	public boolean isNotSimilar() {
+	public boolean isAlreadyInDatabase() {
 		var organisation = getEditedEntity();
 		if (organisation == null) {
-			return true;
+			return false;
 		} else {
 			long id = this.organizationService.getResearchOrganizationIdBySimilarAcronymOrName(organisation.getAcronym(), organisation.getName());
-			return id == 0;
+			return id != 0;
 		}
 	}
 

@@ -107,13 +107,13 @@ public abstract class AbstractConferenceEditor extends AbstractEntityEditor<Conf
 	}
 
 	@Override
-	public boolean isNotSimilar() {
+	public boolean isAlreadyInDatabase() {
 		var entity = getEditedEntity();
 		if (entity == null) {
-			return true;
+			return false;
 		} else {
 			var id = this.conferenceService.getConferenceIdBySimilarNameAndAcronyme(entity.getName(), entity.getAcronym());
-			return id == 0;
+			return id != 0;
 		}
 	}
 

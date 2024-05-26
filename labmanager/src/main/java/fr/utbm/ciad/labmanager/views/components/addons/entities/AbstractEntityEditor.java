@@ -149,8 +149,8 @@ public abstract class AbstractEntityEditor<T extends IdentifiableEntity> extends
 		return getEntityDataBinder().validate().isOk();
 	}
 
-	public boolean isNotSimilar() {
-		return true;
+	public boolean isAlreadyInDatabase() {
+		return false;
 	}
 	
 	/** Replies if the editor is launched by an user with base administration rights.

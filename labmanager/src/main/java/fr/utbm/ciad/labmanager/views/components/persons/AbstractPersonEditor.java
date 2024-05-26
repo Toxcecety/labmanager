@@ -206,16 +206,16 @@ public abstract class AbstractPersonEditor extends AbstractEntityEditor<Person> 
 	}
 
 	@Override
-	public boolean isNotSimilar() {
+	public boolean isAlreadyInDatabase() {
 		var user = getEditedUser();
 		if (user != null) {
 			var person = user.getPerson();
 			if (person != null) {
 				long id = this.personService.getPersonIdBySimilarName(person.getLastName(), person.getFirstName());
-                return id == 0;
+                return id != 0;
 			}
 		}
-		return true;
+		return false;
 	}
 
 	@Override

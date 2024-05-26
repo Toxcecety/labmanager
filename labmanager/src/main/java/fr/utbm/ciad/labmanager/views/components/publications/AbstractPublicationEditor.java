@@ -28,6 +28,7 @@ import static fr.utbm.ciad.labmanager.views.ViewConstants.HAL_ICON;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 
 import com.vaadin.componentfactory.ToggleButton;
@@ -49,13 +50,8 @@ import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import fr.utbm.ciad.labmanager.components.security.AuthenticatedUser;
-import fr.utbm.ciad.labmanager.data.publication.AbstractConferenceBasedPublication;
-import fr.utbm.ciad.labmanager.data.publication.AbstractJournalBasedPublication;
-import fr.utbm.ciad.labmanager.data.publication.ConferenceBasedPublication;
-import fr.utbm.ciad.labmanager.data.publication.JournalBasedPublication;
-import fr.utbm.ciad.labmanager.data.publication.Publication;
-import fr.utbm.ciad.labmanager.data.publication.PublicationLanguage;
-import fr.utbm.ciad.labmanager.data.publication.PublicationType;
+import fr.utbm.ciad.labmanager.data.member.Person;
+import fr.utbm.ciad.labmanager.data.publication.*;
 import fr.utbm.ciad.labmanager.data.publication.type.Book;
 import fr.utbm.ciad.labmanager.data.publication.type.BookChapter;
 import fr.utbm.ciad.labmanager.data.publication.type.ConferencePaper;
@@ -264,6 +260,35 @@ public abstract class AbstractPublicationEditor extends AbstractEntityEditor<Pub
 	@Override
 	public boolean isValidData() {
 		return super.isValidData();
+	}
+
+	@Override
+	public boolean isAlreadyInDatabase() {
+		var entity = getEditedEntity();
+		if (entity != null) {
+			List<Publication> publications = this.publicationService.getPublicationsBySimilarTitle(entity.getTitle());
+			if (!publications.isEmpty()) {
+				final List<Person> EditedEntityAuthors = entity.getAuthors();
+				for (Publication publication : publications) {
+					List<Person> finalAuthors = publication.getAuthors();
+					if (EditedEntityAuthors.size() == finalAuthors.size()) {
+						boolean check = false;
+						for (int i = 0; i < EditedEntityAuthors.size(); i++) {
+							if (!EditedEntityAuthors.get(i).equals(finalAuthors.get(i))) {
+								check = false;
+								break;
+							} else {
+								check = true;
+							}
+						}
+						if (check) {
+							return check;
+						}
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	/** Create the instance of the dynamic field builder.

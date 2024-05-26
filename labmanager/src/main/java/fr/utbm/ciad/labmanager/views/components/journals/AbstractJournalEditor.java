@@ -117,13 +117,13 @@ public abstract class AbstractJournalEditor extends AbstractEntityEditor<Journal
 	}
 
 	@Override
-	public boolean isNotSimilar() {
+	public boolean isAlreadyInDatabase() {
 		var entity = getEditedEntity();
 		if (entity == null) {
-			return true;
+			return false;
 		} else {
 			long id = this.journalService.getJournalIdBySimilarNameAndSimilarPublisher(entity.getJournalName(), entity.getPublisher());
-			return id == 0;
+			return id != 0;
 		}
 	}
 

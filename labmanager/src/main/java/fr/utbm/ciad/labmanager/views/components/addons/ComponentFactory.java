@@ -657,7 +657,7 @@ public final class ComponentFactory {
 			validateCallback = (dialog, entity) -> {
 				if (content.isNewEntity()) {
 					if (content.isValidData()) {
-						if (!content.isNotSimilar()) {
+						if (content.isAlreadyInDatabase()) {
 							content.notifySimilarity();
 						} else {
 							content.validateByOrganizationalStructureManager();
@@ -736,15 +736,15 @@ public final class ComponentFactory {
 				dialog -> {
 					if (content.isNewEntity()) {
 						if (content.isValidData()) {
-							if (content.isNotSimilar()) {
+							if (content.isAlreadyInDatabase()) {
+								content.notifySimilarity();
+							} else {
 								if (content.save()) {
 									dialog.close();
 									if (saveDoneCallback != null) {
 										saveDoneCallback.accept(dialog, content.getEditedEntity());
 									}
 								}
-							} else {
-								content.notifySimilarity();
 							}
 						} else {
 							content.notifyInvalidity();

@@ -24,8 +24,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 /** JPA repository for a publication.
@@ -85,4 +87,9 @@ public interface PublicationRepository extends JpaRepository<Publication, Long>,
 	 */
 	List<Publication> findAllByPublicationYear(Integer year);
 
+
+	@NotNull
+	@Modifying
+	@Query("SELECT p FROM Publication p LEFT JOIN FETCH p.authorships")
+	List<Publication> findAll();
 }
