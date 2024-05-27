@@ -23,7 +23,7 @@ public class PublicationCategoryBarChart extends AbstractPublicationCategoryChar
     private LineChart lineChart;
     private List<Integer> totalPublication;
     private List<PublicationType> publicationTypes;
-
+    private Legend legend;
 
     public PublicationCategoryBarChart(@Autowired PublicationService publicationService) {
         super(publicationService);
@@ -55,9 +55,13 @@ public class PublicationCategoryBarChart extends AbstractPublicationCategoryChar
         rectangularCoordinate.addAxis(xAxis, yAxis);
         rectangularCoordinate.getPosition(true).setTop(Size.percentage(15));
 
+        legend = new Legend();
+        legend.getPosition(true).setLeft(Size.percentage(1));
+        legend.getPosition(true).setTop(Size.percentage(6));
+
 
         disableDefaultLegend();
-        add(legend, rectangularCoordinate, toolbox);
+        add(legend, rectangularCoordinate);
         setSVGRendering();
         setDefaultBackground(TRANSPARENT);
     }

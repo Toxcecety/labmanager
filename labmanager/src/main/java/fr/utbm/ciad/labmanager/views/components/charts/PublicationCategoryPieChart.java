@@ -63,12 +63,9 @@ public class PublicationCategoryPieChart extends AbstractPublicationCategoryChar
         pieChart = new PieChart(categoryData,data);
 
         Chart.Label label = pieChart.getLabel(true);
-        label.setInside(true);
-        label.setFormatter("{1}");
-
+        label.setInside(false);
+        label.setFormatter("{0} - {1}");
         pieChart.setLabel(label);
-
-
 
 
 

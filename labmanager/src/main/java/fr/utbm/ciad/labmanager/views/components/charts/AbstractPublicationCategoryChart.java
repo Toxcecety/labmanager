@@ -14,8 +14,6 @@ public abstract class AbstractPublicationCategoryChart extends AbstractSOChartCh
 
     protected PublicationService publicationService;
 
-    protected Legend legend;
-
     protected Toolbox toolbox;
 
     private List<PublicationType> publicationTypeList;
@@ -35,14 +33,11 @@ public abstract class AbstractPublicationCategoryChart extends AbstractSOChartCh
         toolbox.addButton(toolboxDownload, new Toolbox.Zoom());
         toolbox.getPosition(true).setLeft(Size.percentage(80));
 
-        legend = new Legend();
-        legend.getPosition(true).setLeft(Size.percentage(1));
-        legend.getPosition(true).setTop(Size.percentage(6));
 
         disableDefaultLegend();
         setSVGRendering();
         setDefaultBackground(TRANSPARENT);
-        add(legend, toolbox);
+        add(toolbox);
 
     }
 

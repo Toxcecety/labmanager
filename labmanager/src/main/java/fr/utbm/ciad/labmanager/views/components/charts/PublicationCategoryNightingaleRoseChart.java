@@ -1,6 +1,7 @@
 package fr.utbm.ciad.labmanager.views.components.charts;
 
 import com.storedobject.chart.*;
+import com.storedobject.chart.Chart;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import fr.utbm.ciad.labmanager.data.publication.PublicationType;
@@ -59,6 +60,12 @@ public class PublicationCategoryNightingaleRoseChart extends AbstractPublication
         }
 
         nightingaleRoseChart = new NightingaleRoseChart(categoryData,data);
+
+        Chart.Label label = nightingaleRoseChart.getLabel(true);
+        label.setInside(false);
+        label.setFormatter("{0} - {1}");
+        nightingaleRoseChart.setLabel(label);
+
         add(nightingaleRoseChart);
         return this;
     }
