@@ -63,8 +63,6 @@ public class ChartsView extends VerticalLayout {
                 new Div(nightingaleChart));
         add(tabSheet);
 
-        YearRange yearRange = new YearRange(publicationService);
-        add(yearRange);
     }
 
 }
