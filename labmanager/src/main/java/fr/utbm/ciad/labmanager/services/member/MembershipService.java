@@ -21,17 +21,7 @@ package fr.utbm.ciad.labmanager.services.member;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -818,6 +808,58 @@ public class MembershipService extends AbstractEntityService<Membership> {
 			return criteriaBuilder.or(conditions);
 		}
 
+	}
+
+	/** Iterator on the memberships of a person.
+	 * This iterator is filtering the memberships in order to reply only the active memberships.
+	 *
+	 */
+	private static class MembershipIterator implements Iterator<Membership> {
+		private final Iterator<Membership> base;
+
+		private boolean foundActive;
+
+		private Membership next;
+
+		private MembershipIterator(Person person, MembershipService membershipService, Comparator<Membership> membershipComparator){
+			this.base = membershipService.getMembershipsForPerson(person.getId()).stream()
+					.filter(it -> !it.isFuture()).sorted(membershipComparator).iterator();
+			searchNext();
+		}
+
+		private void searchNext() {
+			this.next = null;
+			if (this.base.hasNext()) {
+				final var mbr = this.base.next();
+				if (!mbr.isFormer() || !this.foundActive) {
+					this.foundActive = true;
+					this.next = mbr;
+				}
+			}
+		}
+
+		@Override
+		public boolean hasNext() {
+			return this.next != null;
+		}
+
+		@Override
+		public Membership next() {
+			final var currentNext = this.next;
+			searchNext();
+			return currentNext;
+		}
+
+	}
+	public List<String> getActiveMembershipsForPerson(Person person, Comparator<Membership> membershipComparator) {
+		List<String> labels = new ArrayList<>();
+        Iterator<Membership> memberships = new MembershipIterator(person, this, membershipComparator);
+        while (memberships.hasNext()){
+            final var mbr = memberships.next();
+            final var organization = mbr.getDirectResearchOrganization();
+            labels.add(organization.getAcronymOrName());
+        }
+        return labels;
 	}
 
 }
