@@ -49,6 +49,7 @@ import fr.utbm.ciad.labmanager.services.organization.ResearchOrganizationService
 import fr.utbm.ciad.labmanager.utils.country.CountryCode;
 import fr.utbm.ciad.labmanager.utils.io.filemanager.DownloadableFileManager;
 import fr.utbm.ciad.labmanager.views.components.addons.ComponentFactory;
+import fr.utbm.ciad.labmanager.views.components.addons.SimilarityError;
 import fr.utbm.ciad.labmanager.views.components.addons.converters.StringTrimer;
 import fr.utbm.ciad.labmanager.views.components.addons.details.DetailsWithErrorMark;
 import fr.utbm.ciad.labmanager.views.components.addons.details.DetailsWithErrorMarkStatusHandler;
@@ -146,14 +147,19 @@ public abstract class AbstractOrganizationEditor extends AbstractEntityEditor<Re
 	}
 
 	@Override
-	public boolean isAlreadyInDatabase() {
+	public SimilarityError isAlreadyInDatabase() {
 		var organisation = getEditedEntity();
-		if (organisation == null) {
-			return false;
-		} else {
+		if (organisation != null) {
 			long id = this.organizationService.getResearchOrganizationIdBySimilarAcronymOrName(organisation.getAcronym(), organisation.getName());
-			return id != 0;
+			if (id == 0) {
+				return SimilarityError.NO_ERROR;
+			} else if (id == organisation.getId()) {
+				return SimilarityError.NO_ERROR;
+			} else {
+				return SimilarityError.SAME_NAME_AND_ACRONYM;
+			}
 		}
+		return SimilarityError.NO_ERROR;
 	}
 
 	@Override

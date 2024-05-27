@@ -37,6 +37,7 @@ import fr.utbm.ciad.labmanager.data.conference.Conference;
 import fr.utbm.ciad.labmanager.services.AbstractEntityService.EntityEditingContext;
 import fr.utbm.ciad.labmanager.services.conference.ConferenceService;
 import fr.utbm.ciad.labmanager.views.components.addons.ComponentFactory;
+import fr.utbm.ciad.labmanager.views.components.addons.SimilarityError;
 import fr.utbm.ciad.labmanager.views.components.addons.converters.StringTrimer;
 import fr.utbm.ciad.labmanager.views.components.addons.details.DetailsWithErrorMark;
 import fr.utbm.ciad.labmanager.views.components.addons.details.DetailsWithErrorMarkStatusHandler;
@@ -107,14 +108,19 @@ public abstract class AbstractConferenceEditor extends AbstractEntityEditor<Conf
 	}
 
 	@Override
-	public boolean isAlreadyInDatabase() {
+	public SimilarityError isAlreadyInDatabase() {
 		var entity = getEditedEntity();
-		if (entity == null) {
-			return false;
-		} else {
+		if (entity != null) {
 			var id = this.conferenceService.getConferenceIdBySimilarNameAndAcronyme(entity.getName(), entity.getAcronym());
-			return id != 0;
+			if (id == 0) {
+				return SimilarityError.NO_ERROR;
+			} else if (id == entity.getId()) {
+				return SimilarityError.NO_ERROR;
+			} else {
+				return SimilarityError.SAME_NAME_AND_ACRONYM;
+			}
 		}
+		return SimilarityError.NO_ERROR;
 	}
 
 	@Override

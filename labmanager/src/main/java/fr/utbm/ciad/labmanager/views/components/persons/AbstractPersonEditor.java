@@ -71,6 +71,7 @@ import fr.utbm.ciad.labmanager.services.user.UserService.UserEditingContext;
 import fr.utbm.ciad.labmanager.utils.country.CountryCode;
 import fr.utbm.ciad.labmanager.views.ViewConstants;
 import fr.utbm.ciad.labmanager.views.components.addons.ComponentFactory;
+import fr.utbm.ciad.labmanager.views.components.addons.SimilarityError;
 import fr.utbm.ciad.labmanager.views.components.addons.converters.StringTrimer;
 import fr.utbm.ciad.labmanager.views.components.addons.details.DetailsWithErrorMark;
 import fr.utbm.ciad.labmanager.views.components.addons.details.DetailsWithErrorMarkStatusHandler;
@@ -206,16 +207,22 @@ public abstract class AbstractPersonEditor extends AbstractEntityEditor<Person> 
 	}
 
 	@Override
-	public boolean isAlreadyInDatabase() {
+	public SimilarityError isAlreadyInDatabase() {
 		var user = getEditedUser();
 		if (user != null) {
 			var person = user.getPerson();
 			if (person != null) {
 				long id = this.personService.getPersonIdBySimilarName(person.getLastName(), person.getFirstName());
-                return id != 0;
+                if (id == 0) {
+					return SimilarityError.NO_ERROR;
+				} else if (id == person.getId()) {
+					return SimilarityError.NO_ERROR;
+				} else {
+					return SimilarityError.SAME_NAME;
+				}
 			}
 		}
-		return false;
+		return SimilarityError.NO_ERROR;
 	}
 
 	@Override

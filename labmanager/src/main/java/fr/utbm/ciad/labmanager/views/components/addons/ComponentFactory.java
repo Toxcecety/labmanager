@@ -91,6 +91,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import org.apache.commons.lang3.StringUtils;
 import org.arakhne.afc.vmutil.FileSystem;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
@@ -653,28 +654,18 @@ public final class ComponentFactory {
 		final SerializableBiConsumer<Dialog, T> validateCallback;
 		if (content.isBaseAdmin()) {
 			validateCallback = (dialog, entity) -> {
-				if (content.isNewEntity()) {
-					if (content.isValidData()) {
-						if (content.isAlreadyInDatabase()) {
-							content.notifySimilarity();
-						} else {
-							content.validateByOrganizationalStructureManager();
-							if (!content.isValidData()) {
-								content.notifyInvalidity();
-							}
-						}
+				if (content.isValidData()) {
+					final var SimilarityType = content.isAlreadyInDatabase();
+
+					if (SimilarityType.isSimilarityError()) {
+						content.notifySimilarityError(SimilarityType.getSimilarityErrorMessage());
+					} else if (SimilarityType.isSimilarityWarning()) {
+						content.notifySimilarityWarning(SimilarityType.getSimilarityErrorMessage());
 					} else {
-						content.notifyInvalidity();
+						content.validateByOrganizationalStructureManager();
 					}
 				} else {
-					if (content.isValidData()) {
-						content.validateByOrganizationalStructureManager();
-						if (!content.isValidData()) {
-							content.notifyInvalidity();
-						}
-					} else {
-						content.notifyInvalidity();
-					}
+					content.notifyInvalidity();
 				}
 			};
 		} else {
@@ -709,6 +700,47 @@ public final class ComponentFactory {
 		} else {
 			validateCallback0 = null;
 		}
+		final SerializableConsumer<Dialog> deleteCallback = getDialogSerializableConsumer(content, deleteDoneCallback);
+		doOpenEditionModalDialog(title, content, mapEnterKeyToSave,
+				dialog -> {
+					if (content.isValidData()) {
+						var SimilarityType = content.isAlreadyInDatabase();
+
+						if (SimilarityType.isSimilarityError()) {
+							content.notifySimilarityError(SimilarityType.getSimilarityErrorMessage());
+						} else if (SimilarityType.isSimilarityWarning()) {
+							final ConfirmDialog confirmDialog = new ConfirmDialog();
+							confirmDialog.setHeader(content.getTranslation("views.save.entity")); //$NON-NLS-1$
+							confirmDialog.setText(SimilarityType.getSimilarityErrorMessage()); //$NON-NLS-1$
+							confirmDialog.setCancelable(true);
+							confirmDialog.setCancelText(content.getTranslation("views.save.cancel")); //$NON-NLS-1$
+							confirmDialog.setConfirmText(content.getTranslation("views.save")); //$NON-NLS-1$
+							confirmDialog.addConfirmListener(event -> {
+								if (content.save()) {
+									dialog.close();
+									if (saveDoneCallback != null) {
+										saveDoneCallback.accept(dialog, content.getEditedEntity());
+									}
+								}
+							});
+							confirmDialog.open();
+						} else {
+							if (content.save()) {
+								dialog.close();
+								if (saveDoneCallback != null) {
+									saveDoneCallback.accept(dialog, content.getEditedEntity());
+								}
+							}
+						}
+					} else {
+						content.notifyInvalidity();
+					}
+				},
+				validateCallback0,
+				deleteCallback);
+	}
+
+	private static <T extends IdentifiableEntity> @Nullable SerializableConsumer<Dialog> getDialogSerializableConsumer(AbstractEntityEditor<T> content, SerializableBiConsumer<Dialog, T> deleteDoneCallback) {
 		final SerializableConsumer<Dialog> deleteCallback;
 		if (deleteDoneCallback != null) {
 			deleteCallback = dialog -> {
@@ -729,38 +761,7 @@ public final class ComponentFactory {
 		} else {
 			deleteCallback = null;
 		}
-		doOpenEditionModalDialog(title, content, mapEnterKeyToSave,
-				dialog -> {
-					if (content.isNewEntity()) {
-						if (content.isValidData()) {
-							if (content.isAlreadyInDatabase()) {
-								content.notifySimilarity();
-							} else {
-								if (content.save()) {
-									dialog.close();
-									if (saveDoneCallback != null) {
-										saveDoneCallback.accept(dialog, content.getEditedEntity());
-									}
-								}
-							}
-						} else {
-							content.notifyInvalidity();
-						}
-					} else {
-						if (content.isValidData()) {
-							if (content.save()) {
-								dialog.close();
-								if (saveDoneCallback != null) {
-									saveDoneCallback.accept(dialog, content.getEditedEntity());
-								}
-							}
-						} else {
-							content.notifyInvalidity();
-						}
-					}
-				},
-				validateCallback0,
-				deleteCallback);
+		return deleteCallback;
 	}
 
 	/** Open a standard dialog box for editing an information.

@@ -39,6 +39,7 @@ import fr.utbm.ciad.labmanager.data.member.Person;
 import fr.utbm.ciad.labmanager.services.AbstractEntityService.EntityEditingContext;
 import fr.utbm.ciad.labmanager.services.journal.JournalService;
 import fr.utbm.ciad.labmanager.views.components.addons.ComponentFactory;
+import fr.utbm.ciad.labmanager.views.components.addons.SimilarityError;
 import fr.utbm.ciad.labmanager.views.components.addons.converters.StringTrimer;
 import fr.utbm.ciad.labmanager.views.components.addons.details.DetailsWithErrorMark;
 import fr.utbm.ciad.labmanager.views.components.addons.details.DetailsWithErrorMarkStatusHandler;
@@ -117,14 +118,19 @@ public abstract class AbstractJournalEditor extends AbstractEntityEditor<Journal
 	}
 
 	@Override
-	public boolean isAlreadyInDatabase() {
+	public SimilarityError isAlreadyInDatabase() {
 		var entity = getEditedEntity();
-		if (entity == null) {
-			return false;
-		} else {
+		if (entity != null) {
 			long id = this.journalService.getJournalIdBySimilarNameAndSimilarPublisher(entity.getJournalName(), entity.getPublisher());
-			return id != 0;
+			if (id == 0) {
+				return SimilarityError.NO_ERROR;
+			} else if (id == entity.getId()) {
+				return SimilarityError.NO_ERROR;
+			} else {
+				return SimilarityError.SAME_TITLE_AND_PUBLISHER;
+			}
 		}
+		return SimilarityError.NO_ERROR;
 	}
 
 	@Override

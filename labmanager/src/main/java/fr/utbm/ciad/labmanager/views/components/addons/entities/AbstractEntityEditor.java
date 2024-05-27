@@ -41,6 +41,7 @@ import fr.utbm.ciad.labmanager.services.AbstractEntityService.EntityDeletingCont
 import fr.utbm.ciad.labmanager.services.AbstractEntityService.EntityEditingContext;
 import fr.utbm.ciad.labmanager.views.ViewConstants;
 import fr.utbm.ciad.labmanager.views.components.addons.ComponentFactory;
+import fr.utbm.ciad.labmanager.views.components.addons.SimilarityError;
 import fr.utbm.ciad.labmanager.views.components.addons.details.DetailsWithErrorMark;
 import fr.utbm.ciad.labmanager.views.components.users.UserIdentityChangedObserver;
 import org.slf4j.Logger;
@@ -149,8 +150,8 @@ public abstract class AbstractEntityEditor<T extends IdentifiableEntity> extends
 		return getEntityDataBinder().validate().isOk();
 	}
 
-	public boolean isAlreadyInDatabase() {
-		return false;
+	public SimilarityError isAlreadyInDatabase() {
+		return SimilarityError.NO_ERROR;
 	}
 	
 	/** Replies if the editor is launched by an user with base administration rights.
@@ -367,8 +368,12 @@ public abstract class AbstractEntityEditor<T extends IdentifiableEntity> extends
 		ComponentFactory.showWarningNotification(getTranslation("views.save_invalid_data")); //$NON-NLS-1$
 	}
 
-	public void notifySimilarity() {
-		ComponentFactory.showWarningNotification(getTranslation("views.save_similar_data")); //$NON-NLS-1$
+	public void notifySimilarityError(String message) {
+		ComponentFactory.showErrorNotification(message); //$NON-NLS-1$
+	}
+
+	public void notifySimilarityWarning(String message) {
+		ComponentFactory.showWarningNotification(message); //$NON-NLS-1$
 	}
 
 	/** Notify the user that the entity cannot be validated.

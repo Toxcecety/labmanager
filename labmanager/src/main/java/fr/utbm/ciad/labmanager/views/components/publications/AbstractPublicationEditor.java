@@ -73,6 +73,7 @@ import fr.utbm.ciad.labmanager.services.scientificaxis.ScientificAxisService;
 import fr.utbm.ciad.labmanager.services.user.UserService;
 import fr.utbm.ciad.labmanager.utils.io.filemanager.DownloadableFileManager;
 import fr.utbm.ciad.labmanager.views.components.addons.ComponentFactory;
+import fr.utbm.ciad.labmanager.views.components.addons.SimilarityError;
 import fr.utbm.ciad.labmanager.views.components.addons.converters.StringToDoiConverter;
 import fr.utbm.ciad.labmanager.views.components.addons.converters.StringToKeywordsConverter;
 import fr.utbm.ciad.labmanager.views.components.addons.converters.StringTrimer;
@@ -258,37 +259,33 @@ public abstract class AbstractPublicationEditor extends AbstractEntityEditor<Pub
 	}
 
 	@Override
-	public boolean isValidData() {
-		return super.isValidData();
-	}
-
-	@Override
-	public boolean isAlreadyInDatabase() {
+	public SimilarityError isAlreadyInDatabase() {
 		var entity = getEditedEntity();
+		SimilarityError returned = SimilarityError.NO_ERROR;
 		if (entity != null) {
 			List<Publication> publications = this.publicationService.getPublicationsBySimilarTitle(entity.getTitle());
 			if (!publications.isEmpty()) {
+				returned = SimilarityError.SAME_TITLE_BUT_DIFFERENT_AUTHORS;
 				final List<Person> EditedEntityAuthors = entity.getAuthors();
 				for (Publication publication : publications) {
 					List<Person> finalAuthors = publication.getAuthors();
 					if (EditedEntityAuthors.size() == finalAuthors.size()) {
-						boolean check = false;
 						for (int i = 0; i < EditedEntityAuthors.size(); i++) {
 							if (!EditedEntityAuthors.get(i).equals(finalAuthors.get(i))) {
-								check = false;
+								returned = SimilarityError.SAME_TITLE_BUT_DIFFERENT_AUTHORS;
 								break;
 							} else {
-								check = true;
+								returned = SimilarityError.SAME_TITLE_AND_AUTHORS;
 							}
 						}
-						if (check) {
-							return check;
+						if (returned.isSimilarityError()) {
+							return returned;
 						}
 					}
 				}
 			}
 		}
-		return false;
+		return returned;
 	}
 
 	/** Create the instance of the dynamic field builder.
