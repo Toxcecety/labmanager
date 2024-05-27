@@ -100,7 +100,7 @@ public interface PublicationRepository extends JpaRepository<Publication, Long>,
 	List<Map<String, Long>> countPublicationsByYearForTypeOrdered(@Param("type") PublicationType type);
 
 	@Query("SELECT DISTINCT p.type FROM Publication p")
-	List<String> findAllDistinctPublicationTypes();
+	List<PublicationType> findAllDistinctPublicationTypes();
 
 	@Query("SELECT COUNT(p) AS publicationCount FROM Publication p WHERE p.type = :type AND p.publicationYear = :year")
 	Integer countPublicationsForTypeAndYearV2(@Param("type") PublicationType type, @Param("year") Integer year);

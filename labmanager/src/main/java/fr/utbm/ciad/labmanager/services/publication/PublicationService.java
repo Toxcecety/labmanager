@@ -48,14 +48,7 @@ import fr.utbm.ciad.labmanager.data.journal.Journal;
 import fr.utbm.ciad.labmanager.data.journal.JournalRepository;
 import fr.utbm.ciad.labmanager.data.member.Person;
 import fr.utbm.ciad.labmanager.data.member.PersonRepository;
-import fr.utbm.ciad.labmanager.data.publication.Authorship;
-import fr.utbm.ciad.labmanager.data.publication.AuthorshipRepository;
-import fr.utbm.ciad.labmanager.data.publication.ConferenceBasedPublication;
-import fr.utbm.ciad.labmanager.data.publication.JournalBasedPublication;
-import fr.utbm.ciad.labmanager.data.publication.Publication;
-import fr.utbm.ciad.labmanager.data.publication.PublicationLanguage;
-import fr.utbm.ciad.labmanager.data.publication.PublicationRepository;
-import fr.utbm.ciad.labmanager.data.publication.PublicationType;
+import fr.utbm.ciad.labmanager.data.publication.*;
 import fr.utbm.ciad.labmanager.data.publication.type.Book;
 import fr.utbm.ciad.labmanager.data.publication.type.BookChapter;
 import fr.utbm.ciad.labmanager.data.publication.type.ConferencePaper;
@@ -531,12 +524,23 @@ public class PublicationService extends AbstractPublicationService {
 		return this.publicationRepository.countPublicationsByYearForTypeOrdered(type);
 	}
 
-	public List<String> getAllType(){
+	public List<PublicationType> getAllType(){
 		return this.publicationRepository.findAllDistinctPublicationTypes();
 	}
 
 	public Integer getCountPublicationByTypeByYearV2(PublicationType type, Integer year){
 		return this.publicationRepository.countPublicationsForTypeAndYearV2(type,year);
+	}
+
+	public List<String> getAllCategories(){
+		List<PublicationType> publicationTypes = getAllType();
+		List<String> publicationCategories = new ArrayList<>();
+		for(PublicationType publicationType : publicationTypes){
+			if(!publicationCategories.contains(publicationType.getCategory(true).toString())){
+				publicationCategories.add(publicationType.getCategory(true).toString());
+			}
+		}
+		return publicationCategories;
 	}
 
     /**
