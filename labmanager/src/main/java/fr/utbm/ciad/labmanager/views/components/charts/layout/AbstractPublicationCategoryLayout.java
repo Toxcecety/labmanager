@@ -81,10 +81,10 @@ public abstract class AbstractPublicationCategoryLayout<T extends PublicationCat
         });
 
 
-        validateButton = new Button("Create Chart");
+        validateButton = new Button(getTranslation("views.charts.create"));
         validateButton.setEnabled(false);
         validateButton.addClickListener(e -> {
-            if(Objects.equals(validateButton.getText(), "Create Chart")){
+            if(Objects.equals(validateButton.getText(), getTranslation("views.charts.create"))){
                 if(!yearRange.getButtonState()){
                     chart.setYear(yearRange.getChosenStartValue());
                 }else{
@@ -97,9 +97,9 @@ public abstract class AbstractPublicationCategoryLayout<T extends PublicationCat
                 }
 
                 horizontalLayout1.add(this.chart.createChart());
-                validateButton.setText("Refresh Chart");
+                validateButton.setText(getTranslation("views.charts.refresh"));
 
-            }else if(Objects.equals(validateButton.getText(), "Refresh Chart")){
+            }else if(Objects.equals(validateButton.getText(), getTranslation("views.charts.refresh"))){
                 horizontalLayout1.remove(this.chart.createChart());
                 this.chart = factory.create(this.publicationService);
 

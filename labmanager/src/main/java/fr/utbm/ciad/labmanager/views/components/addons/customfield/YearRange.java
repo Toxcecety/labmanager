@@ -44,7 +44,7 @@ public class YearRange extends CustomField<Integer> {
         horizontalLayout.setAlignItems(FlexComponent.Alignment.END);
 
         start = new Select<>();
-        start.setLabel("Start");
+        start.setLabel(getTranslation("views.start"));
         start.setItems(years);
         start.setValue(years.get(0));
         chosenStartValue = years.get(0);
@@ -57,7 +57,7 @@ public class YearRange extends CustomField<Integer> {
         });
 
         end = new Select<>();
-        end.setLabel("End");
+        end.setLabel(getTranslation("views.end"));
         end.setItems(years.subList(1, years.size()));
         end.setValue(years.get(years.size()-1));
         chosenEndValue = years.get(years.size()-1);
@@ -67,7 +67,7 @@ public class YearRange extends CustomField<Integer> {
 
         });
 
-        button = new Button("Set period");
+        button = new Button(getTranslation("views.set_period"));
         button.addSingleClickListener(e -> switchPeriodState());
         button.setMinWidth("150px");
         buttonState = false;
@@ -98,11 +98,11 @@ public class YearRange extends CustomField<Integer> {
 
     protected void switchPeriodState(){
         if(buttonState){
-            button.setText("Set period");
+            button.setText(getTranslation("views.set_period"));
             horizontalLayout.remove(text,end);
             buttonState = false;
         }else{
-            button.setText("Set year");
+            button.setText(getTranslation("views.set_year"));
             horizontalLayout.add(text,end);
             buttonState = true;
 

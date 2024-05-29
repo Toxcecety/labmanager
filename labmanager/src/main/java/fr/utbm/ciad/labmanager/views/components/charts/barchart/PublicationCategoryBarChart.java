@@ -37,7 +37,7 @@ public class PublicationCategoryBarChart extends AbstractPublicationCategoryChar
         categoryData = new CategoryData();
 
 
-        xValues.setName("Years");
+        xValues.setName(getTranslation("views.years"));
 
         // yValues
         publicationTypes = getPublicationTypeList();
@@ -50,7 +50,7 @@ public class PublicationCategoryBarChart extends AbstractPublicationCategoryChar
         rectangularCoordinate = new RectangularCoordinate();
         yAxis = new YAxis(DataType.NUMBER);
         xAxis = new XAxis(categoryData);
-        xAxis.setName("Years");
+        xAxis.setName(getTranslation("views.years"));
 
         rectangularCoordinate.addAxis(xAxis, yAxis);
         rectangularCoordinate.getPosition(true).setTop(Size.percentage(15));
