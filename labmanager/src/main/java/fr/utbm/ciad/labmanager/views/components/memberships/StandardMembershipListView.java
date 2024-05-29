@@ -1,6 +1,6 @@
 /*
  * $Id$
- * 
+ *
  * Copyright (c) 2019-2024, CIAD Laboratory, Universite de Technologie de Belfort Montbeliard
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,29 +19,32 @@
 
 package fr.utbm.ciad.labmanager.views.components.memberships;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Supplier;
-
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import fr.utbm.ciad.labmanager.components.security.AuthenticatedUser;
+import fr.utbm.ciad.labmanager.data.member.MemberStatus;
 import fr.utbm.ciad.labmanager.data.member.Membership;
 import fr.utbm.ciad.labmanager.data.member.Person;
 import fr.utbm.ciad.labmanager.data.organization.ResearchOrganization;
+import fr.utbm.ciad.labmanager.services.AbstractEntityService;
 import fr.utbm.ciad.labmanager.services.AbstractEntityService.EntityDeletingContext;
 import fr.utbm.ciad.labmanager.services.member.MembershipService;
 import fr.utbm.ciad.labmanager.services.member.PersonService;
@@ -62,8 +65,15 @@ import org.slf4j.Logger;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Supplier;
+
 /** List all the organization memberships.
- * 
+ *
  * @author $Author: sgalland$
  * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
@@ -75,7 +85,7 @@ public class StandardMembershipListView extends AbstractTwoLevelTreeListView<Per
 	private static final long serialVersionUID = 2320930215751419329L;
 
 	private final MembershipService membershipService;
-	
+
 	private final PersonService personService;
 
 	private final UserService userService;
@@ -142,7 +152,7 @@ public class StandardMembershipListView extends AbstractTwoLevelTreeListView<Per
 	protected List<Column<TreeListEntity<Person, Membership>>> getInitialSortingColumns() {
 		return Arrays.asList(getFirstColumn(), this.periodColumn);
 	}
-	
+
 	@Override
 	protected SortDirection getInitialSortingDirection(Column<TreeListEntity<Person, Membership>> column) {
 		if (column == this.periodColumn) {
@@ -169,34 +179,70 @@ public class StandardMembershipListView extends AbstractTwoLevelTreeListView<Per
 		final var selection = this.getGrid().getSelectionModel().getFirstSelectedItem();
 		if (selection.isPresent()) {
 			final TreeListEntity<Person, Membership> entity = selection.get();
-			extendContract(entity);
-		}
-	}
-
-	protected final void extendContract(TreeListEntity<Person, Membership> entity) {
-		final var membership = entity.getChildEntity();
-		// Membership may be null because the user has clicked on the person name (the root).
-		if (membership != null) {
-			openExtendContractEditor(membership, getTranslation("views.membership.extend_contract_membership", membership.getPerson().getFullName())); //$NON-NLS-1$;
+			if (entity.getChildEntity() != null) {
+				openExtendContractEditor(this.membershipService.startEditing(entity.getChildEntity()), getTranslation("views.membership.extend_contract_membership", entity.getChildEntity().getPerson().getFullName())); //$NON-NLS-1$;
+			}
 		}
 	}
 
 	/** Show the editor of the contract extension.
 	 *
-	 * @param membership the membership whose contract is to be extended.
+	 * @param context the editing context.
 	 * @param title the title of the editor.
 	 */
-	protected void openExtendContractEditor(Membership membership, String title) {
-		final var editor = new EmbeddedContractEditor(
-				this.membershipService.startEditing(membership),
-				membership.getPerson() == null,
-				getAuthenticatedUser(), getMessageSourceAccessor());
-		final SerializableBiConsumer<Dialog, Membership> refreshAll = (dialog, entity) -> refreshGrid();
-		final SerializableBiConsumer<Dialog, Membership> refreshOne = (dialog, entity) -> refreshItem(TreeListEntity.child(entity));
-		ComponentFactory.openEditionModalDialog(title, editor, false,
-				// Refresh the "old" item, even if its has been changed in the JPA database
-				refreshAll,
-				null);
+	protected void openExtendContractEditor(AbstractEntityService.EntityEditingContext<Membership> context, String title) {
+
+		LocalDate date = context.getEntity().getMemberToWhen() == null ? context.getEntity().getMemberSinceWhen() : context.getEntity().getMemberToWhen();
+
+		Dialog dialog = new Dialog(title);
+
+		var errorMessage = new Span();
+		errorMessage.setVisible(false);
+
+		var datePicker = new DatePicker(getTranslation("views.membership.to"));
+		datePicker.setValue(date);
+
+		var comboBox = new ComboBox<MemberStatus>(getTranslation("views.membership.status"));
+		comboBox.setItems(MemberStatus.values());
+		comboBox.setValue(context.getEntity().getMemberStatus());
+		comboBox.setItemLabelGenerator(this::getStatusLabel);
+		comboBox.setRequired(true);
+		comboBox.setPrefixComponent(VaadinIcon.DOCTOR.create());
+
+		VerticalLayout dialogLayout = new VerticalLayout(errorMessage, datePicker, comboBox);
+		dialogLayout.setPadding(false);
+		dialogLayout.setSpacing(false);
+		dialogLayout.setAlignItems(FlexComponent.Alignment.STRETCH);
+		dialogLayout.getStyle().set("width", "18rem").set("max-width", "100%");
+		dialog.add(dialogLayout);
+
+		var buttonAccept = new Button("Accept", event -> {
+			context.getEntity().setMemberStatus(comboBox.getValue());
+			if (datePicker.getValue().compareTo(date) > 0) {
+				context.getEntity().setMemberToWhen(datePicker.getValue());
+                try {
+                    context.save();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+				refreshGrid();
+                dialog.close();
+			} else {
+				// Show error message
+				errorMessage.setText("The end date must be after the current end date");
+				errorMessage.setVisible(true);
+			}
+		});
+		var buttonCancel = new Button("Cancel", event -> {
+			dialog.close();
+		});
+
+		dialog.getFooter().add(buttonCancel, buttonAccept);
+		dialog.open();
+	}
+
+	private String getStatusLabel(MemberStatus status) {
+		return status.getLabel(getMessageSourceAccessor(), null, false, getLocale());
 	}
 
 	@Override
@@ -364,7 +410,7 @@ public class StandardMembershipListView extends AbstractTwoLevelTreeListView<Per
 	}
 
 	/** UI and JPA filters for {@link StandardMembershipListView}.
-	 * 
+	 *
 	 * @author $Author: sgalland$
 	 * @version $Name$ $Revision$ $Date$
 	 * @mavengroupid $GroupId$
@@ -398,7 +444,7 @@ public class StandardMembershipListView extends AbstractTwoLevelTreeListView<Per
 		protected void resetFilters() {
 			this.includeTypes.setValue(Boolean.TRUE);
 		}
-		
+
 		@Override
 		protected Predicate buildPredicateForDefaultOrganization(Root<Membership> root, CriteriaQuery<?> query,
 				CriteriaBuilder criteriaBuilder, ResearchOrganization defaultOrganization) {
