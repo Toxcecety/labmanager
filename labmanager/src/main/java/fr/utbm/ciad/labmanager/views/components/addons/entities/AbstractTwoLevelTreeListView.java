@@ -299,7 +299,7 @@ public abstract class AbstractTwoLevelTreeListView<R extends IdentifiableEntity,
 			final var originalStream = AbstractTwoLevelTreeListView.this.childEntityFetcher.fetch(
 					query.getParent().getId(),
 					VaadinSpringDataHelpers.toSpringPageRequest(query),
-					this.filters).stream();
+					null).stream();
 			return originalStream.map(it -> TreeListEntity.child(it));
 		}
 
