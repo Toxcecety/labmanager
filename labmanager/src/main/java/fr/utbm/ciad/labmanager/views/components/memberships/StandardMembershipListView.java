@@ -142,7 +142,9 @@ public class StandardMembershipListView extends AbstractTwoLevelTreeListView<Per
 				(rootEntity) -> {
 					return rootEntity.getMemberships().size();
 				});
-		setChildEntityFetcher(this.membershipService::getMembershipsForPerson);
+		setChildEntityFetcher((parentId, pageRequest, filters) -> {
+			return this.membershipService.getMembershipsForPerson(parentId, pageRequest, filters);
+		});
 		initializeDataInGrid(getGrid(), getFilters());
 	}
 
@@ -214,7 +216,7 @@ public class StandardMembershipListView extends AbstractTwoLevelTreeListView<Per
 		dialogLayout.getStyle().set("width", "18rem").set("max-width", "100%");
 		dialog.add(dialogLayout);
 
-		var buttonAccept = new Button("Accept", event -> {
+		var buttonAccept = new Button(getTranslation("views.validate"), event -> {
 			context.getEntity().setMemberStatus(comboBox.getValue());
 			if (datePicker.getValue().isAfter(date)) {
 				context.getEntity().setMemberToWhen(datePicker.getValue());
@@ -231,7 +233,7 @@ public class StandardMembershipListView extends AbstractTwoLevelTreeListView<Per
 				errorMessage.setVisible(true);
 			}
 		});
-		var buttonCancel = new Button("Cancel", event -> {
+		var buttonCancel = new Button(getTranslation("views.cancel"), event -> {
 			dialog.close();
 		});
 
@@ -252,7 +254,7 @@ public class StandardMembershipListView extends AbstractTwoLevelTreeListView<Per
 
 	@Override
 	protected AbstractFilters<Membership> createFilters() {
-		return new MembershipFilters(this.organizationService::getDefaultOrganization, this.organizationService::getFileManager, this::refreshGrid);
+		return new MembershipFilters(() -> this.organizationService.getDefaultOrganization(), () -> this.organizationService.getFileManager() , this::refreshGrid);
 	}
 
 	@Override
