@@ -142,9 +142,7 @@ public class StandardMembershipListView extends AbstractTwoLevelTreeListView<Per
 				(rootEntity) -> {
 					return rootEntity.getMemberships().size();
 				});
-		setChildEntityFetcher((parentId, pageRequest, filters) -> {
-			return this.membershipService.getMembershipsForPerson(parentId, pageRequest, filters);
-		});
+		setChildEntityFetcher(this.membershipService::getMembershipsForPerson);
 		initializeDataInGrid(getGrid(), getFilters());
 	}
 
@@ -218,7 +216,7 @@ public class StandardMembershipListView extends AbstractTwoLevelTreeListView<Per
 
 		var buttonAccept = new Button("Accept", event -> {
 			context.getEntity().setMemberStatus(comboBox.getValue());
-			if (datePicker.getValue().compareTo(date) > 0) {
+			if (datePicker.getValue().isAfter(date)) {
 				context.getEntity().setMemberToWhen(datePicker.getValue());
                 try {
                     context.save();
@@ -229,7 +227,7 @@ public class StandardMembershipListView extends AbstractTwoLevelTreeListView<Per
                 dialog.close();
 			} else {
 				// Show error message
-				errorMessage.setText("The end date must be after the current end date");
+				errorMessage.setText(getTranslation("views.membership.extend_contract_error"));
 				errorMessage.setVisible(true);
 			}
 		});
@@ -254,7 +252,7 @@ public class StandardMembershipListView extends AbstractTwoLevelTreeListView<Per
 
 	@Override
 	protected AbstractFilters<Membership> createFilters() {
-		return new MembershipFilters(() -> this.organizationService.getDefaultOrganization(), () -> this.organizationService.getFileManager() , this::refreshGrid);
+		return new MembershipFilters(this.organizationService::getDefaultOrganization, this.organizationService::getFileManager, this::refreshGrid);
 	}
 
 	@Override
@@ -310,8 +308,7 @@ public class StandardMembershipListView extends AbstractTwoLevelTreeListView<Per
 			}
 		}
 
-		final var period = new Span(periodStr);
-		return period;
+        return new Span(periodStr);
 	}
 
 	private static ResearchOrganization getService(Membership membership) {
