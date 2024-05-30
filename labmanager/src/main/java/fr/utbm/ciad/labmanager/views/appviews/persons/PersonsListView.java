@@ -20,6 +20,7 @@
 package fr.utbm.ciad.labmanager.views.appviews.persons;
 
 import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
@@ -35,6 +36,7 @@ import fr.utbm.ciad.labmanager.services.user.UserService;
 import fr.utbm.ciad.labmanager.views.appviews.MainLayout;
 import fr.utbm.ciad.labmanager.views.components.addons.ComponentFactory;
 import fr.utbm.ciad.labmanager.views.components.addons.wizard.AbstractLabManagerWizard;
+import fr.utbm.ciad.labmanager.views.components.persons.PersonAdditionWizard;
 import fr.utbm.ciad.labmanager.views.components.persons.StandardPersonListView;
 import jakarta.annotation.security.RolesAllowed;
 import org.slf4j.Logger;
@@ -60,6 +62,9 @@ public class PersonsListView extends StandardPersonListView implements HasDynami
 	private static final Logger LOGGER = LoggerFactory.getLogger(PersonsListView.class);
 
 	private MenuItem updateRankingsButton;
+
+	private MenuItem editNew;
+
 
 	/** Constructor.
 	 *
@@ -100,6 +105,8 @@ public class PersonsListView extends StandardPersonListView implements HasDynami
 		
 		this.updateRankingsButton = ComponentFactory.addIconItem(menu, LineAwesomeIcon.SYNC_ALT_SOLID, null, null, it -> openRankingsUpdateWizard());
 
+		this.editNew = ComponentFactory.addIconItem(menu, LineAwesomeIcon.SYNC_ALT_SOLID, null, null, it -> openEditWizard());
+
 		return menu;
 	}
 
@@ -113,6 +120,14 @@ public class PersonsListView extends StandardPersonListView implements HasDynami
 		} else {
 			getUI().ifPresent(ui -> ui.navigate(PersonRankingUpdaterWizard.class));
 		}
+	}
+
+	protected void openEditWizard() {
+		Dialog dialog = new Dialog();
+		var personEditor = new PersonAdditionWizard(null);
+		dialog.add(personEditor);
+		dialog.setSizeFull();
+		dialog.open();
 	}
 
 	@Override
