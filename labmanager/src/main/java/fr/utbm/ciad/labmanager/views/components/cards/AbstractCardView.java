@@ -1,6 +1,5 @@
 package fr.utbm.ciad.labmanager.views.components.cards;
 
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.ListItem;
@@ -24,9 +23,9 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Width;
 
 import java.util.List;
 
-public abstract class CardView<T> extends ListItem {
+public abstract class AbstractCardView<T> extends ListItem {
 
-    public CardView(CardBuilder builder, T entity) {
+    public AbstractCardView(CardBuilder builder, T entity) {
         String title = builder.title;
         String subtitleText = builder.subtitleText;
         String imageUrl = builder.imageUrl != null ? builder.imageUrl : "https://images.unsplash.com/photo-1615796153287-98eacf0abb13?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxleHBsb3JlLWZlZWR8Mnx8fGVufDB8fHx8fA%3D%3D";
