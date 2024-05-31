@@ -24,6 +24,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -105,4 +107,21 @@ public interface PersonRepository extends JpaRepository<Person, Long>, JpaSpecif
 	@Query("SELECT p FROM Person p")
 	List<Person> findAll();
 
+	@Query("SELECT p FROM Person p WHERE LOWER(p.firstName) LIKE LOWER(CONCAT('%', :name, '%')) OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :name, '%'))")
+	Page<Person> findByName(String name, Pageable pageable);
+
+	@Query("SELECT count(p) FROM Person p WHERE p.firstName LIKE %:name% OR p.lastName ILIKE %:name%")
+	long countFindByName(String name);
+
+	@Query("SELECT p FROM Person p WHERE p.orcid ILIKE %:orcid%")
+	Page<Person> findByOrcid(String orcid, Pageable pageable);
+
+	@Query("SELECT count(p) FROM Person p WHERE p.orcid ILIKE %:orcid%")
+	long countFindByOrcid(String orcid);
+
+	@Query("SELECT p FROM Person p JOIN p.memberships m WHERE m.researchOrganization.acronym ILIKE %:orgName%")
+	Page<Person> findByOrganization(String orgName, Pageable pageable);
+
+	@Query("SELECT count(p) FROM Person p JOIN p.memberships m WHERE m.researchOrganization.acronym ILIKE %:orgName%")
+	long countFindByOrganization(String orgName);
 }

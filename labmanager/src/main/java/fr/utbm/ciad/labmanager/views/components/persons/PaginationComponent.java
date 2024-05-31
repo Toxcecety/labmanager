@@ -51,6 +51,16 @@ public class PaginationComponent extends Div {
         prevButton.setEnabled(currentPage != 0);
     }
 
+    public void setTotalPages(long totalPages) {
+        this.totalPages = totalPages;
+        if (totalPages <= 1) {
+            setVisible(false);
+        } else {
+            setVisible(true);
+        }
+        nextButton.setEnabled(currentPage != totalPages);
+    }
+
     public void addPageChangeListener(ComponentEventListener<PageChangeEvent> listener) {
         addListener(PageChangeEvent.class, listener);
     }
