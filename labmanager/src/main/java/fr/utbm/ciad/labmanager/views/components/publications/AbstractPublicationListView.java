@@ -578,9 +578,32 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
 
 									// Read the publications from the file
 									List<Publication> publications = importFunction.apply(reader);
-									for (int i = 0; i < publications.size(); i++) {
-										this.addEntity(publications.get(i), file, i+1, publications.size());
-									}
+
+									Dialog dialog = new Dialog();
+									Grid<Publication> publicationGrid = new Grid<>(Publication.class, false);
+
+									// Adding columns
+									publicationGrid.addColumn(Publication::getTitle).setHeader("Title");
+									publicationGrid.addColumn(Publication::getAuthors).setHeader("Author");
+									//publicationGrid.addColumn(Publication::getErrorMessage).setHeader("Error Message");
+
+									publicationGrid.addComponentColumn(publication -> {
+										Button editButton = new Button("Edit");
+										editButton.addClickListener(e -> {
+											this.addEntity(publication, publication.getTitle());
+										});
+										return editButton;
+									}).setHeader("Actions");
+
+									publicationGrid.setItems(publications);
+
+									Button closeButton = new Button("Close", e -> dialog.close());
+									dialog.add(publicationGrid, closeButton);
+									dialog.setWidthFull();
+									dialog.setHeight("400px");
+
+									// Open the dialog
+									dialog.open();
 								} catch (Exception e) {
 									throw new RuntimeException(e);
 								}
@@ -791,8 +814,8 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
 		openPublicationEditor(emptyPublication, getTranslation("views.publication.add_publication")); //$NON-NLS-1$
 	}
 
-    protected void addEntity(Publication entity,String fileName, int index, int size) {
-        openPublicationEditor(entity, getTranslation("views.publication.import_publication", index, size, fileName)); //$NON-NLS-1$
+    protected void addEntity(Publication entity,String fileName) {
+        openPublicationEditor(entity, getTranslation("views.publication.import_publication", fileName)); //$NON-NLS-1$
     }
 
     @Override
