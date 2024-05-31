@@ -1,19 +1,22 @@
-package fr.utbm.ciad.labmanager.views.components.charts;
+package fr.utbm.ciad.labmanager.views.components.charts.publicationcategory;
 
 import com.storedobject.chart.*;
 import com.storedobject.chart.Chart;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.combobox.MultiSelectComboBox;
-import fr.utbm.ciad.labmanager.data.publication.PublicationCategory;
 import fr.utbm.ciad.labmanager.data.publication.PublicationType;
 import fr.utbm.ciad.labmanager.services.publication.PublicationService;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 
-import static com.storedobject.chart.Color.TRANSPARENT;
-
+/** Implementation of a publication category nightingale rose chart.
+ *
+ * @author $Author: sgalland$
+ * @author $Author: erenon$
+ * @version $Name$ $Revision$ $Date$
+ * @mavengroupid $GroupId$
+ * @mavenartifactid $ArtifactId$
+ * @since 4.0
+ */
 public class PublicationCategoryNightingaleRoseChart extends AbstractPublicationCategoryChart {
 
     private CategoryData categoryData;
@@ -26,6 +29,10 @@ public class PublicationCategoryNightingaleRoseChart extends AbstractPublication
 
     private Integer totalPublication;
 
+    /** Constructor.
+     *
+     * @param publicationService the service for accessing the scientific publications.
+     */
     public PublicationCategoryNightingaleRoseChart(@Autowired PublicationService publicationService){
         super(publicationService);
         publicationCategories = new HashMap<>();
@@ -33,7 +40,10 @@ public class PublicationCategoryNightingaleRoseChart extends AbstractPublication
         totalPublication = 0;
     }
 
-
+    /** Add a data in the chart, for example, the name of a chosen publication category
+     *
+     * @param item the name of the chosen item.
+     */
     public void addData(String chosenCategory) {
         Integer countTypePublicationV2;
         List<PublicationType> temporaryPublicationTypeList = getPublicationTypeList().stream().filter(publicationType -> Objects.equals(publicationType.getCategory(true).toString(), chosenCategory)).toList();
@@ -50,11 +60,19 @@ public class PublicationCategoryNightingaleRoseChart extends AbstractPublication
 
     }
 
+    /** Remove a data in the chart, for example, the name of a chosen publication category
+     *
+     * @param item the name of the chosen item.
+     */
     public void removeData(String chosenCategory) {
         totalPublication -= publicationCategories.get(chosenCategory);
         publicationCategories.remove(chosenCategory);
     }
 
+    /** Replies the created chart (from SOChart library). The creation of the chart must be implemented in this method.
+     *
+     * @return The created chart.
+     */
     public SOChart createChart(){
         categoryData = new CategoryData();
         Data data = new Data();
@@ -78,6 +96,10 @@ public class PublicationCategoryNightingaleRoseChart extends AbstractPublication
         return this;
     }
 
+    /** Method called at the creation of the chart. It precises that a unique year is provided by the user.
+     *
+     * @param start The year of study.
+     */
     @Override
     public void setYear(Integer start) {
         years = new ArrayList<>();
@@ -91,6 +113,11 @@ public class PublicationCategoryNightingaleRoseChart extends AbstractPublication
 
     }
 
+    /** Method called at the creation of the chart. It precises that a period is provided by the user.
+     *
+     * @param start The beginning of the period.
+     * @param end The end of the period.
+     */
     @Override
     public void setPeriod(Integer start, Integer end) {
         years = new ArrayList<>();

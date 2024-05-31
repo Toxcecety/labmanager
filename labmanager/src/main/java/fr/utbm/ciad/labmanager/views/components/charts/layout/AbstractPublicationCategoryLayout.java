@@ -4,21 +4,25 @@ import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import fr.utbm.ciad.labmanager.data.publication.Publication;
-import fr.utbm.ciad.labmanager.data.publication.PublicationType;
 import fr.utbm.ciad.labmanager.services.publication.PublicationService;
 import fr.utbm.ciad.labmanager.views.components.addons.customfield.YearRange;
-import fr.utbm.ciad.labmanager.views.components.charts.Chart;
-import fr.utbm.ciad.labmanager.views.components.charts.PublicationCategoryChart;
-import fr.utbm.ciad.labmanager.views.components.charts.PublicationCategoryPieChart;
+import fr.utbm.ciad.labmanager.views.components.charts.publicationcategory.PublicationCategoryChart;
 import fr.utbm.ciad.labmanager.views.components.charts.factory.PublicationCategoryChartFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+/** Abstract implementation of the layout for displaying charts about publication categories.
+ *
+ * @author $Author: sgalland$
+ * @author $Author: erenon$
+ * @version $Name$ $Revision$ $Date$
+ * @mavengroupid $GroupId$
+ * @mavenartifactid $ArtifactId$
+ * @since 4.0
+ */
 public abstract class AbstractPublicationCategoryLayout<T extends PublicationCategoryChart> extends AbstractChartLayout{
 
     private PublicationService publicationService;
@@ -37,6 +41,11 @@ public abstract class AbstractPublicationCategoryLayout<T extends PublicationCat
 
     private YearRange yearRange;
 
+    /** Constructor.
+     *
+     * @param publicationService the service for accessing the scientific publications.
+     * @param factory the factory for creating publication category charts.
+     */
     public AbstractPublicationCategoryLayout(@Autowired PublicationService publicationService, PublicationCategoryChartFactory<T> factory) {
         super();
         this.factory = factory;
@@ -127,6 +136,10 @@ public abstract class AbstractPublicationCategoryLayout<T extends PublicationCat
 
     }
 
+    /** Replies the publication category chart factory.
+     *
+     * @return the publication category chart factory.
+     */
     public PublicationCategoryChartFactory getPublicationCategoryChartFactory(){
         return factory;
     }

@@ -13,6 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.awt.*;
 import java.util.List;
 
+/** Custom Field in order to set a period. (Was thought in order to be used by AbstractPublicationCategoryLayout
+ *
+ * @author $Author: sgalland$
+ * @author $Author: erenon$
+ * @version $Name$ $Revision$ $Date$
+ * @mavengroupid $GroupId$
+ * @mavenartifactid $ArtifactId$
+ */
 public class YearRange extends CustomField<Integer> {
 
     private PublicationService publicationService;
@@ -27,14 +35,14 @@ public class YearRange extends CustomField<Integer> {
 
     private Integer chosenEndValue;
 
-    private Button button;
-
     private Text text;
-
-    private Boolean buttonState;
 
     private HorizontalLayout horizontalLayout;
 
+    /** Constructor.
+     *
+     * @param publicationService the service for accessing the scientific publications.
+     */
     public YearRange(@Autowired PublicationService publicationService){
         this.publicationService = publicationService;
         years = this.publicationService.getAllYears();
@@ -81,23 +89,40 @@ public class YearRange extends CustomField<Integer> {
     protected void setPresentationValue(Integer integer) {
     }
 
+    /** Replies the chosen start value
+     *
+     * @return the chosen start value
+     * @since 4.0
+     */
     public Integer getChosenStartValue() {
         return chosenStartValue;
     }
 
+    /** Replies the chosen end value
+     *
+     * @return the chosen end value
+     * @since 4.0
+     */
     public Integer getChosenEndValue() {
         return chosenEndValue;
     }
 
+    /** Replies the start select field
+     *
+     * @return the start select field
+     * @since 4.0
+     */
     public Select<Integer> getStart() {
         return start;
     }
 
+    /** Replies the end select field
+     *
+     * @return the end select field
+     * @since 4.0
+     */
     public Select<Integer> getEnd() {
         return end;
     }
 
-    public Boolean getButtonState() {
-        return buttonState;
-    }
 }

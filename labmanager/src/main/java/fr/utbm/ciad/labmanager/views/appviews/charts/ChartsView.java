@@ -1,38 +1,34 @@
 package fr.utbm.ciad.labmanager.views.appviews.charts;
 
-import com.storedobject.chart.*;
-
-import com.vaadin.flow.component.Unit;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.router.Route;
-import fr.utbm.ciad.labmanager.data.publication.PublicationType;
 import fr.utbm.ciad.labmanager.services.publication.PublicationService;
 import fr.utbm.ciad.labmanager.views.appviews.MainLayout;
-import fr.utbm.ciad.labmanager.views.components.addons.customfield.YearRange;
-import fr.utbm.ciad.labmanager.views.components.charts.PublicationCategoryNightingaleRoseChart;
-import fr.utbm.ciad.labmanager.views.components.charts.PublicationCategoryPieChart;
+import fr.utbm.ciad.labmanager.views.components.charts.publicationcategory.PublicationCategoryNightingaleRoseChart;
+import fr.utbm.ciad.labmanager.views.components.charts.publicationcategory.PublicationCategoryPieChart;
 import fr.utbm.ciad.labmanager.views.components.charts.factory.PublicationCategoryBarChartFactory;
 import fr.utbm.ciad.labmanager.views.components.charts.factory.PublicationCategoryChartFactory;
 import fr.utbm.ciad.labmanager.views.components.charts.factory.PublicationCategoryNightingaleRoseChartFactory;
 import fr.utbm.ciad.labmanager.views.components.charts.factory.PublicationCategoryPieChartFactory;
-import fr.utbm.ciad.labmanager.views.components.charts.layout.AbstractPublicationCategoryLayout;
-import fr.utbm.ciad.labmanager.views.components.charts.barchart.PublicationCategoryBarChart;
+import fr.utbm.ciad.labmanager.views.components.charts.publicationcategory.PublicationCategoryBarChart;
 import fr.utbm.ciad.labmanager.views.components.charts.layout.PublicationCategoryLayout;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.*;
-
+/** Display the charts
+ *
+ * @author $Author: sgalland$
+ * @author $Author: erenon$
+ * @version $Name$ $Revision$ $Date$
+ * @mavengroupid $GroupId$
+ * @mavenartifactid $ArtifactId$
+ * @since 4.0
+ */
 @Route(value = "charts", layout = MainLayout.class)
 @PermitAll
 public class ChartsView extends VerticalLayout {
-
-    private List<AbstractPublicationCategoryLayout> abstractPublicationCategoryLayouts;
 
     private TabSheet tabSheet;
 
@@ -42,9 +38,12 @@ public class ChartsView extends VerticalLayout {
 
     private PublicationCategoryChartFactory<PublicationCategoryNightingaleRoseChart> nightingaleChartFactory;
 
+    /** Constructor.
+     *
+     * @param publicationService the service for accessing the scientific publications.
+     */
     public ChartsView(@Autowired PublicationService publicationService) {
 
-        abstractPublicationCategoryLayouts = new ArrayList<>();
         barChartFactory = new PublicationCategoryBarChartFactory();
         pieChartFactory = new PublicationCategoryPieChartFactory();
         nightingaleChartFactory = new PublicationCategoryNightingaleRoseChartFactory();

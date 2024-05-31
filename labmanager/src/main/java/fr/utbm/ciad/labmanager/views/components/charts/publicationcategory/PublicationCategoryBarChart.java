@@ -1,30 +1,51 @@
-package fr.utbm.ciad.labmanager.views.components.charts.barchart;
+package fr.utbm.ciad.labmanager.views.components.charts.publicationcategory;
 
 import com.storedobject.chart.*;
 import fr.utbm.ciad.labmanager.data.publication.PublicationType;
 import fr.utbm.ciad.labmanager.services.publication.PublicationService;
-import fr.utbm.ciad.labmanager.views.components.charts.AbstractPublicationCategoryChart;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 
 import static com.storedobject.chart.Color.TRANSPARENT;
 
+/** Implementation of a publication category bar chart.
+ *
+ * @author $Author: sgalland$
+ * @author $Author: erenon$
+ * @version $Name$ $Revision$ $Date$
+ * @mavengroupid $GroupId$
+ * @mavenartifactid $ArtifactId$
+ * @since 4.0
+ */
 public class PublicationCategoryBarChart extends AbstractPublicationCategoryChart {
 
     private PublicationService publicationService;
+
     private Data xValues;
+
     private List<BarChart> barChartList;
+
     private CategoryData categoryData;
+
     private CoordinateSystem rectangularCoordinate;
+
     private XAxis xAxis;
+
     private YAxis yAxis;
+
     private LineChart lineChart;
+
     private List<Integer> totalPublication;
+
     private List<PublicationType> publicationTypes;
+
     private Legend legend;
 
+    /** Constructor.
+     *
+     * @param publicationService the service for accessing the scientific publications.
+     */
     public PublicationCategoryBarChart(@Autowired PublicationService publicationService) {
         super(publicationService);
 
@@ -67,7 +88,10 @@ public class PublicationCategoryBarChart extends AbstractPublicationCategoryChar
     }
 
 
-
+    /** Add a data in the chart, for example, the name of a chosen publication category
+     *
+     * @param item the name of the chosen item.
+     */
     public void addData(String chosenCategory) {
         Data data = new Data();
         Integer countTypePublicationV2;
@@ -95,6 +119,10 @@ public class PublicationCategoryBarChart extends AbstractPublicationCategoryChar
 
     }
 
+    /** Remove a data in the chart, for example, the name of a chosen publication category
+     *
+     * @param item the name of the chosen item.
+     */
     public void removeData(String chosenCategory) {
         BarChart barChart = findBarChart(chosenCategory);
         Integer countTypePublicationV2;
@@ -108,6 +136,11 @@ public class PublicationCategoryBarChart extends AbstractPublicationCategoryChar
         barChartList.remove(barChart);
     }
 
+    /** Replies the created chart (from SOChart library). The multiple bar charts needs to be plotted on a Coordinate System
+     * in order to be displayed on the UI. Creation of a line chart in order to show the evolution of the number of publication.
+     *
+     * @return The created chart.
+     */
     @Override
     public SOChart createChart() {
 
@@ -125,6 +158,11 @@ public class PublicationCategoryBarChart extends AbstractPublicationCategoryChar
         return this;
     }
 
+    /** Method called at the creation of the chart. It precises that a unique year is provided by the user. Initialising
+     * the x-axis of the Coordinate System.
+     *
+     * @param start The year of study.
+     */
     @Override
     public void setYear(Integer start) {
         getYears().clear();
@@ -144,6 +182,12 @@ public class PublicationCategoryBarChart extends AbstractPublicationCategoryChar
 
     }
 
+    /** Method called at the creation of the chart. It precises that a unique year is provided by the user. Initialising
+     * the x-axis of the Coordinate System.
+     *
+     * @param start The beginning of the period.
+     * @param end The end of the period.
+     */
     @Override
     public void setPeriod(Integer start, Integer end) {
         getYears().clear();
@@ -169,7 +213,10 @@ public class PublicationCategoryBarChart extends AbstractPublicationCategoryChar
 
     }
 
-
+    /** Method called for finding a bar chart in barChartList. Used in removeData().
+     *
+     * @param item The chosen category.
+     */
     protected BarChart findBarChart(String item){
         for (BarChart barChart : barChartList) {
             if (item.equals(barChart.getName())) {
