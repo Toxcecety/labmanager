@@ -4,8 +4,10 @@ import com.storedobject.chart.*;
 import com.storedobject.chart.Chart;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
+import fr.utbm.ciad.labmanager.data.publication.PublicationCategory;
 import fr.utbm.ciad.labmanager.data.publication.PublicationType;
 import fr.utbm.ciad.labmanager.services.publication.PublicationService;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
@@ -22,10 +24,13 @@ public class PublicationCategoryNightingaleRoseChart extends AbstractPublication
 
     private List<Integer> years;
 
+    private Integer totalPublication;
+
     public PublicationCategoryNightingaleRoseChart(@Autowired PublicationService publicationService){
         super(publicationService);
         publicationCategories = new HashMap<>();
         years = new ArrayList<>();
+        totalPublication = 0;
     }
 
 
@@ -40,13 +45,14 @@ public class PublicationCategoryNightingaleRoseChart extends AbstractPublication
 
             }
         }
+        totalPublication += total;
         publicationCategories.put(chosenCategory,total);
 
     }
 
     public void removeData(String chosenCategory) {
+        totalPublication -= publicationCategories.get(chosenCategory);
         publicationCategories.remove(chosenCategory);
-
     }
 
     public SOChart createChart(){
@@ -54,13 +60,15 @@ public class PublicationCategoryNightingaleRoseChart extends AbstractPublication
         Data data = new Data();
         data.addAll(publicationCategories.values());
 
-
-        for(String s : publicationCategories.keySet()){
-            categoryData.add(s);
+        float percentage = 0;
+        String toString;
+        for(var s : publicationCategories.entrySet()){
+            percentage = ((float) s.getValue() /totalPublication)*100;
+            toString = s.getKey() + " - " + String.format("%.2f",percentage) + "% ";
+            categoryData.add(toString);
         }
 
         nightingaleRoseChart = new NightingaleRoseChart(categoryData,data);
-
         Chart.Label label = nightingaleRoseChart.getLabel(true);
         label.setInside(false);
         label.setFormatter("{0} - {1}");

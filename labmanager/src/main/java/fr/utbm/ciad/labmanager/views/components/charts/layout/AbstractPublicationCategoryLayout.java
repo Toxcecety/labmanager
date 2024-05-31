@@ -85,7 +85,7 @@ public abstract class AbstractPublicationCategoryLayout<T extends PublicationCat
         validateButton.setEnabled(false);
         validateButton.addClickListener(e -> {
             if(Objects.equals(validateButton.getText(), getTranslation("views.charts.create"))){
-                if(!yearRange.getButtonState()){
+                if(yearRange.getEnd().isEmpty()){
                     chart.setYear(yearRange.getChosenStartValue());
                 }else{
                     chart.setPeriod(yearRange.getChosenStartValue(), yearRange.getChosenEndValue());
@@ -103,7 +103,7 @@ public abstract class AbstractPublicationCategoryLayout<T extends PublicationCat
                 horizontalLayout1.remove(this.chart.createChart());
                 this.chart = factory.create(this.publicationService);
 
-                if(!yearRange.getButtonState()){
+                if(yearRange.getEnd().isEmpty()){
                     chart.setYear(yearRange.getChosenStartValue());
                 }else{
                     chart.setPeriod(yearRange.getChosenStartValue(), yearRange.getChosenEndValue());

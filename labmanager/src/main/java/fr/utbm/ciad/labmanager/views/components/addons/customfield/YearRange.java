@@ -46,35 +46,28 @@ public class YearRange extends CustomField<Integer> {
         start = new Select<>();
         start.setLabel(getTranslation("views.start"));
         start.setItems(years);
-        start.setValue(years.get(0));
-        chosenStartValue = years.get(0);
+        start.setValue(years.get(years.size()-6));
+        chosenStartValue = years.get(years.size()-6);
         start.addValueChangeListener(e ->{
             Integer selectedValue = e.getValue();
             chosenStartValue = selectedValue;
             int startValue = years.indexOf(selectedValue);
             end.setItems(years.subList(startValue,years.size()));
-            end.setValue(years.get(years.size()-1));
+            end.setValue(null);
         });
 
         end = new Select<>();
         end.setLabel(getTranslation("views.end"));
-        end.setItems(years.subList(1, years.size()));
-        end.setValue(years.get(years.size()-1));
-        chosenEndValue = years.get(years.size()-1);
+        end.setItems(years.subList(years.indexOf(chosenStartValue+1), years.size()));
+        end.setValue(null);
         end.addValueChangeListener(e ->{
             Integer selectedValue = e.getValue();
             chosenEndValue = selectedValue;
 
         });
 
-        button = new Button(getTranslation("views.set_period"));
-        button.addSingleClickListener(e -> switchPeriodState());
-        button.setMinWidth("150px");
-        buttonState = false;
-        horizontalLayout.add(button);
-
         text = new Text(" - ");
-        horizontalLayout.add(start);
+        horizontalLayout.add(start,text,end);
         add(horizontalLayout);
 
     }
@@ -94,19 +87,6 @@ public class YearRange extends CustomField<Integer> {
 
     public Integer getChosenEndValue() {
         return chosenEndValue;
-    }
-
-    protected void switchPeriodState(){
-        if(buttonState){
-            button.setText(getTranslation("views.set_period"));
-            horizontalLayout.remove(text,end);
-            buttonState = false;
-        }else{
-            button.setText(getTranslation("views.set_year"));
-            horizontalLayout.add(text,end);
-            buttonState = true;
-
-        }
     }
 
     public Select<Integer> getStart() {

@@ -19,6 +19,7 @@ public class PublicationCategoryPieChart extends AbstractPublicationCategoryChar
     private Map<String,Integer> publicationCategories;
     private PieChart pieChart;
     private List<Integer> years;
+    private Integer totalPublication;
 
     public PublicationCategoryPieChart(@Autowired PublicationService publicationService){
         super(publicationService);
@@ -27,7 +28,7 @@ public class PublicationCategoryPieChart extends AbstractPublicationCategoryChar
         publicationCategories = new HashMap<>();
         years = new ArrayList<>();
         categoryData = new CategoryData();
-
+        totalPublication = 0;
 
     }
 
@@ -42,11 +43,13 @@ public class PublicationCategoryPieChart extends AbstractPublicationCategoryChar
 
             }
         }
+        totalPublication += total;
         publicationCategories.put(chosenCategory,total);
 
     }
 
     public void removeData(String chosenCategory) {
+        totalPublication -= publicationCategories.get(chosenCategory);
         publicationCategories.remove(chosenCategory);
     }
 
@@ -55,10 +58,14 @@ public class PublicationCategoryPieChart extends AbstractPublicationCategoryChar
         Data data = new Data();
         data.addAll(publicationCategories.values());
 
-
-        for(String s : publicationCategories.keySet()){
-            categoryData.add(s);
+        float percentage = 0;
+        String toString;
+        for(var s : publicationCategories.entrySet()){
+            percentage = ((float) s.getValue() /totalPublication)*100;
+            toString = s.getKey() + " - " + String.format("%.2f",percentage) + "% ";
+            categoryData.add(toString);
         }
+
 
         pieChart = new PieChart(categoryData,data);
 
