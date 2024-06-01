@@ -9,7 +9,7 @@ import com.storedobject.chart.SOChart;
  * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
- * @since 4.0
+ * @since 4.1
  */
 public abstract class AbstractSOChartChart extends SOChart implements Chart {
 

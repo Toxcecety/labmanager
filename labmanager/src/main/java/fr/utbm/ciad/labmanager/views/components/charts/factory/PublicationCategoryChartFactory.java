@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
- * @since 3.6
+ * @since 4.1
  */
 public interface PublicationCategoryChartFactory<T> {
 

@@ -11,7 +11,7 @@ import fr.utbm.ciad.labmanager.views.components.charts.Chart;
  * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
- * @since 4.0
+ * @since 4.1
  */
 public abstract class AbstractChartLayout extends VerticalLayout implements ChartLayout {
 

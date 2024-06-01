@@ -7,7 +7,7 @@ package fr.utbm.ciad.labmanager.views.components.charts.layout;
  * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
- * @since 3.6
+ * @since 4.1
  */
 public interface ChartLayout {
 }

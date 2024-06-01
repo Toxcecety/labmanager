@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
- * @since 4.0
+ * @since 4.1
  */
 public class PublicationCategoryPieChartFactory implements PublicationCategoryChartFactory<PublicationCategoryPieChart>{
 
