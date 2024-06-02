@@ -5,6 +5,7 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.OrderedList;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.HasDynamicTitle;
@@ -36,10 +37,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Route(value = "persons_cards", layout = MainLayout.class)
 @RolesAllowed({UserRole.RESPONSIBLE_GRANT, UserRole.ADMIN_GRANT})
-public class PersonsCardView extends Composite<VerticalLayout> implements HasDynamicTitle, HasComponents, HasStyle {
+public class PersonsCardView extends VerticalLayout implements HasDynamicTitle, HasComponents, HasStyle {
     private static final long serialVersionUID = 1616874715478139507L;
+    private static final int cardsPerRow = 4;
+    private static final int numberOfRows = 4;
     private final OrderedList imageContainer;
-    private static final int pageSize = 16;
     private final PersonService personService;
     private final UserService userService;
     private final AuthenticatedUser authenticatedUser;
@@ -59,8 +61,9 @@ public class PersonsCardView extends Composite<VerticalLayout> implements HasDyn
         this.membershipService = membershipService;
         this.chronoMembershipComparator = chronoMembershipComparator;
 
-        addClassNames("image-gallery-view");
-        addClassNames(LumoUtility.MaxWidth.SCREEN_LARGE, LumoUtility.Margin.Horizontal.AUTO, LumoUtility.Padding.Bottom.LARGE, LumoUtility.Padding.Horizontal.LARGE);
+        setJustifyContentMode(JustifyContentMode.CENTER);
+        getStyle().set("padding-left", "75px");
+        getStyle().set("padding-right", "75px");
 
         HorizontalLayout container = new HorizontalLayout();
         container.addClassNames(LumoUtility.AlignItems.CENTER, LumoUtility.JustifyContent.BETWEEN);
@@ -68,14 +71,16 @@ public class PersonsCardView extends Composite<VerticalLayout> implements HasDyn
         SearchComponent searchComponent = new SearchComponent(new String[]{"Name", "ORCID", "Organizations"});
 
         imageContainer = new OrderedList();
+        imageContainer.setWidthFull();
         imageContainer.addClassNames(LumoUtility.Gap.MEDIUM, LumoUtility.Display.GRID, LumoUtility.ListStyleType.NONE, LumoUtility.Margin.NONE, LumoUtility.Padding.NONE);
-        imageContainer.getStyle().set("grid-template-columns", "repeat(4, 1fr)");
+        String gridTemplateColumns = "repeat(" + cardsPerRow + ", 1fr)";
+        imageContainer.getStyle().set("grid-template-columns", gridTemplateColumns);
 
         add(searchComponent);
         add(container, imageContainer);
-        this.numberOfPages = personService.countAllPersons() / 16;
+        this.numberOfPages = personService.countAllPersons() / cardsPerRow*numberOfRows;
         paginationComponent = new PaginationComponent(numberOfPages);
-        AtomicReference<Pageable> pageable = new AtomicReference<>(PageRequest.of(paginationComponent.getCurrentPage(), 16, Sort.by("lastName").and(Sort.by("firstName"))));
+        AtomicReference<Pageable> pageable = new AtomicReference<>(PageRequest.of(paginationComponent.getCurrentPage(), cardsPerRow*numberOfRows, Sort.by("lastName").and(Sort.by("firstName"))));
         add(paginationComponent);
         AtomicReference<Page<Person>> persons = new AtomicReference<>(personService.getAllPersons(pageable.get()));
         for (Person person : persons.get()) {
@@ -101,7 +106,7 @@ public class PersonsCardView extends Composite<VerticalLayout> implements HasDyn
     }
 
     private void fetchCards(int pageNumber) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("lastName").and(Sort.by("firstName")));
+        Pageable pageable = PageRequest.of(pageNumber, cardsPerRow*numberOfRows, Sort.by("lastName").and(Sort.by("firstName")));
         Page<Person> persons = switch (filterQuery) {
             case "Name" -> personService.getPersonsByName(searchQuery, pageable);
             case "ORCID" -> personService.getPersonsByOrcid(searchQuery, pageable);
@@ -117,10 +122,10 @@ public class PersonsCardView extends Composite<VerticalLayout> implements HasDyn
 
     private void updatePaginationComponent() {
         numberOfPages = switch (filterQuery) {
-            case "Name" -> personService.countPersonsByName(searchQuery) / 16;
-            case "ORCID" -> personService.countPersonsByOrcid(searchQuery) / 16;
-            case "Organizations" -> personService.countPersonsByOrganization(searchQuery) / 16;
-            default -> personService.countAllPersons() / 16;
+            case "Name" -> personService.countPersonsByName(searchQuery) / cardsPerRow*numberOfRows;
+            case "ORCID" -> personService.countPersonsByOrcid(searchQuery) / cardsPerRow*numberOfRows;
+            case "Organizations" -> personService.countPersonsByOrganization(searchQuery) / cardsPerRow*numberOfRows;
+            default -> personService.countAllPersons() / cardsPerRow*numberOfRows;
         };
         paginationComponent.setTotalPages(numberOfPages);
     }

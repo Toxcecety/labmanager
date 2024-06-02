@@ -49,10 +49,18 @@ public class SearchComponent extends Div {
             Notification notification = new Notification();
             notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
             notification.setText("Please select a filter before searching.");
-            notification.setDuration(3000); // Display for 3 seconds
+            notification.setDuration(3000);
             notification.open();
         } else {
-            fireEvent(new SearchComponentEvent(this));
+            if (searchField.isEmpty()) {
+                Notification notification = new Notification();
+                notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                notification.setText("Please fill in the search field.");
+                notification.setDuration(3000);
+                notification.open();
+            } else {
+                fireEvent(new SearchComponentEvent(this));
+            }
         }
     }
 

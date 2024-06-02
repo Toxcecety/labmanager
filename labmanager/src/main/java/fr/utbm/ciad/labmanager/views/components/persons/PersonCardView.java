@@ -9,20 +9,21 @@ import fr.utbm.ciad.labmanager.services.member.MembershipService;
 import fr.utbm.ciad.labmanager.services.member.PersonService;
 import fr.utbm.ciad.labmanager.services.user.UserService;
 import fr.utbm.ciad.labmanager.views.components.addons.ComponentFactory;
-import fr.utbm.ciad.labmanager.views.components.cards.AbstractCardView;
+import fr.utbm.ciad.labmanager.views.components.cards.AbstractPersonCardView;
 import org.springframework.context.support.MessageSourceAccessor;
 
-public class PersonCardView extends AbstractCardView<Person> {
+public class PersonCardView extends AbstractPersonCardView<Person> {
     private final PersonService personService;
     private final UserService userService;
     private final AuthenticatedUser authenticatedUser;
     private final MessageSourceAccessor messages;
 
     public PersonCardView(Person person, PersonService personService, UserService userService, AuthenticatedUser authenticatedUser, MessageSourceAccessor messages, MembershipService membershipService, ChronoMembershipComparator membershipComparator){
-        super(new CardBuilder().setTitle(person.getFullName()).setSubtitleText(person.getEmail()).setDescriptionText(!person.getPrivateBiography() ? person.getBiography() : "Biography is marked as private")
-                .setImageUrl(person.getPhotoURL() != null  ? person.getPhotoURL().toString() : "https://images.unsplash.com/photo-1615796153287-98eacf0abb13?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxleHBsb3JlLWZlZWR8Mnx8fGVufDB8fHx8fA%3D%3D")
+        super(new CardBuilder().setImageUrl(person.getPhotoURL() != null  ? person.getPhotoURL().toString() : null)
+                .setName(person.getFullName()).setEmail(person.getEmail())
+                .setOfficePhone(person.getOfficePhone()).setMobilePhone(person.getMobilePhone())
+                .setOfficeRoom(person.getOfficeRoom())
                 .setLabels(membershipService.getActiveMembershipsForPerson(person, membershipComparator)), person);
-
         this.personService = personService;
         this.userService = userService;
         this.authenticatedUser = authenticatedUser;
