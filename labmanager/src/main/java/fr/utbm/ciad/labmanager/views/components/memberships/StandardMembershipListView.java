@@ -44,7 +44,6 @@ import fr.utbm.ciad.labmanager.data.member.MemberStatus;
 import fr.utbm.ciad.labmanager.data.member.Membership;
 import fr.utbm.ciad.labmanager.data.member.Person;
 import fr.utbm.ciad.labmanager.data.organization.ResearchOrganization;
-import fr.utbm.ciad.labmanager.data.scientificaxis.ScientificAxis;
 import fr.utbm.ciad.labmanager.services.AbstractEntityService;
 import fr.utbm.ciad.labmanager.services.AbstractEntityService.EntityDeletingContext;
 import fr.utbm.ciad.labmanager.services.member.MembershipService;
@@ -53,12 +52,10 @@ import fr.utbm.ciad.labmanager.services.organization.OrganizationAddressService;
 import fr.utbm.ciad.labmanager.services.organization.ResearchOrganizationService;
 import fr.utbm.ciad.labmanager.services.scientificaxis.ScientificAxisService;
 import fr.utbm.ciad.labmanager.services.user.UserService;
-import fr.utbm.ciad.labmanager.utils.HasAsynchronousUploadService;
 import fr.utbm.ciad.labmanager.utils.io.filemanager.FileManager;
 import fr.utbm.ciad.labmanager.views.components.addons.ComponentFactory;
 import fr.utbm.ciad.labmanager.views.components.addons.entities.AbstractTwoLevelTreeListView;
 import fr.utbm.ciad.labmanager.views.components.addons.entities.TreeListEntity;
-import fr.utbm.ciad.labmanager.views.components.organizations.EmbeddedAddressEditor;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
@@ -70,7 +67,6 @@ import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -198,36 +194,40 @@ public class StandardMembershipListView extends AbstractTwoLevelTreeListView<Per
 
 		var membership = context.getEntity();
 
-		LocalDate date = context.getEntity().getMemberToWhen() == null ? context.getEntity().getMemberSinceWhen() : context.getEntity().getMemberToWhen();
+		LocalDate date = membership.getMemberToWhen() == null ? membership.getMemberSinceWhen() : membership.getMemberToWhen();
 
 		Dialog dialog = new Dialog(title);
+		dialog.setWidth("auto");
+		dialog.setCloseOnOutsideClick(true);
+		dialog.setCloseOnEsc(true);
 
 		var errorMessage = new Span();
 		errorMessage.setVisible(false);
-		errorMessage.getStyle().setColor("hsl(3, 89%, 42%)");
+		errorMessage.getStyle().setColor("var(--lumo-error-color)");
 		errorMessage.getStyle().set("font-weight", "bold");
-
 
 		var sinceDatePicker = new DatePicker(getTranslation("views.membership.since"));
 		sinceDatePicker.setValue(LocalDate.now());
 		sinceDatePicker.setVisible(false);
+		sinceDatePicker.getStyle().set("width", "100%");
 
 		var toDatePicker = new DatePicker(getTranslation("views.membership.to"));
 		toDatePicker.setValue(date);
 
-		var comboBox = new ComboBox<MemberStatus>(getTranslation("views.membership.status"));
-		comboBox.setItems(MemberStatus.values());
-		comboBox.setValue(membership.getMemberStatus());
-		comboBox.setItemLabelGenerator(this::getStatusLabel);
-		comboBox.setRequired(true);
-		comboBox.setPrefixComponent(VaadinIcon.DOCTOR.create());
+		var memberStatusComboBox = new ComboBox<MemberStatus>(getTranslation("views.membership.status"));
+		memberStatusComboBox.setItems(MemberStatus.values());
+		memberStatusComboBox.setValue(membership.getMemberStatus());
+		memberStatusComboBox.setItemLabelGenerator(this::getStatusLabel);
+		memberStatusComboBox.setRequired(true);
+		memberStatusComboBox.setPrefixComponent(VaadinIcon.DOCTOR.create());
+		memberStatusComboBox.getStyle().set("width", "100%");
 
 		// Check if the status has changed, and adapt the UI accordingly
-		comboBox.addValueChangeListener(event -> {
+		memberStatusComboBox.addValueChangeListener(event -> {
 			if (event.isFromClient()) {
 				if (event.getValue() != membership.getMemberStatus()) {
 					sinceDatePicker.setVisible(true);
-					if(toDatePicker.getValue().isBefore(sinceDatePicker.getValue()) || toDatePicker.getValue().isEqual(sinceDatePicker.getValue())){
+					if (toDatePicker.getValue().isBefore(sinceDatePicker.getValue()) || toDatePicker.getValue().isEqual(sinceDatePicker.getValue())) {
 						toDatePicker.setValue(LocalDate.now().plusDays(1));
 					}
 				} else if (sinceDatePicker.isVisible()) {
@@ -236,35 +236,29 @@ public class StandardMembershipListView extends AbstractTwoLevelTreeListView<Per
 			}
 		});
 
-		VerticalLayout dialogLayout = new VerticalLayout(errorMessage,sinceDatePicker, toDatePicker, comboBox);
+		HorizontalLayout statusLayout = new HorizontalLayout(memberStatusComboBox, sinceDatePicker);
+		statusLayout.setPadding(false);
+		statusLayout.setSpacing(true);
+		statusLayout.setMaxWidth("100%");
+
+		VerticalLayout dialogLayout = new VerticalLayout(toDatePicker, statusLayout, errorMessage);
 		dialogLayout.setPadding(false);
 		dialogLayout.setSpacing(false);
 		dialogLayout.setAlignItems(FlexComponent.Alignment.STRETCH);
-		dialogLayout.getStyle().set("width", "18rem").set("max-width", "100%");
+		dialogLayout.getStyle().set("max-width", "100%");
 		dialog.add(dialogLayout);
 
-		var buttonAccept = new Button(getTranslation("views.validate"), event -> {
-			membership.setMemberStatus(comboBox.getValue());
+		Button buttonAccept = new Button(getTranslation("views.validate"), event -> {
+			membership.setMemberStatus(memberStatusComboBox.getValue());
 
 			// If the status has changed, we need to create a new membership
-			if(sinceDatePicker.isVisible()){
-				if(sinceDatePicker.getValue().isBefore(toDatePicker.getValue())){
+			if (sinceDatePicker.isVisible()) {
+				if (sinceDatePicker.getValue().isBefore(toDatePicker.getValue())) {
 					try {
-						var newMembership = new Membership();
-						newMembership.setDirectResearchOrganization(membership.getDirectResearchOrganization());
-						newMembership.setSuperResearchOrganization(membership.getSuperResearchOrganization());
-						newMembership.setOrganizationAddress(membership.getOrganizationAddress());
-						newMembership.setPerson(membership.getPerson());
+						var newMembership = this.membershipService.copyMembership(membership);
+
 						newMembership.setMemberSinceWhen(sinceDatePicker.getValue());
 						newMembership.setMemberToWhen(toDatePicker.getValue());
-						newMembership.setMemberStatus(membership.getMemberStatus());
-						newMembership.setPermanentPosition(membership.getMemberStatus().isPermanentPositionAllowed());
-						newMembership.setResponsibility(membership.getResponsibility());
-						newMembership.setCnuSection(membership.getCnuSection());
-						newMembership.setConrsSection(membership.getConrsSection());
-						newMembership.setFrenchBap(membership.getFrenchBap());
-						newMembership.setMainPosition(membership.isMainPosition());
-						newMembership.setScientificAxes(new ArrayList<ScientificAxis>(membership.getScientificAxes()));
 
 						var editor = this.membershipService.startEditing(newMembership);
 						editor.save();
@@ -275,11 +269,11 @@ public class StandardMembershipListView extends AbstractTwoLevelTreeListView<Per
 						throw new RuntimeException(e);
 					}
 
-				}else{
+				} else {
 					errorMessage.setText(getTranslation("views.membership.extend_contract_error"));
 					errorMessage.setVisible(true);
 				}
-			}else{
+			} else {
 				if (toDatePicker.getValue().isAfter(date)) {
 					membership.setMemberToWhen(toDatePicker.getValue());
 					try {

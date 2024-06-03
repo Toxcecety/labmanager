@@ -19,30 +19,8 @@
 
 package fr.utbm.ciad.labmanager.services.member;
 
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
 import fr.utbm.ciad.labmanager.configuration.Constants;
-import fr.utbm.ciad.labmanager.data.member.MemberStatus;
-import fr.utbm.ciad.labmanager.data.member.Membership;
-import fr.utbm.ciad.labmanager.data.member.MembershipRepository;
-import fr.utbm.ciad.labmanager.data.member.Person;
-import fr.utbm.ciad.labmanager.data.member.PersonRepository;
-import fr.utbm.ciad.labmanager.data.member.Responsibility;
+import fr.utbm.ciad.labmanager.data.member.*;
 import fr.utbm.ciad.labmanager.data.organization.OrganizationAddress;
 import fr.utbm.ciad.labmanager.data.organization.ResearchOrganization;
 import fr.utbm.ciad.labmanager.data.organization.ResearchOrganizationRepository;
@@ -67,6 +45,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /** Service for the memberships to research organizations.
  * 
@@ -521,6 +506,26 @@ public class MembershipService extends AbstractEntityService<Membership> {
 		throw new IllegalArgumentException("Cannot find membership with id: " + membershipId); //$NON-NLS-1$
 	}
 
+
+	public Membership copyMembership(Membership oldMemberShip) {
+		final var newMembership = new Membership();
+		newMembership.setDirectResearchOrganization(oldMemberShip.getDirectResearchOrganization());
+		newMembership.setSuperResearchOrganization(oldMemberShip.getSuperResearchOrganization());
+		newMembership.setOrganizationAddress(oldMemberShip.getOrganizationAddress());
+		newMembership.setPerson(oldMemberShip.getPerson());
+		newMembership.setMemberSinceWhen(oldMemberShip.getMemberSinceWhen());
+		newMembership.setMemberToWhen(oldMemberShip.getMemberToWhen());
+		newMembership.setMemberStatus(oldMemberShip.getMemberStatus());
+		newMembership.setPermanentPosition(oldMemberShip.getMemberStatus().isPermanentPositionAllowed());
+		newMembership.setResponsibility(oldMemberShip.getResponsibility());
+		newMembership.setCnuSection(oldMemberShip.getCnuSection());
+		newMembership.setConrsSection(oldMemberShip.getConrsSection());
+		newMembership.setFrenchBap(oldMemberShip.getFrenchBap());
+		newMembership.setMainPosition(oldMemberShip.isMainPosition());
+		newMembership.setScientificAxes(oldMemberShip.getScientificAxes());
+		return newMembership;
+	}
+
 	/** Delete the membership with the given identifier.
 	 *
 	 * @param membershipId the identifier of the membership to be deleted.
@@ -550,24 +555,24 @@ public class MembershipService extends AbstractEntityService<Membership> {
 
 	/** Replies the persons in the organization of the given identifier.
 	 * This function does not consider the suborganizations.
-	 * The function {@link #getMembersOf(int)} provides the members for an organization and the associated
+	 * The function {@link #getMembersOf(long)} provides the members for an organization and the associated
 	 * suborganizations.
 	 * 
 	 * @param organizationId the identifier of the organization.
 	 * @return the persons.
-	 * @see #getMembersOf(int)
+	 * @see #getMembersOf(long)
 	 */
 	public Set<Person> getDirectMembersOf(long organizationId) {
 		return this.personRepository.findDistinctByMembershipsResearchOrganizationId(organizationId);
 	}
 
 	/** Replies the persons in the organization of the given identifier and its suborganizations.
-	 * The function {@link #getDirectMembersOf(int)} provides the members for an organization and not of the associated
+	 * The function {@link #getDirectMembersOf(long)} provides the members for an organization and not of the associated
 	 * suborganizations.
 	 * 
 	 * @param organizationId the identifier of the organization.
 	 * @return the persons.
-	 * @see #getDirectMembersOf(int)
+	 * @see #getDirectMembersOf(long)
 	 */
 	public Set<Person> getMembersOf(long organizationId) {
 		final var optOrg = this.organizationRepository.findById(Long.valueOf(organizationId));
