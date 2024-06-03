@@ -19,27 +19,41 @@ import java.util.List;
 public class PersonAdditionWizard extends AbstractLabManagerWizard<Person> {
 
 
-    public PersonAdditionWizard(@Autowired PersonService personService, VerticalLayout personalInformationComponents, VerticalLayout contactInformationComponents, VerticalLayout researcherIdsComponents, VerticalLayout biographyComponents, VerticalLayout socialLinksComponents) {
+    public PersonAdditionWizard(@Autowired PersonService personService, VerticalLayout personalInformationComponents, VerticalLayout contactInformationComponents, VerticalLayout researcherIdsComponents, VerticalLayout biographyComponents, VerticalLayout indexesComponents, VerticalLayout socialLinksComponents) {
         this(personService,
                 defaultWizardConfiguration(null, false),
-                new Person(), personalInformationComponents, contactInformationComponents, researcherIdsComponents, biographyComponents, socialLinksComponents);
+                new Person(), personalInformationComponents, contactInformationComponents, researcherIdsComponents, biographyComponents, indexesComponents,socialLinksComponents);
+    }
+
+    public PersonAdditionWizard(PersonService personService, VerticalLayout personalInformationComponents, VerticalLayout contactInformationComponents, VerticalLayout researcherIdsComponents, VerticalLayout biographyComponents, VerticalLayout indexesComponents, VerticalLayout socialLinksComponents, VerticalLayout administrationComponents) {
+        this(personService,
+                defaultWizardConfiguration(null, false),
+                new Person(), personalInformationComponents, contactInformationComponents, researcherIdsComponents, biographyComponents, indexesComponents,socialLinksComponents,administrationComponents);
     }
 
     public boolean isNewEntity(){
         return true;
     }
 
-    protected PersonAdditionWizard(PersonService personService, WizardConfigurationProperties properties, Person context, VerticalLayout personalInformationComponents, VerticalLayout contactInformationComponents, VerticalLayout researcherIdsComponents, VerticalLayout biographyComponents, VerticalLayout socialLinksComponents) {
+    protected PersonAdditionWizard(PersonService personService, WizardConfigurationProperties properties, Person context, VerticalLayout personalInformationComponents, VerticalLayout contactInformationComponents, VerticalLayout researcherIdsComponents, VerticalLayout biographyComponents, VerticalLayout indexesComponents, VerticalLayout socialLinksComponents) {
         super(properties, context, Arrays.asList(
                 new PersonalInformationComponents(context, personalInformationComponents),
                 new PersonContactInformation(context, contactInformationComponents),
                 new PersonResearcherIds(context, researcherIdsComponents),
                 new PersonBiography(context, biographyComponents),
+                new PersonIndexes(context, indexesComponents),
                 new PersonSocialLinks(context, socialLinksComponents)));
     }
 
-    private PersonAdditionWizard(WizardConfigurationProperties properties, Person context, List<WizardStep<Person>> steps) {
-        super(properties, context, steps);
+    protected PersonAdditionWizard(PersonService personService, WizardConfigurationProperties properties, Person context, VerticalLayout personalInformationComponents, VerticalLayout contactInformationComponents, VerticalLayout researcherIdsComponents, VerticalLayout biographyComponents, VerticalLayout indexesComponents, VerticalLayout socialLinksComponents, VerticalLayout administrationComponents) {
+        super(properties, context, Arrays.asList(
+                new PersonalInformationComponents(context, personalInformationComponents),
+                new PersonContactInformation(context, contactInformationComponents),
+                new PersonResearcherIds(context, researcherIdsComponents),
+                new PersonBiography(context, biographyComponents),
+                new PersonIndexes(context, indexesComponents),
+                new PersonSocialLinks(context, socialLinksComponents),
+                new PersonAdministration(context, administrationComponents)));
     }
 
 
@@ -47,7 +61,7 @@ public class PersonAdditionWizard extends AbstractLabManagerWizard<Person> {
 
         private VerticalLayout content;
         public PersonalInformationComponents(Person context, VerticalLayout content) {
-            super(context, "test", 1);
+            super(context, content.getTranslation("views.persons.personal_informations"), 1);
             this.content = content;
         }
 
@@ -80,7 +94,7 @@ public class PersonAdditionWizard extends AbstractLabManagerWizard<Person> {
         private VerticalLayout content;
 
         public PersonContactInformation(Person context, VerticalLayout content) {
-            super(context, "Contact Information", 2);
+            super(context, content.getTranslation("views.persons.contact_informations"), 2);
             this.content = content;
         }
 
@@ -91,7 +105,7 @@ public class PersonAdditionWizard extends AbstractLabManagerWizard<Person> {
 
         @Override
         public boolean isValid() {
-            return false;
+            return true;
         }
 
         @Override
@@ -115,7 +129,7 @@ public class PersonAdditionWizard extends AbstractLabManagerWizard<Person> {
 
         private VerticalLayout content;
         public PersonResearcherIds(Person context, VerticalLayout content) {
-            super(context, "test", 3);
+            super(context, content.getTranslation("views.persons.researcher_ids"), 3);
             this.content = content;
         }
 
@@ -146,7 +160,39 @@ public class PersonAdditionWizard extends AbstractLabManagerWizard<Person> {
 
         private VerticalLayout content;
         public PersonBiography(Person context, VerticalLayout content) {
-            super(context, "test", 4);
+            super(context, content.getTranslation("views.persons.biography_details"), 4);
+            this.content = content;
+        }
+
+        @Override
+        protected Html getInformationMessage() {
+            return null;
+        }
+
+        @Override
+        public boolean isValid() {
+
+            return true;
+        }
+
+        @Override
+        protected boolean commitAfterContextUpdated() {
+            return true;
+        }
+
+        @Override
+        protected void createForm(FormLayout form) {
+            form.add(content);
+        }
+
+
+    }
+
+    protected static class PersonIndexes extends AbstractFormWizardStep<Person> {
+
+        private VerticalLayout content;
+        public PersonIndexes(Person context, VerticalLayout content) {
+            super(context, content.getTranslation("views.persons.indexes"), 5);
             this.content = content;
         }
 
@@ -178,7 +224,39 @@ public class PersonAdditionWizard extends AbstractLabManagerWizard<Person> {
 
         private VerticalLayout content;
         public PersonSocialLinks(Person context, VerticalLayout content) {
-            super(context, "test", 5);
+            super(context, content.getTranslation("views.persons.social_links"), 6);
+            this.content = content;
+        }
+
+        @Override
+        protected Html getInformationMessage() {
+            return null;
+        }
+
+        @Override
+        public boolean isValid() {
+
+            return true;
+        }
+
+        @Override
+        protected boolean commitAfterContextUpdated() {
+            return true;
+        }
+
+        @Override
+        protected void createForm(FormLayout form) {
+            form.add(content);
+        }
+
+
+    }
+
+    protected static class PersonAdministration extends AbstractFormWizardStep<Person> {
+
+        private VerticalLayout content;
+        public PersonAdministration(Person context, VerticalLayout content) {
+            super(context, content.getTranslation("views.persons.administration_details"), 7);
             this.content = content;
         }
 

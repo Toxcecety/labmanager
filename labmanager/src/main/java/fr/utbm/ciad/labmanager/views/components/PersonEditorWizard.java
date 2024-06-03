@@ -58,8 +58,6 @@ import static fr.utbm.ciad.labmanager.views.ViewConstants.*;
 
 public class PersonEditorWizard extends AbstractEntityEditor<Person> {
 
-    private DetailsWithErrorMark personalInformationDetails;
-
     private TextField lastname;
 
     private TextField firstname;
@@ -72,8 +70,6 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
 
     private VerticalLayout photo;
 
-    private DetailsWithErrorMark contactInformationDetails;
-
     private TextField email;
 
     private PhoneNumberField officePhone;
@@ -82,13 +78,9 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
 
     private TextField officeRoom;
 
-    private DetailsWithErrorMark biographyDetails;
-
     private ToggleButton privateBiography;
 
     private MarkdownField biography;
-
-    private DetailsWithErrorMark researcherIdsDetails;
 
     private TextField orcid;
 
@@ -97,8 +89,6 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
     private TextField wos;
 
     private TextField gscholar;
-
-    private Details indexesDetails;
 
     private IntegerField wosHindex;
 
@@ -111,8 +101,6 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
     private IntegerField scopusCitations;
 
     private IntegerField gscholarCitations;
-
-    private DetailsWithErrorMark socialLinksDetails;
 
     private TextField researchGate;
 
@@ -158,12 +146,7 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
                 "views.persons.administration.validated_person", //$NON-NLS-1$
                 userContext.getPersonContext(), relinkEntityWhenSaving);
         this.userContext = userContext;
-        personAdditionWizard = new PersonAdditionWizard(personService,createPersonalInformationComponents(),createContactInformationComponents(),createResearcherIdsComponents(),createBiographyComponents(),createSocialLinksComponents());
-    }
 
-    @Override
-    protected void createEditorContent(VerticalLayout rootContainer) {
-        rootContainer.add(personAdditionWizard);
         if (isBaseAdmin()) {
             Consumer<FormLayout> builderCallback = null;
             if (isAdvancedAdmin()) {
@@ -191,46 +174,18 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
                     getUserDataBinder().forField(this.userRole).bind(User::getRole, User::setRole);
                 };
             }
-            createAdministrationComponents(rootContainer, builderCallback,
-                    it -> it.bind(Person::isValidated, Person::setValidated));
+            personAdditionWizard = new PersonAdditionWizard(personService,createPersonalInformationComponents(),createContactInformationComponents(),createResearcherIdsComponents(),createBiographyComponents(),createIndexesComponents(),createSocialLinksComponents(),createAdministrationComponents( builderCallback, it -> it.bind(Person::isValidated, Person::setValidated)));
+
+        }else{
+            personAdditionWizard = new PersonAdditionWizard(personService,createPersonalInformationComponents(),createContactInformationComponents(),createResearcherIdsComponents(),createBiographyComponents(),createIndexesComponents(),createSocialLinksComponents());
         }
-        createIndexesComponents(rootContainer);
     }
 
-    /*
-        protected void createEditorContent() {
-            if (isBaseAdmin()) {
-                Consumer<FormLayout> builderCallback = null;
-                if (isAdvancedAdmin()) {
-                    builderCallback = content -> {
-                        this.webpageConvention = new ComboBox<>();
-                        this.webpageConvention.setItems(WebPageNaming.values());
-                        this.webpageConvention.setItemLabelGenerator(this::getWebPageNamingLabel);
-                        this.webpageConvention.setValue(WebPageNaming.UNSPECIFIED);
-                        content.add(this.webpageConvention, 2);
+    @Override
+    protected void createEditorContent(VerticalLayout rootContainer) {
+        rootContainer.add(personAdditionWizard);
+    }
 
-                        this.userLogin = new TextField();
-                        this.userLogin.setClearButtonVisible(true);
-                        this.userLogin.setPrefixComponent(VaadinIcon.HASH.create());
-                        content.add(this.userLogin);
-
-                        this.userRole = new ComboBox<>();
-                        this.userRole.setItems(UserRole.values());
-                        this.userRole.setItemLabelGenerator(this::getUserRoleLabel);
-                        this.userRole.setPrefixComponent(VaadinIcon.MEDAL.create());
-                        this.userRole.setValue(UserRole.USER);
-                        content.add(this.userRole);
-
-                        getEntityDataBinder().forField(this.webpageConvention).bind(Person::getWebPageNaming, Person::setWebPageNaming);
-                        getUserDataBinder().forField(this.userLogin).bind(User::getLogin, User::setLogin);
-                        getUserDataBinder().forField(this.userRole).bind(User::getRole, User::setRole);
-                    };
-                }
-                createAdministrationComponents(rootContainer, builderCallback,
-                        it -> it.bind(Person::isValidated, Person::setValidated));
-            }
-        }
-        */
     @Override
     protected String computeValidationSuccessMessage() {
         return getTranslation("views.persons.validation_success", //$NON-NLS-1$
@@ -268,6 +223,7 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
 
     protected VerticalLayout createPersonalInformationComponents() {
         VerticalLayout verticalLayout = new VerticalLayout();
+        verticalLayout.setSizeFull();
         final var content = ComponentFactory.newColumnForm(2);
 
         lastname = new TextField();
@@ -305,17 +261,14 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
         content.add(photo, 2);
         updatePhoto();
 
-        personalInformationDetails = createDetailsWithErrorMark(verticalLayout, content, "personal", true); //$NON-NLS-1$
 
         getEntityDataBinder().forField(lastname)
                 .withConverter(new StringTrimer())
                 .withValidator(new NotEmptyStringValidator(getTranslation("views.persons.last_name.error"))) //$NON-NLS-1$
-                .withValidationStatusHandler(new DetailsWithErrorMarkStatusHandler(lastname, personalInformationDetails))
                 .bind(Person::getLastName, Person::setLastName);
         getEntityDataBinder().forField(firstname)
                 .withConverter(new StringTrimer())
                 .withValidator(new NotEmptyStringValidator(getTranslation("views.persons.first_name.error"))) //$NON-NLS-1$
-                .withValidationStatusHandler(new DetailsWithErrorMarkStatusHandler(firstname, personalInformationDetails))
                 .bind(Person::getFirstName, Person::setFirstName);
         getEntityDataBinder().forField(gender).bind(Person::getGender, Person::setGender);
         getEntityDataBinder().forField(nationality).bind(Person::getNationality, Person::setNationality);
@@ -333,6 +286,8 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
      */
     protected VerticalLayout createContactInformationComponents() {
         VerticalLayout verticalLayout = new VerticalLayout();
+        verticalLayout.setSizeFull();
+
         final var content = ComponentFactory.newColumnForm(1);
 
         this.email = new TextField();
@@ -355,25 +310,22 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
         this.officeRoom.setPrefixComponent(VaadinIcon.OFFICE.create());
         content.add(this.officeRoom, 2);
 
-        this.contactInformationDetails = createDetailsWithErrorMark(verticalLayout, content, "contact"); //$NON-NLS-1$
 
         getEntityDataBinder().forField(this.email)
                 .withConverter(new StringTrimer())
                 .withValidator(new EmailValidator(getTranslation("views.forms.email.invalid_format"), true)) //$NON-NLS-1$
-                .withValidationStatusHandler(new DetailsWithErrorMarkStatusHandler(this.email, this.contactInformationDetails))
                 .bind(Person::getEmail, Person::setEmail);
         getEntityDataBinder().forField(this.officePhone)
                 .withValidator(this.officePhone.getDefaultValidator())
-                .withValidationStatusHandler(new DetailsWithErrorMarkStatusHandler(this.officePhone, this.contactInformationDetails))
                 .bind(Person::getOfficePhone, Person::setOfficePhone);
         getEntityDataBinder().forField(this.mobilePhone)
                 .withValidator(this.mobilePhone.getDefaultValidator())
-                .withValidationStatusHandler(new DetailsWithErrorMarkStatusHandler(this.mobilePhone, this.contactInformationDetails))
                 .bind(Person::getMobilePhone, Person::setMobilePhone);
         getEntityDataBinder().forField(this.officeRoom)
                 .withConverter(new StringTrimer())
                 .bind(Person::getOfficeRoom, Person::setOfficeRoom);
 
+        verticalLayout.add(content);
         return verticalLayout;
     }
 
@@ -389,6 +341,8 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
      */
     protected VerticalLayout createResearcherIdsComponents() {
         VerticalLayout verticalLayout = new VerticalLayout();
+        verticalLayout.setSizeFull();
+
         final var content = ComponentFactory.newColumnForm(2);
 
         this.orcid = ComponentFactory.newClickableIconTextField(Person.ORCID_BASE_URL, ORCID_ICON);
@@ -411,13 +365,11 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
         this.gscholar.setPrefixComponent(VaadinIcon.HASH.create());
         content.add(this.gscholar, 2);
 
-        this.researcherIdsDetails = createDetailsWithErrorMark(verticalLayout, content, "identifiers"); //$NON-NLS-1$
 
         getEntityDataBinder().forField(this.orcid)
                 .withConverter(new StringTrimer())
                 .withValidator(new OrcidValidator(getTranslation("views.persons.invalid_orcid"), //$NON-NLS-1$
                         getTranslation("views.persons.undesired_orcid"), true)) //$NON-NLS-1$
-                .withValidationStatusHandler(new DetailsWithErrorMarkStatusHandler(this.orcid, this.researcherIdsDetails))
                 .bind(Person::getORCID, Person::setORCID);
         getEntityDataBinder().forField(this.scopus)
                 .withConverter(new StringTrimer())
@@ -429,6 +381,7 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
                 .withConverter(new StringTrimer())
                 .bind(Person::getGoogleScholarId, Person::setGoogleScholarId);
 
+        verticalLayout.add(content);
         return verticalLayout;
     }
 
@@ -438,6 +391,8 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
      */
     protected VerticalLayout createBiographyComponents() {
         VerticalLayout verticalLayout = new VerticalLayout();
+        verticalLayout.setSizeFull();
+
         final var content = ComponentFactory.newColumnForm(2);
 
         this.privateBiography = new ToggleButton();
@@ -446,14 +401,13 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
         this.biography = new MarkdownField();
         content.add(this.biography, 2);
 
-        this.biographyDetails = createDetailsWithErrorMark(verticalLayout, content, "biography"); //$NON-NLS-1$
-
         getEntityDataBinder().forField(this.privateBiography)
                 .bind(Person::getPrivateBiography, Person::setPrivateBiography);
         getEntityDataBinder().forField(this.biography)
                 .withConverter(new StringTrimer())
                 .bind(Person::getBiography, Person::setBiography);
 
+        verticalLayout.add(content);
         return verticalLayout;
     }
 
@@ -497,7 +451,10 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
      * @return the details for the indexes.
      */
 
-    protected Details createIndexesComponents(VerticalLayout receiver) {
+    protected VerticalLayout createIndexesComponents() {
+        VerticalLayout verticalLayout = new VerticalLayout();
+        verticalLayout.setSizeFull();
+
         final var content0 = ComponentFactory.newColumnForm(1);
 
         this.wosHindex = new IntegerField();
@@ -550,7 +507,6 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
         final var vl = new VerticalLayout(content0, content1);
         vl.setSpacing(false);
 
-        this.indexesDetails = createDetails(receiver, vl, "indexes"); //$NON-NLS-1$
 
         getEntityDataBinder().forField(this.wosHindex).bind(Person::getWosHindex, Person::setWosHindex);
         getEntityDataBinder().forField(this.scopusHindex).bind(Person::getScopusHindex, Person::setScopusHindex);
@@ -559,7 +515,8 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
         getEntityDataBinder().forField(this.scopusCitations).bind(Person::getScopusCitations, Person::setScopusCitations);
         getEntityDataBinder().forField(this.gscholarCitations).bind(Person::getGoogleScholarCitations, Person::setGoogleScholarCitations);
 
-        return this.indexesDetails;
+        verticalLayout.add(vl);
+        return verticalLayout;
     }
 
     /** Create the components for entering the social links.
@@ -578,6 +535,8 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
      */
     protected VerticalLayout createSocialLinksComponents() {
         VerticalLayout verticalLayout = new VerticalLayout();
+        verticalLayout.setSizeFull();
+
         final var content = ComponentFactory.newColumnForm(1);
 
         this.researchGate = ComponentFactory.newClickableIconTextField(Person.RESEARCHGATE_BASE_URL, RESEARCHGATE_ICON);
@@ -620,7 +579,6 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
         this.facebook.setPrefixComponent(VaadinIcon.HASH.create());
         content.add(this.facebook);
 
-        this.socialLinksDetails = createDetailsWithErrorMark(verticalLayout, content, "social"); //$NON-NLS-1$
 
         final var invalidUrl = getTranslation("views.urls.invalid_format"); //$NON-NLS-1$
 
@@ -633,17 +591,14 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
         getEntityDataBinder().forField(this.dblp)
                 .withConverter(new StringTrimer())
                 .withValidator(new UrlValidator(invalidUrl, true))
-                .withValidationStatusHandler(new DetailsWithErrorMarkStatusHandler(this.dblp, this.socialLinksDetails))
                 .bind(Person::getDblpURL, Person::setDblpURL);
         getEntityDataBinder().forField(this.academiaEdu)
                 .withConverter(new StringTrimer())
                 .withValidator(new UrlValidator(invalidUrl, true))
-                .withValidationStatusHandler(new DetailsWithErrorMarkStatusHandler(this.academiaEdu, this.socialLinksDetails))
                 .bind(Person::getAcademiaURL, Person::setAcademiaURL);
         getEntityDataBinder().forField(this.euCordis)
                 .withConverter(new StringTrimer())
                 .withValidator(new UrlValidator(invalidUrl, true))
-                .withValidationStatusHandler(new DetailsWithErrorMarkStatusHandler(this.euCordis, this.socialLinksDetails))
                 .bind(Person::getCordisURL, Person::setCordisURL);
         getEntityDataBinder().forField(this.linkedin)
                 .withConverter(new StringTrimer())
@@ -655,13 +610,13 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
                 .withConverter(new StringTrimer())
                 .bind(Person::getFacebookId, Person::setFacebookId);
 
+        verticalLayout.add(content);
         return verticalLayout;
     }
 
     @Override
     public void localeChange(LocaleChangeEvent event) {
         super.localeChange(event);
-        this.personalInformationDetails.setSummaryText(getTranslation("views.persons.personal_informations")); //$NON-NLS-1$
         this.lastname.setLabel(getTranslation("views.persons.last_name")); //$NON-NLS-1$
         this.firstname.setLabel(getTranslation("views.persons.first_name")); //$NON-NLS-1$
         this.gender.setLabel(getTranslation("views.persons.gender")); //$NON-NLS-1$
@@ -676,7 +631,6 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
         final String helpPhone = getTranslation("views.phonenumber.help"); //$NON-NLS-1$
         final String errPhone = getTranslation("views.phonenumber.invalid"); //$NON-NLS-1$
 
-        this.contactInformationDetails.setSummaryText(getTranslation("views.persons.contact_informations")); //$NON-NLS-1$
         this.email.setLabel(getTranslation("views.persons.email")); //$NON-NLS-1$
         this.email.setErrorMessage(getTranslation("views.persons.email.error")); //$NON-NLS-1$
         this.officePhone.setLabel(getTranslation("views.persons.officephone")); //$NON-NLS-1$
@@ -687,11 +641,9 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
         this.officeRoom.setLabel(getTranslation("views.persons.officeroom")); //$NON-NLS-1$
         this.officeRoom.setHelperText(getTranslation("views.persons.officeroom.helper")); //$NON-NLS-1$
 
-        this.biographyDetails.setSummaryText(getTranslation("views.persons.biography_details")); //$NON-NLS-1$
         this.privateBiography.setLabel(getTranslation("views.persons.biography_private")); //$NON-NLS-1$
         this.biography.setLabel(getTranslation("views.persons.biography")); //$NON-NLS-1$
 
-        this.researcherIdsDetails.setSummaryText(getTranslation("views.persons.researcher_ids")); //$NON-NLS-1$
         this.orcid.setLabel(getTranslation("views.persons.orcid")); //$NON-NLS-1$
         this.orcid.setHelperText(getTranslation("views.persons.orcid.helper")); //$NON-NLS-1$
         this.scopus.setLabel(getTranslation("views.persons.scopus")); //$NON-NLS-1$
@@ -701,9 +653,7 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
         this.gscholar.setLabel(getTranslation("views.persons.gscholar")); //$NON-NLS-1$
         this.gscholar.setHelperText(getTranslation("views.persons.gscholar.helper")); //$NON-NLS-1$
 
-        /*
-        this.indexesDetails = new Details();
-        this.indexesDetails.setSummaryText(getTranslation("views.persons.indexes")); //$NON-NLS-1$
+
         this.wosHindex.setLabel(getTranslation("views.persons.wos_hindex")); //$NON-NLS-1$
         this.wosHindex.setHelperText(getTranslation("views.persons.wos_update.helper")); //$NON-NLS-1$
         this.scopusHindex.setLabel(getTranslation("views.persons.scopus_hindex")); //$NON-NLS-1$
@@ -716,9 +666,8 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
         this.scopusCitations.setHelperText(getTranslation("views.persons.scopus_update.helper")); //$NON-NLS-1$
         this.gscholarCitations.setLabel(getTranslation("views.persons.gscholar_citations")); //$NON-NLS-1$
         this.gscholarCitations.setHelperText(getTranslation("views.persons.gscholar_update.helper")); //$NON-NLS-1$
-         */
 
-        this.socialLinksDetails.setSummaryText(getTranslation("views.persons.social_links")); //$NON-NLS-1$
+
         this.researchGate.setLabel(getTranslation("views.persons.researchgate")); //$NON-NLS-1$
         this.researchGate.setHelperText(getTranslation("views.persons.researchgate.helper")); //$NON-NLS-1$
         this.adScientificIndex.setLabel(getTranslation("views.persons.adscientificindex")); //$NON-NLS-1$
