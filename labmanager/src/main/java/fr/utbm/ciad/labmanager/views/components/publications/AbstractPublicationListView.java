@@ -28,8 +28,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.aspose.slides.ms.System.e;
 import com.google.common.base.Strings;
 import com.helger.commons.io.stream.StringInputStream;
 import com.vaadin.flow.component.Component;
@@ -42,6 +44,8 @@ import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -56,6 +60,7 @@ import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import fr.utbm.ciad.labmanager.components.security.AuthenticatedUser;
 import fr.utbm.ciad.labmanager.configuration.Constants;
 import fr.utbm.ciad.labmanager.data.member.Person;
+import fr.utbm.ciad.labmanager.data.publication.Authorship;
 import fr.utbm.ciad.labmanager.data.publication.Publication;
 import fr.utbm.ciad.labmanager.data.publication.PublicationLanguage;
 import fr.utbm.ciad.labmanager.data.publication.PublicationType;
@@ -73,9 +78,11 @@ import fr.utbm.ciad.labmanager.utils.io.od.OpenDocumentConstants;
 import fr.utbm.ciad.labmanager.utils.io.ris.RISConstants;
 import fr.utbm.ciad.labmanager.views.ViewConstants;
 import fr.utbm.ciad.labmanager.views.components.addons.ComponentFactory;
+import fr.utbm.ciad.labmanager.views.components.addons.SimilarityError;
 import fr.utbm.ciad.labmanager.views.components.addons.badges.BadgeRenderer;
 import fr.utbm.ciad.labmanager.views.components.addons.badges.BadgeState;
 import fr.utbm.ciad.labmanager.views.components.addons.download.DownloadExtension;
+import fr.utbm.ciad.labmanager.views.components.addons.entities.AbstractEntityEditor;
 import fr.utbm.ciad.labmanager.views.components.addons.entities.AbstractEntityListView;
 import fr.utbm.ciad.labmanager.views.components.addons.wizard.AbstractLabManagerWizard;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -579,31 +586,86 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
 									// Read the publications from the file
 									List<Publication> publications = importFunction.apply(reader);
 
-									Dialog dialog = new Dialog();
-									Grid<Publication> publicationGrid = new Grid<>(Publication.class, false);
+									Dialog gridImportDialog = new Dialog();
+									Grid<AbstractEntityEditor<Publication>> publicationGrid = new Grid<>();
 
 									// Adding columns
-									publicationGrid.addColumn(Publication::getTitle).setHeader("Title");
-									publicationGrid.addColumn(Publication::getAuthors).setHeader("Author");
-									//publicationGrid.addColumn(Publication::getErrorMessage).setHeader("Error Message");
+									publicationGrid
+											.addColumn(editor -> editor
+													.getEditedEntity()
+													.getTitle())
+											.setHeader("Title");
+									publicationGrid
+											.addColumn(publication -> publication
+													.getEditedEntity()
+													.getType()
+													.getCategory(false))
+											.setHeader("Type")
+											.setAutoWidth(true);
+									publicationGrid
+											.addColumn(publication -> publication
+													.getEditedEntity()
+													.getAuthors()
+													.stream()
+													.map(Person::getFullName)
+													.collect(Collectors.joining(", ")))
+											.setHeader("Author");
 
-									publicationGrid.addComponentColumn(publication -> {
-										Button editButton = new Button("Edit");
-										editButton.addClickListener(e -> {
-											this.addEntity(publication, publication.getTitle());
+
+
+
+									publicationGrid
+											.addComponentColumn(editor -> {
+												Button editButton = new Button("Edit");
+												editButton.addClickListener(e -> {
+													this.addEntity(
+															editor,
+															editor.getEditedEntity().getTitle(),
+															false,
+															(dialog, entity) ->
+															{
+																editor.getEditedEntity().setValidated(true);
+																publicationGrid.getDataProvider().refreshAll();
+															}
+													);
+												});
+												return editButton;
+											})
+											.setHeader("Edition");
+
+									publicationGrid
+											.addColumn(createStatusComponentRenderer())
+											.setHeader("Checked")
+											.setWidth("5%");
+
+									List<AbstractEntityEditor<Publication>> editors = publications.stream()
+											.map(this::createPublicationEditor)
+											.toList();
+
+									publicationGrid.setItems(editors);
+
+									Button closeButton = new Button("Close", e -> gridImportDialog.close());
+									Button saveAllButton = new Button("Save Checked Entity", e -> {
+										publicationGrid.getListDataView().getItems().forEach(editor -> {
+											try {
+												if (editor.getEditedEntity().isValidated()) {
+													editor.getEditedEntity().setValidated(false);
+													editor.save();
+												}
+											} catch (Exception ex) {
+												getLogger().error("Error while saving publication", ex);
+											}
 										});
-										return editButton;
-									}).setHeader("Actions");
-
-									publicationGrid.setItems(publications);
-
-									Button closeButton = new Button("Close", e -> dialog.close());
-									dialog.add(publicationGrid, closeButton);
-									dialog.setWidthFull();
-									dialog.setHeight("400px");
+										gridImportDialog.close();
+										refreshGrid();
+									});
+									gridImportDialog.add(publicationGrid);
+									gridImportDialog.getFooter().add(closeButton, saveAllButton);
+									gridImportDialog.setWidthFull();
+									gridImportDialog.setHeight("auto");
 
 									// Open the dialog
-									dialog.open();
+									gridImportDialog.open();
 								} catch (Exception e) {
 									throw new RuntimeException(e);
 								}
@@ -611,6 +673,31 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
 					this.importDialog.close();
 				});
 		return upload;
+	}
+
+	private static final SerializableBiConsumer<Span, AbstractEntityEditor<Publication>> statusComponentUpdater = (Span span, AbstractEntityEditor<Publication> Editor) -> {
+		SimilarityError error = Editor.isAlreadyInDatabase();
+		String theme;
+		String text;
+		if (Editor.getEditedEntity().isValidated()) {
+			theme = "badge success";
+			text = "Checked";
+		} else {
+			if (error.isSimilarityError() || error.isSimilarityWarning()) {
+				theme = "badge error";
+				text = "Not checked";
+			} else {
+				Editor.getEditedEntity().setValidated(true);
+				theme = "badge success";
+				text = "Checked";
+			}
+		}
+		span.getElement().setAttribute("theme", theme);
+		span.setText(text);
+	};
+
+	private static ComponentRenderer<Span, AbstractEntityEditor<Publication>> createStatusComponentRenderer() {
+		return new ComponentRenderer<>(Span::new, statusComponentUpdater);
 	}
 
 	/**
@@ -811,16 +898,20 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
 				getSupportedPublicationTypes().findFirst().get(),
 				EMPTY, EMPTY, EMPTY, now, now.getYear(), EMPTY, EMPTY,
 				EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, PublicationLanguage.getDefault());
-		openPublicationEditor(emptyPublication, getTranslation("views.publication.add_publication")); //$NON-NLS-1$
+		openPublicationEditor(emptyPublication, getTranslation("views.publication.add_publication"), true); //$NON-NLS-1$
 	}
 
-    protected void addEntity(Publication entity,String fileName) {
-        openPublicationEditor(entity, getTranslation("views.publication.import_publication", fileName)); //$NON-NLS-1$
+    protected void addEntity(Publication entity, String fileName, boolean saveInDatabase, SerializableBiConsumer<Dialog, Publication> refreshAll) {
+        openPublicationEditor(entity, getTranslation("views.publication.import_publication", fileName), saveInDatabase, refreshAll); //$NON-NLS-1$
     }
+
+	protected void addEntity(AbstractEntityEditor<Publication> editor, String fileName, boolean saveInDatabase, SerializableBiConsumer<Dialog, Publication> refreshAll) {
+		openPublicationEditor(editor, getTranslation("views.publication.import_publication", fileName), saveInDatabase, refreshAll); //$NON-NLS-1$
+	}
 
     @Override
     protected void edit(Publication publication) {
-        openPublicationEditor(publication, getTranslation("views.publication.edit_publication", publication.getTitle())); //$NON-NLS-1$
+        openPublicationEditor(publication, getTranslation("views.publication.edit_publication", publication.getTitle()), true); //$NON-NLS-1$
     }
 
 	/** Show the editor of a publication.
@@ -828,8 +919,25 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
 	 * @param publication the publication to edit.
 	 * @param title the title of the editor.
 	 */
-	protected void openPublicationEditor(Publication publication, String title) {
-		final var editor = new EmbeddedPublicationEditor(
+	protected void openPublicationEditor(Publication publication, String title, boolean saveInDatabase) {
+		openPublicationEditor(publication, title, saveInDatabase, (dialog, entity) -> refreshGrid());
+	}
+
+	protected void openPublicationEditor(Publication publication, String title, boolean saveInDatabase, SerializableBiConsumer<Dialog, Publication> refreshAll) {
+		openPublicationEditor(createPublicationEditor(publication), title, saveInDatabase, refreshAll);
+	}
+
+	protected void openPublicationEditor(AbstractEntityEditor<Publication> editor, String title, boolean saveInDatabase, SerializableBiConsumer<Dialog, Publication> refreshAll) {
+		final var newEntity = editor.isNewEntity();
+		ComponentFactory.openEditionModalDialog(title, "views.check", editor, false,
+				saveInDatabase,
+				// Refresh the "old" item, even if its has been changed in the JPA database
+				refreshAll,
+				newEntity ? null : refreshAll);
+	}
+
+	private AbstractEntityEditor<Publication> createPublicationEditor(Publication publication) {
+		return new EmbeddedPublicationEditor(
 				this.publicationService.startEditing(publication),
 				getSupportedPublicationTypeArray(),
 				true,
@@ -847,12 +955,6 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
 				this.personFieldHelperLabelKey,
 				this.personNullErrorKey,
 				this.personDuplicateErrorKey);
-		final var newEntity = editor.isNewEntity();
-		final SerializableBiConsumer<Dialog, Publication> refreshAll = (dialog, entity) -> refreshGrid();
-		ComponentFactory.openEditionModalDialog(title, editor, false,
-				// Refresh the "old" item, even if its has been changed in the JPA database
-				refreshAll,
-				newEntity ? null : refreshAll);
 	}
 
 	@Override
