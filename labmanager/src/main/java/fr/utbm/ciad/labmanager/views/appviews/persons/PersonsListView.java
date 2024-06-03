@@ -60,6 +60,7 @@ public class PersonsListView extends StandardPersonListView implements HasDynami
 	private static final long serialVersionUID = 1616874715478139507L;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PersonsListView.class);
+	private final PersonService personService;
 
 	private MenuItem updateRankingsButton;
 
@@ -78,17 +79,18 @@ public class PersonsListView extends StandardPersonListView implements HasDynami
 	 * @param authenticatedUser the connected user.
 	 */
     public PersonsListView(
-    		@Autowired PersonService personService,
-    		@Autowired UserService userService,
-    		@Autowired MembershipService membershipService,
-    		@Autowired ResearchOrganizationService organizationService,
-    		@Autowired ChronoMembershipComparator membershipComparator,
-    		@Autowired AuthenticatedUser authenticatedUser,
-    		@Autowired MessageSourceAccessor messages) {
+			@Autowired PersonService personService,
+			@Autowired UserService userService,
+			@Autowired MembershipService membershipService,
+			@Autowired ResearchOrganizationService organizationService,
+			@Autowired ChronoMembershipComparator membershipComparator,
+			@Autowired AuthenticatedUser authenticatedUser,
+			@Autowired MessageSourceAccessor messages) {
     	super(personService, userService, membershipService, organizationService, membershipComparator,
     			(ps, query, filters) -> ps.getAllPersons(query, filters),
     			authenticatedUser, messages, LOGGER);
-    }
+		this.personService = personService;
+	}
 
 	@Override
 	public String getPageTitle() {
@@ -124,8 +126,7 @@ public class PersonsListView extends StandardPersonListView implements HasDynami
 
 	protected void openEditWizard() {
 		Dialog dialog = new Dialog();
-		var personEditor = new PersonAdditionWizard(null);
-		dialog.add(personEditor);
+
 		dialog.setSizeFull();
 		dialog.open();
 	}

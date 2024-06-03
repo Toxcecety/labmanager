@@ -20,9 +20,12 @@
 package fr.utbm.ciad.labmanager.views.components.persons;
 
 import fr.utbm.ciad.labmanager.components.security.AuthenticatedUser;
+import fr.utbm.ciad.labmanager.services.member.PersonService;
 import fr.utbm.ciad.labmanager.services.user.UserService.UserEditingContext;
+import fr.utbm.ciad.labmanager.views.components.PersonEditorWizard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.MessageSourceAccessor;
 
 /** Editor of person information that may be embedded. This editor does not provide
@@ -35,7 +38,7 @@ import org.springframework.context.support.MessageSourceAccessor;
  * @mavenartifactid $ArtifactId$
  * @since 4.0
  */
-public final class EmbeddedPersonEditor extends AbstractPersonEditor {
+public final class EmbeddedPersonEditor extends PersonEditorWizard {
 
 	private static final long serialVersionUID = 3928100811567654630L;
 
@@ -48,8 +51,8 @@ public final class EmbeddedPersonEditor extends AbstractPersonEditor {
 	 * @param messages the accessor to the localized messages (Spring layer).
 	 */
 	public EmbeddedPersonEditor(UserEditingContext userContext, AuthenticatedUser authenticatedUser,
-			MessageSourceAccessor messages) {
-		super(userContext, false, authenticatedUser, messages, LOGGER);
+								MessageSourceAccessor messages, @Autowired PersonService personService) {
+		super(userContext, false, authenticatedUser, messages, LOGGER,personService);
 		createEditorContentAndLinkBeans();
 	}
 

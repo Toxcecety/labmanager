@@ -327,9 +327,9 @@ public abstract class AbstractPersonEditor extends AbstractEntityEditor<Person> 
 				getEditedEntity().getFullName(), error.getLocalizedMessage());
 	}
 
-	private void updatePhoto() {
+	protected void updatePhoto() {
 		final var photoURL = getEditedEntity().getPhotoURL();
-		this.photo.removeAll();
+		//this.photo.removeAll();
 		if (photoURL != null) {
 			final var url = photoURL.toExternalForm();
 			final var image = new Image(url, url);
@@ -339,6 +339,7 @@ public abstract class AbstractPersonEditor extends AbstractEntityEditor<Person> 
 			image.setMaxWidth(ViewConstants.PHOTO_SIZE, Unit.PIXELS);
 			this.photo.add(image);			
 		} else {
+			this.photo = new VerticalLayout();
 			final var size = new StringBuilder();
 			size.append(ViewConstants.PHOTO_SIZE);
 			size.append(Unit.PIXELS.getSymbol());
@@ -415,7 +416,7 @@ public abstract class AbstractPersonEditor extends AbstractEntityEditor<Person> 
 			.bind(Person::getGravatarId, Person::setGravatarId);
 	}
 
-	private String getGenderLabel(Gender gender) {
+	protected String getGenderLabel(Gender gender) {
 		return gender.getLabel(getMessageSourceAccessor(), getLocale());
 	}
 

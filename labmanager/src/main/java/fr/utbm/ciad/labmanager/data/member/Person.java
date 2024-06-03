@@ -56,6 +56,7 @@ import fr.utbm.ciad.labmanager.utils.country.CountryCode;
 import fr.utbm.ciad.labmanager.utils.io.hal.HalTools;
 import fr.utbm.ciad.labmanager.utils.io.json.JsonUtils;
 import fr.utbm.ciad.labmanager.utils.phone.PhoneNumber;
+import fr.utbm.ciad.labmanager.views.components.addons.wizard.AbstractContextData;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -80,7 +81,7 @@ import org.springframework.context.support.MessageSourceAccessor;
  */
 @Entity
 @Table(name = "Persons")
-public class Person implements Serializable, JsonSerializable, AttributeProvider, Comparable<Person>, IdentifiableEntity {
+public class Person extends AbstractContextData implements Serializable, JsonSerializable, AttributeProvider, Comparable<Person>, IdentifiableEntity {
 
 	private static final long serialVersionUID = -1312811718336186349L;
 
