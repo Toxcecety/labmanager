@@ -19,19 +19,6 @@
 
 package fr.utbm.ciad.labmanager.views.components.publications;
 
-import java.io.*;
-import java.nio.charset.Charset;
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import com.aspose.slides.ms.System.e;
 import com.google.common.base.Strings;
 import com.helger.commons.io.stream.StringInputStream;
 import com.vaadin.flow.component.Component;
@@ -39,13 +26,12 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -60,7 +46,6 @@ import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import fr.utbm.ciad.labmanager.components.security.AuthenticatedUser;
 import fr.utbm.ciad.labmanager.configuration.Constants;
 import fr.utbm.ciad.labmanager.data.member.Person;
-import fr.utbm.ciad.labmanager.data.publication.Authorship;
 import fr.utbm.ciad.labmanager.data.publication.Publication;
 import fr.utbm.ciad.labmanager.data.publication.PublicationLanguage;
 import fr.utbm.ciad.labmanager.data.publication.PublicationType;
@@ -98,6 +83,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.vaadin.lineawesome.LineAwesomeIcon;
+
+import java.io.*;
+import java.nio.charset.Charset;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /** Abstract implementation of a list all the publications whatever the type of publication.
  * 
@@ -537,9 +530,9 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
 	 * It creates an upload component for users to upload files, which are then processed by the provided import function.
 	 * The dialog also includes "Cancel" and "Import" buttons for user interactions.
 	 *
-	 * @param dialogTitle       The title of the import dialog, displayed at the top of the dialog.
-	 * @param importFunction    A function that takes a {@link Reader} and returns a list of {@link Publication} objects.
-	 *                          This function defines how the uploaded files are read and processed into publications.
+	 * @param dialogTitle    The title of the import dialog, displayed at the top of the dialog.
+	 * @param importFunction A function that takes a {@link Reader} and returns a list of {@link Publication} objects.
+	 *                       This function defines how the uploaded files are read and processed into publications.
 	 */
 	protected void setupImportDialog(String dialogTitle, Function<Reader, List<Publication>> importFunction) {
 		Upload upload = getUploadDialog(importFunction);
@@ -564,9 +557,9 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
 	 * to not allow auto-uploading of files. It also sets up a listener to process the uploaded files
 	 * using the provided import function once all files have been uploaded.
 	 *
-	 * @param importFunction    A function that takes a {@link Reader} and returns a list of {@link Publication} objects.
-	 *                          This function is used to read and process the uploaded files into publications.
-	 * @return                  The configured {@link Upload} component ready to be added to the import dialog.
+	 * @param importFunction A function that takes a {@link Reader} and returns a list of {@link Publication} objects.
+	 *                       This function is used to read and process the uploaded files into publications.
+	 * @return The configured {@link Upload} component ready to be added to the import dialog.
 	 */
 	private @NotNull Upload getUploadDialog(Function<Reader, List<Publication>> importFunction) {
 		MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
@@ -576,103 +569,114 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
 
 		upload.addAllFinishedListener(
 				event -> {
-					buffer
-							.getFiles()
-							.forEach(file ->
-							{
-								try (InputStream fileData = buffer.getInputStream(file);
-									 Reader reader = new BufferedReader(new InputStreamReader(fileData))) {
+					List<Publication> publications = processFiles(buffer, importFunction);
 
-									// Read the publications from the file
-									List<Publication> publications = importFunction.apply(reader);
+					Dialog gridImportDialog = new Dialog();
+					gridImportDialog.setWidthFull();
+					gridImportDialog.setHeight("auto");
+					gridImportDialog.setHeaderTitle(getTranslation("views.import.dialog.title"));
 
-									Dialog gridImportDialog = new Dialog();
-									Grid<AbstractEntityEditor<Publication>> publicationGrid = new Grid<>();
+					Grid<AbstractEntityEditor<Publication>> publicationGrid = new Grid<>();
 
-									// Adding columns
-									publicationGrid
-											.addColumn(editor -> editor
-													.getEditedEntity()
-													.getTitle())
-											.setHeader("Title");
-									publicationGrid
-											.addColumn(publication -> publication
-													.getEditedEntity()
-													.getType()
-													.getCategory(false))
-											.setHeader("Type")
-											.setAutoWidth(true);
-									publicationGrid
-											.addColumn(publication -> publication
-													.getEditedEntity()
-													.getAuthors()
-													.stream()
-													.map(Person::getFullName)
-													.collect(Collectors.joining(", ")))
-											.setHeader("Author");
-
-
-
-
-									publicationGrid
-											.addComponentColumn(editor -> {
-												Button editButton = new Button("Edit");
-												editButton.addClickListener(e -> {
-													this.addEntity(
-															editor,
-															editor.getEditedEntity().getTitle(),
-															false,
-															(dialog, entity) ->
-															{
-																editor.getEditedEntity().setValidated(true);
-																publicationGrid.getDataProvider().refreshAll();
-															}
-													);
-												});
-												return editButton;
-											})
-											.setHeader("Edition");
-
-									publicationGrid
-											.addColumn(createStatusComponentRenderer())
-											.setHeader("Checked")
-											.setWidth("5%");
-
-									List<AbstractEntityEditor<Publication>> editors = publications.stream()
-											.map(this::createPublicationEditor)
-											.toList();
-
-									publicationGrid.setItems(editors);
-
-									Button closeButton = new Button("Close", e -> gridImportDialog.close());
-									Button saveAllButton = new Button("Save Checked Entity", e -> {
-										publicationGrid.getListDataView().getItems().forEach(editor -> {
-											try {
-												if (editor.getEditedEntity().isValidated()) {
-													editor.getEditedEntity().setValidated(false);
-													editor.save();
-												}
-											} catch (Exception ex) {
-												getLogger().error("Error while saving publication", ex);
+					// Adding columns
+					// Title column
+					publicationGrid
+							.addColumn(editor -> editor
+									.getEditedEntity()
+									.getTitle())
+							.setHeader(getTranslation("views.import.grid.column.title"));
+					// Authors column
+					publicationGrid
+							.addColumn(publication -> publication
+									.getEditedEntity()
+									.getAuthors()
+									.stream()
+									.map(Person::getFullName)
+									.collect(Collectors.joining(", ")))
+							.setHeader(getTranslation("views.import.grid.column.authors"));
+					// Type column
+					publicationGrid
+							.addColumn(publication -> publication
+									.getEditedEntity()
+									.getType()
+									.getCategory(false))
+							.setHeader(getTranslation("views.import.grid.column.category"))
+							.setAutoWidth(true)
+							.setFlexGrow(0);
+					// Status column
+					publicationGrid
+							.addColumn(createStatusComponentRenderer())
+							.setHeader(getTranslation("views.import.grid.column.checked"))
+							.setAutoWidth(true)
+							.setFlexGrow(0);
+					// Edition button column
+					publicationGrid
+							.addComponentColumn(editor -> {
+								Button editButton = new Button(getTranslation("views.import.grid.edition.edit"));
+								editButton.addClickListener(e -> {
+									this.addEntity(
+											editor,
+											editor.getEditedEntity().getTitle(),
+											false,
+											(dialog, entity) ->
+											{
+												editor.getEditedEntity().setValidated(true);
+												publicationGrid.getDataProvider().refreshAll();
 											}
-										});
-										gridImportDialog.close();
-										refreshGrid();
-									});
-									gridImportDialog.add(publicationGrid);
-									gridImportDialog.getFooter().add(closeButton, saveAllButton);
-									gridImportDialog.setWidthFull();
-									gridImportDialog.setHeight("auto");
+									);
+								});
+								return editButton;
+							})
+							.setHeader(getTranslation("views.import.grid.column.edit"))
+							.setAutoWidth(true)
+							.setFlexGrow(0);
 
-									// Open the dialog
-									gridImportDialog.open();
-								} catch (Exception e) {
-									throw new RuntimeException(e);
+					List<AbstractEntityEditor<Publication>> editors = publications.stream()
+							.map(this::createPublicationEditor)
+							.toList();
+
+					publicationGrid.setItems(editors);
+
+					Button closeButton = new Button(getTranslation("views.import.dialog.close"), e -> gridImportDialog.close());
+					Button saveAllButton = new Button(getTranslation("views.import.dialog.save"), e -> {
+						publicationGrid.getListDataView().getItems().forEach(editor -> {
+							try {
+								if (editor.getEditedEntity().isValidated()) {
+									editor.getEditedEntity().setValidated(false);
+									editor.save();
 								}
-							});
+							} catch (Exception ex) {
+								getLogger().error("Error while saving publication", ex);
+							}
+						});
+						gridImportDialog.close();
+						refreshGrid();
+					});
+					gridImportDialog.add(publicationGrid);
+					gridImportDialog.getFooter().add(closeButton, saveAllButton);
+
+					// Open the dialog
+					gridImportDialog.open();
+
 					this.importDialog.close();
 				});
 		return upload;
+	}
+
+	private List<Publication> processFiles(MultiFileMemoryBuffer buffer, Function<Reader, List<Publication>> importFunction) {
+		List<Publication> publications = new ArrayList<>(Collections.emptyList());
+		buffer.getFiles().forEach(file -> {
+			try (InputStream fileData = buffer.getInputStream(file);
+				 Reader reader = new BufferedReader(new InputStreamReader(fileData))) {
+
+				// Read the publications from the file
+				publications.addAll(importFunction.apply(reader));
+
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		});
+		return publications;
 	}
 
 	private static final SerializableBiConsumer<Span, AbstractEntityEditor<Publication>> statusComponentUpdater = (Span span, AbstractEntityEditor<Publication> Editor) -> {
@@ -681,15 +685,15 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
 		String text;
 		if (Editor.getEditedEntity().isValidated()) {
 			theme = "badge success";
-			text = "Checked";
+			text = span.getTranslation("views.import.grid.checked.checked");
 		} else {
 			if (error.isSimilarityError() || error.isSimilarityWarning()) {
 				theme = "badge error";
-				text = "Not checked";
+				text = span.getTranslation("views.import.grid.checked.not_checked");
 			} else {
 				Editor.getEditedEntity().setValidated(true);
 				theme = "badge success";
-				text = "Checked";
+				text = span.getTranslation("views.import.grid.checked.checked");
 			}
 		}
 		span.getElement().setAttribute("theme", theme);

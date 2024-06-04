@@ -19,31 +19,9 @@
 
 package fr.utbm.ciad.labmanager.views.components.addons;
 
-import static fr.utbm.ciad.labmanager.views.ViewConstants.DEFAULT_MINIMAL_WIDTH_FOR_2_COLUMNS_FORM;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOError;
-import java.io.IOException;
-import java.io.Serializable;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-import java.util.regex.Pattern;
-
 import com.google.common.base.Strings;
 import com.ibm.icu.text.Normalizer2;
-import com.vaadin.flow.component.ClickEvent;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Key;
-import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -94,6 +72,18 @@ import org.arakhne.afc.vmutil.FileSystem;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.vaadin.lineawesome.LineAwesomeIcon;
+
+import java.io.*;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.regex.Pattern;
+
+import static fr.utbm.ciad.labmanager.views.ViewConstants.DEFAULT_MINIMAL_WIDTH_FOR_2_COLUMNS_FORM;
 
 /** Factory of Vaadin components.
  * 
