@@ -1,8 +1,10 @@
 package fr.utbm.ciad.labmanager.views.components.persons;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import fr.utbm.ciad.labmanager.data.member.Person;
 import fr.utbm.ciad.labmanager.services.member.PersonService;
@@ -12,6 +14,7 @@ import io.overcoded.vaadin.wizard.WizardStep;
 import io.overcoded.vaadin.wizard.config.WizardConfigurationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
 
@@ -72,7 +75,13 @@ public class PersonAdditionWizard extends AbstractLabManagerWizard<Person> {
 
         @Override
         public boolean isValid() {
+            List<Component> components = content.getChildren().toList();
+            TextField lastName = (TextField) components.get(0).getChildren().toList().get(0);
+            TextField firstName = (TextField) components.get(0).getChildren().toList().get(1);
 
+            if(lastName.isEmpty() || firstName.isEmpty()){
+                return false;
+            }
             return true;
         }
 
@@ -83,6 +92,19 @@ public class PersonAdditionWizard extends AbstractLabManagerWizard<Person> {
 
         @Override
         protected void createForm(FormLayout form) {
+
+            List<Component> components = content.getChildren().toList();
+            TextField lastName = (TextField) components.get(0).getChildren().toList().get(0);
+            TextField firstName = (TextField) components.get(0).getChildren().toList().get(1);
+
+            lastName.addValueChangeListener(event -> {
+                isValid();
+                updateButtonStateForNextStep();
+            });
+            firstName.addValueChangeListener(event -> {
+                isValid();
+                updateButtonStateForNextStep();
+            });
             form.add(content);
         }
 
