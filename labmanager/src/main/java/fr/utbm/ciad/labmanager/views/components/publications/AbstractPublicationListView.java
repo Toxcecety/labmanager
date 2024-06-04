@@ -26,7 +26,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -663,6 +662,13 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
 		return upload;
 	}
 
+	/**
+	 * List all the publications contained in the given file.
+	 *
+	 * @param buffer         the buffer that contains the file.
+	 * @param importFunction the function that is used to import the publications.
+	 * @return the list of publications.
+	 */
 	private List<Publication> processFiles(MultiFileMemoryBuffer buffer, Function<Reader, List<Publication>> importFunction) {
 		List<Publication> publications = new ArrayList<>(Collections.emptyList());
 		buffer.getFiles().forEach(file -> {
@@ -679,6 +685,12 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
 		return publications;
 	}
 
+	/**
+	 * This is a SerializableBiConsumer functional interface implementation that updates the status of a publication.
+	 * It takes a Span and an AbstractEntityEditor of Publication as inputs.
+	 * The status of the publication is determined based on whether it is validated or not and whether it has similarity errors or warnings.
+	 * The theme and text of the span are updated accordingly.
+	 */
 	private static final SerializableBiConsumer<Span, AbstractEntityEditor<Publication>> statusComponentUpdater = (Span span, AbstractEntityEditor<Publication> Editor) -> {
 		SimilarityError error = Editor.isAlreadyInDatabase();
 		String theme;
@@ -700,6 +712,13 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
 		span.setText(text);
 	};
 
+	/**
+	 * This method creates a ComponentRenderer for a Span and an AbstractEntityEditor of Publication.
+	 * It uses the statusComponentUpdater defined above to update the status of the publication.
+	 * The ComponentRenderer is used to render the status of the publication in the UI.
+	 *
+	 * @return A ComponentRenderer that can be used to render the status of a publication.
+	 */
 	private static ComponentRenderer<Span, AbstractEntityEditor<Publication>> createStatusComponentRenderer() {
 		return new ComponentRenderer<>(Span::new, statusComponentUpdater);
 	}
@@ -712,12 +731,12 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
 	 */
 	protected void openImportBibtexDialog() {
 		setupImportDialog(getTranslation("views.import.bibtex"), reader -> {
-            try {
-                return publicationService.readPublicationsFromBibTeX(reader, true, false, true, true, true);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
+			try {
+				return publicationService.readPublicationsFromBibTeX(reader, true, false, true, true, true);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		});
 	}
 
 	/**
@@ -727,12 +746,12 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
 	 */
 	protected void openImportRisDialog() {
 		setupImportDialog(getTranslation("views.import.ris"), reader -> {
-            try {
-                return publicationService.readPublicationsFromRIS(reader, true, false, true, true, true, null);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
+			try {
+				return publicationService.readPublicationsFromRIS(reader, true, false, true, true, true, null);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		});
 	}
 
 
@@ -918,19 +937,37 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
         openPublicationEditor(publication, getTranslation("views.publication.edit_publication", publication.getTitle()), true); //$NON-NLS-1$
     }
 
-	/** Show the editor of a publication.
+	/**
+	 * Show the editor of a publication.
 	 *
-	 * @param publication the publication to edit.
-	 * @param title the title of the editor.
+	 * @param publication    the publication to edit.
+	 * @param title          the title of the editor.
+	 * @param saveInDatabase indicates if the editor should save the publication in the database.
 	 */
 	protected void openPublicationEditor(Publication publication, String title, boolean saveInDatabase) {
 		openPublicationEditor(publication, title, saveInDatabase, (dialog, entity) -> refreshGrid());
 	}
 
+	/**
+	 * Show the editor of a publication.
+	 *
+	 * @param publication    the publication to edit.
+	 * @param title          the title of the editor.
+	 * @param saveInDatabase indicates if the editor should save the publication in the database.
+	 * @param refreshAll     the function to call for refreshing all the data.
+	 */
 	protected void openPublicationEditor(Publication publication, String title, boolean saveInDatabase, SerializableBiConsumer<Dialog, Publication> refreshAll) {
 		openPublicationEditor(createPublicationEditor(publication), title, saveInDatabase, refreshAll);
 	}
 
+	/**
+	 * Show the editor of a publication.
+	 *
+	 * @param editor         the editor to show.
+	 * @param title          the title of the editor.
+	 * @param saveInDatabase indicates if the editor should save the publication in the database.
+	 * @param refreshAll     the function to call for refreshing all the data.
+	 */
 	protected void openPublicationEditor(AbstractEntityEditor<Publication> editor, String title, boolean saveInDatabase, SerializableBiConsumer<Dialog, Publication> refreshAll) {
 		final var newEntity = editor.isNewEntity();
 		ComponentFactory.openEditionModalDialog(title, "views.check", editor, false,
@@ -940,6 +977,12 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
 				newEntity ? null : refreshAll);
 	}
 
+	/**
+	 * Create an AbstractEntityEditor for the given publication.
+	 *
+	 * @param publication the publication to edit.
+	 * @return the editor.
+	 */
 	private AbstractEntityEditor<Publication> createPublicationEditor(Publication publication) {
 		return new EmbeddedPublicationEditor(
 				this.publicationService.startEditing(publication),
