@@ -73,36 +73,27 @@ public interface PublicationRepository extends JpaRepository<Publication, Long>,
 	 */
 	List<Publication> findAllByTitleIgnoreCase(String title);
 
-	/** Replies the list of publications for the given year.
+	/** Replies the list of publication counts for each year.
 	 *
-	 * @param year the year of publication.
-	 * @return the set of publications for the given year.
-	 * @since 3.6
+	 * @return the list of publications counts.
 	 */
-	List<Publication> findAllByPublicationYear(Integer publicationYear);
-
-	/** Replies the list of year.
-	 *
-	 * @return the set of years.
-	 * @since 3.6
-	 */
-	@Query("SELECT COUNT(p) AS publicationCount FROM Publication p GROUP BY p.publicationYear")
-	List<Long> countPublicationsByYear();
-
-	// Méthode pour obtenir les années des publications
 	@Query("SELECT DISTINCT p.publicationYear FROM Publication p")
 	List<Integer> findDistinctPublicationYears();
 
-	@Query("SELECT p.type AS publicationType, COUNT(p) AS publicationCount FROM Publication p WHERE p.publicationYear = :year GROUP BY p.type ORDER BY p.type ASC")
-	List<Map<String, Long>> countPublicationsByTypeForYear(@Param("year") int year);
-
-	@Query("SELECT COUNT(p) AS publicationCount FROM Publication p WHERE p.type = :type GROUP BY p.publicationYear ORDER BY p.publicationYear ASC")
-	List<Map<String, Long>> countPublicationsByYearForTypeOrdered(@Param("type") PublicationType type);
-
+	/** Replies the list of publication types.
+	 *
+	 * @return the list of publication types.
+	 */
 	@Query("SELECT DISTINCT p.type FROM Publication p")
 	List<PublicationType> findAllDistinctPublicationTypes();
 
+	/** Replies the count of publications for the given type and year.
+	 *
+	 * @param type the type of the publication.
+	 * @param year the year of the publication.
+	 * @return the count of publications.
+	 */
 	@Query("SELECT COUNT(p) AS publicationCount FROM Publication p WHERE p.type = :type AND p.publicationYear = :year")
-	Integer countPublicationsForTypeAndYearV2(@Param("type") PublicationType type, @Param("year") Integer year);
+	Integer countPublicationsForTypeAndYear(@Param("type") PublicationType type, @Param("year") Integer year);
 
 }

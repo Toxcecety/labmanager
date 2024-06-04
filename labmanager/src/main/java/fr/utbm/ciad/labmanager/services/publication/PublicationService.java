@@ -467,15 +467,6 @@ public class PublicationService extends AbstractPublicationService {
 		return this.publicationRepository.findAllByTitleIgnoreCase(title);
 	}
 
-	/** Replies the publications for the given year.
-	 *
-	 * @param year the year of publication.
-	 * @return the list of publications.
-	 * @since 3.6
-	 */
-	public List<Publication> getPublicationsByYear(int year) {
-		return this.publicationRepository.findAllByPublicationYear(Integer.valueOf(year));
-	}
 
 	/** Replies the authors of the publication with the given identifier.
 	 * 
@@ -495,43 +486,34 @@ public class PublicationService extends AbstractPublicationService {
 		return this.authorshipRepository.findByPublicationId(publicationId);
 	}
 
-	/** Replies the count of the publication per year.
-	 *
-	 * @return the years.
-	 *
-	 * */
-	public List<Long> getCountPublicationsByYear(){
-		return this.publicationRepository.countPublicationsByYear();
-	}
-
 	/** Replies the years.
 	 *
 	 * @return the years.
-	 *
-	 *
 	 * */
 	public List<Integer> getAllYears(){
 		return this.publicationRepository.findDistinctPublicationYears();
 	}
 
-	/** Replies the count of the publication per year.
+	/** Replies the publication types.
 	 *
 	 * @return the years.
-	 *
-	 *
-	 */
-	public List<Map<String,Long>> getCountPublicationByTypeByYear(PublicationType type){
-		return this.publicationRepository.countPublicationsByYearForTypeOrdered(type);
-	}
-
+	 * */
 	public List<PublicationType> getAllType(){
 		return this.publicationRepository.findAllDistinctPublicationTypes();
 	}
 
-	public Integer getCountPublicationByTypeByYearV2(PublicationType type, Integer year){
-		return this.publicationRepository.countPublicationsForTypeAndYearV2(type,year);
+	/** Replies the publication types.
+	 *
+	 * @return the count of the type.
+	 * */
+	public Integer getCountPublicationByTypeByYear(PublicationType type, Integer year){
+		return this.publicationRepository.countPublicationsForTypeAndYear(type,year);
 	}
 
+	/** Replies the publication categories.
+	 *
+	 * @return the list of publication categories.
+	 * */
 	public List<String> getAllCategories(){
 		List<PublicationType> publicationTypes = getAllType();
 		List<String> publicationCategories = new ArrayList<>();

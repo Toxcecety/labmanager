@@ -99,7 +99,7 @@ public class PublicationCategoryBarChart extends AbstractPublicationCategoryChar
         Integer totalYearCount = 0;
         for(int x = 0; x < getYears().size(); x++){
             for (PublicationType publicationType : temporaryPublicationTypeList ) {
-                countTypePublicationV2 = this.publicationService.getCountPublicationByTypeByYearV2(publicationType, getYears().get(x));
+                countTypePublicationV2 = this.publicationService.getCountPublicationByTypeByYear(publicationType, getYears().get(x));
                 totalYearCount += countTypePublicationV2;
                 totalPublication.set(x, countTypePublicationV2 + totalPublication.get(x));
 
@@ -129,7 +129,7 @@ public class PublicationCategoryBarChart extends AbstractPublicationCategoryChar
         List<PublicationType> temporaryPublicationTypeList = publicationTypes.stream().filter(publicationType -> Objects.equals(publicationType.getCategory(true).toString(), chosenCategory)).toList();
         for(int x = 0; x < getYears().size(); x++){
             for (PublicationType publicationType : temporaryPublicationTypeList ) {
-                countTypePublicationV2 = this.publicationService.getCountPublicationByTypeByYearV2(publicationType, getYears().get(x));
+                countTypePublicationV2 = this.publicationService.getCountPublicationByTypeByYear(publicationType, getYears().get(x));
                 totalPublication.set(x, countTypePublicationV2 - totalPublication.get(x));
             }
         }

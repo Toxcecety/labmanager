@@ -51,7 +51,7 @@ public class PublicationCategoryPieChart extends AbstractPublicationCategoryChar
         Integer total = 0;
         for(int x = 0; x < years.size(); x++){
             for (PublicationType publicationType : temporaryPublicationTypeList ) {
-                countTypePublicationV2 = this.publicationService.getCountPublicationByTypeByYearV2(publicationType, years.get(x));
+                countTypePublicationV2 = this.publicationService.getCountPublicationByTypeByYear(publicationType, years.get(x));
                 total += countTypePublicationV2;
 
             }
