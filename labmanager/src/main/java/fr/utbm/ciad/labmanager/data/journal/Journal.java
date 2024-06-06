@@ -43,6 +43,7 @@ import fr.utbm.ciad.labmanager.data.publication.AbstractJournalBasedPublication;
 import fr.utbm.ciad.labmanager.utils.HashCodeUtils;
 import fr.utbm.ciad.labmanager.utils.io.json.JsonUtils;
 import fr.utbm.ciad.labmanager.utils.ranking.QuartileRanking;
+import fr.utbm.ciad.labmanager.views.components.addons.wizard.AbstractContextData;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -70,7 +71,7 @@ import org.springframework.context.support.MessageSourceAccessor;
  */
 @Entity
 @Table(name = "Journals")
-public class Journal implements Serializable, JsonSerializable, AttributeProvider, IdentifiableEntity {
+public class Journal extends AbstractContextData implements Serializable, JsonSerializable, AttributeProvider, IdentifiableEntity {
 
 	private static final long serialVersionUID = -2046765660549008074L;
 

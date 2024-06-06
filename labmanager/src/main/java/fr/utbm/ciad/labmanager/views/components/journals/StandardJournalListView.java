@@ -239,7 +239,7 @@ public class StandardJournalListView extends AbstractEntityListView<Journal> {
 
 	@Override
 	protected void addEntity() {
-		openJournalEditor(new Journal(), getTranslation("views.journals.add_journal")); //$NON-NLS-1$
+		openJournalEditorWizard(new Journal(), getTranslation("views.journals.add_journal")); //$NON-NLS-1$
 	}
 
 	@Override
@@ -254,6 +254,38 @@ public class StandardJournalListView extends AbstractEntityListView<Journal> {
 	 */
 	protected void openJournalEditor(Journal journal, String title) {
 		final var editor = new EmbeddedJournalEditor(
+				this.journalService.startEditing(journal),
+				getAuthenticatedUser(), getMessageSourceAccessor());
+		final var newEntity = editor.isNewEntity();
+		final SerializableBiConsumer<Dialog, Journal> refreshAll = (dialog, entity) -> {
+			// The number of papers should be loaded because it was not loaded before
+			this.journalService.inSession(session -> {
+				session.load(entity, Long.valueOf(entity.getId()));
+				initializeEntityFromJPA(entity);
+			});
+			refreshGrid();
+		};
+		final SerializableBiConsumer<Dialog, Journal> refreshOne = (dialog, entity) -> {
+			// The number of papers should be loaded because it was not loaded before
+			this.journalService.inSession(session -> {
+				session.load(entity, Long.valueOf(entity.getId()));
+				initializeEntityFromJPA(entity);
+			});
+			refreshItem(entity);
+		};
+		ComponentFactory.openEditionModalDialog(title, editor, false,
+				// Refresh the "old" item, even if its has been changed in the JPA database
+				newEntity ? refreshAll : refreshOne,
+				newEntity ? null : refreshAll);
+	}
+
+	/** Show the editor of an journal.
+	 *
+	 * @param journal the journal to edit.
+	 * @param title the title of the editor.
+	 */
+	protected void openJournalEditorWizard(Journal journal, String title) {
+		final var editor = new EmbeddedJournalEditorWizard(
 				this.journalService.startEditing(journal),
 				getAuthenticatedUser(), getMessageSourceAccessor());
 		final var newEntity = editor.isNewEntity();

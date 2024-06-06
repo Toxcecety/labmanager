@@ -315,8 +315,9 @@ public abstract class AbstractEntityEditor<T extends IdentifiableEntity> extends
 			this.administrationDetails = new Details("", content); //$NON-NLS-1$
 			this.administrationDetails.setOpened(false);
 			this.administrationDetails.addThemeVariants(DetailsVariant.FILLED);
-			receiver.add(this.administrationDetails);
-		}*/
+			content.add(this.administrationDetails);
+		}
+		*/
 		verticalLayout.add(content);
 		return verticalLayout;
 	}
@@ -330,6 +331,7 @@ public abstract class AbstractEntityEditor<T extends IdentifiableEntity> extends
 	protected final void createAdministrationComponents(VerticalLayout receiver, Consumer<BindingBuilder<T, Boolean>> validationBinder) {
 		createAdministrationComponents(receiver, null, validationBinder);
 	}
+
 
 	/** Invoked for validating the entity by an organizational structure manager. This function does not save.
 	 * This function must be overridden by the child class that need to do a specific
