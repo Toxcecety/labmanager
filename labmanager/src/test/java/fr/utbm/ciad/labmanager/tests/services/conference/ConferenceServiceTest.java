@@ -46,6 +46,7 @@ import fr.utbm.ciad.labmanager.data.conference.ConferenceQualityAnnualIndicators
 import fr.utbm.ciad.labmanager.data.conference.ConferenceRepository;
 import fr.utbm.ciad.labmanager.services.conference.ConferenceService;
 import fr.utbm.ciad.labmanager.utils.io.coreportal.CorePortal;
+import fr.utbm.ciad.labmanager.utils.names.ConferenceNameComparator;
 import fr.utbm.ciad.labmanager.utils.ranking.CoreRanking;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -76,6 +77,8 @@ public class ConferenceServiceTest {
 
 	private CorePortal core;
 
+	private ConferenceNameComparator conferenceNameComparator;
+
 	private SessionFactory sessionFactory;
 
 	private ConferenceService test;
@@ -86,12 +89,13 @@ public class ConferenceServiceTest {
 		this.conferenceRepository = mock(ConferenceRepository.class);
 		this.indicatorRepository = mock(ConferenceQualityAnnualIndicatorsRepository.class);
 		this.core = mock(CorePortal.class);
+		this.conferenceNameComparator = mock(ConferenceNameComparator.class);
 		this.sessionFactory = mock(SessionFactory.class);
 		Session session = mock(Session.class);
 		lenient().when(session.getTransaction()).thenReturn(mock(Transaction.class));
 		lenient().when(this.sessionFactory.openSession()).thenReturn(session);
 		this.test = new ConferenceService(this.conferenceRepository,
-				this.indicatorRepository, this.core, this.messages, new Constants(), this.sessionFactory);
+				this.indicatorRepository, this.core, this.conferenceNameComparator, this.messages, new Constants(), this.sessionFactory);
 	}
 
 	@Test

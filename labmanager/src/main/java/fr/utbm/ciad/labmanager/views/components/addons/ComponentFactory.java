@@ -19,31 +19,9 @@
 
 package fr.utbm.ciad.labmanager.views.components.addons;
 
-import static fr.utbm.ciad.labmanager.views.ViewConstants.DEFAULT_MINIMAL_WIDTH_FOR_2_COLUMNS_FORM;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOError;
-import java.io.IOException;
-import java.io.Serializable;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-import java.util.regex.Pattern;
-
 import com.google.common.base.Strings;
 import com.ibm.icu.text.Normalizer2;
-import com.vaadin.flow.component.ClickEvent;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Key;
-import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -91,8 +69,21 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import org.apache.commons.lang3.StringUtils;
 import org.arakhne.afc.vmutil.FileSystem;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.vaadin.lineawesome.LineAwesomeIcon;
+
+import java.io.*;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.regex.Pattern;
+
+import static fr.utbm.ciad.labmanager.views.ViewConstants.DEFAULT_MINIMAL_WIDTH_FOR_2_COLUMNS_FORM;
 
 /** Factory of Vaadin components.
  * 
@@ -589,7 +580,6 @@ public final class ComponentFactory {
 	 * @param title the title of the box.
 	 * @param message the message in the box.
 	 * @param confirmText the text of the confirm button.
-	 * @param confirmHandler the handler invoked when the confirm button is pushed.
 	 * @return the dialog.
 	 */
 	public static ConfirmDialog newCriticalQuestionDialog(String title, String message, String confirmText) {
@@ -646,18 +636,42 @@ public final class ComponentFactory {
 	 * @param content the content of the dialog, where the editing fields are located.
 	 * @param mapEnterKeyToSave if {@code true}, the "save" button is activated when the {@code Enter}
 	 *     is pushed. If {@code false}, the {@code Enter} is not mapped to a component.
-	 * @param enableValidationButton indicates if the 'Validate' button is enabled or not.
 	 * @param saveDoneCallback the callback that is invoked after saving
 	 * @param deleteDoneCallback the callback that is invoked after deleting
 	 */
-	public static <T extends IdentifiableEntity> void openEditionModalDialog(String title, AbstractEntityEditor<T> content,
-			boolean mapEnterKeyToSave, SerializableBiConsumer<Dialog, T> saveDoneCallback, SerializableBiConsumer<Dialog, T> deleteDoneCallback) {
+	public static <T extends IdentifiableEntity> void openEditionModalDialog(
+			String title,
+			AbstractEntityEditor<T> content,
+			boolean mapEnterKeyToSave,
+			SerializableBiConsumer<Dialog, T> saveDoneCallback,
+			SerializableBiConsumer<Dialog, T> deleteDoneCallback) {
+		openEditionModalDialog(title,"views.save", content, mapEnterKeyToSave,
+				true,
+				saveDoneCallback,
+				deleteDoneCallback);
+	}
+
+	public static <T extends IdentifiableEntity> void openEditionModalDialog(
+			String title,
+			String saveTextPath,
+			AbstractEntityEditor<T> content,
+			boolean mapEnterKeyToSave,
+			boolean saveInDatabase,
+			SerializableBiConsumer<Dialog, T> saveDoneCallback,
+			SerializableBiConsumer<Dialog, T> deleteDoneCallback) {
 		final SerializableBiConsumer<Dialog, T> validateCallback;
 		if (content.isBaseAdmin()) {
 			validateCallback = (dialog, entity) -> {
-				content.validateByOrganizationalStructureManager();
 				if (content.isValidData()) {
-					content.save();
+					final var SimilarityType = content.isAlreadyInDatabase();
+
+					if (SimilarityType.isSimilarityError()) {
+						content.notifySimilarityError(SimilarityType.getSimilarityErrorMessage());
+					} else if (SimilarityType.isSimilarityWarning()) {
+						content.notifySimilarityWarning(SimilarityType.getSimilarityErrorMessage());
+					} else {
+						content.validateByOrganizationalStructureManager();
+					}
 				} else {
 					content.notifyInvalidity();
 				}
@@ -665,7 +679,8 @@ public final class ComponentFactory {
 		} else {
 			validateCallback = null;
 		}
-		openEditionModalDialog(title, content, mapEnterKeyToSave,
+		openEditionModalDialog(title, saveTextPath, content, mapEnterKeyToSave,
+				saveInDatabase,
 				saveDoneCallback,
 				validateCallback,
 				deleteDoneCallback);
@@ -680,21 +695,76 @@ public final class ComponentFactory {
 	 * @param content the content of the dialog, where the editing fields are located.
 	 * @param mapEnterKeyToSave if {@code true}, the "save" button is activated when the {@code Enter}
 	 *     is pushed. If {@code false}, the {@code Enter} is not mapped to a component.
-	 * @param enableValidationButton indicates if the 'Validate' button is enabled or not.
+	 * @param saveInDatabase if {@code true}, the entity is saved in the database.
 	 * @param saveDoneCallback the callback that is invoked after saving
 	 * @param validateCallback the callback for validating the information.
 	 * @param deleteDoneCallback the callback that is invoked after deleting
 	 */
-	public static <T extends IdentifiableEntity> void openEditionModalDialog(String title, AbstractEntityEditor<T> content, boolean mapEnterKeyToSave,
+	public static <T extends IdentifiableEntity> void openEditionModalDialog(
+			String title,
+			String saveTextPath,
+			AbstractEntityEditor<T> content,
+			boolean mapEnterKeyToSave,
+			boolean saveInDatabase,
 			SerializableBiConsumer<Dialog, T> saveDoneCallback,
 			SerializableBiConsumer<Dialog, T> validateCallback,
 			SerializableBiConsumer<Dialog, T> deleteDoneCallback) {
 		final SerializableConsumer<Dialog> validateCallback0;
 		if (validateCallback != null) {
-			validateCallback0 = dialog -> validateCallback.accept(dialog, content.getEditedEntity()); 
+			validateCallback0 = dialog -> validateCallback.accept(dialog, content.getEditedEntity());
 		} else {
 			validateCallback0 = null;
 		}
+		final SerializableConsumer<Dialog> deleteCallback = getDialogSerializableConsumer(content, deleteDoneCallback);
+		doOpenEditionModalDialog(title, saveTextPath, content, mapEnterKeyToSave,
+				dialog -> {
+					if (content.isValidData()) {
+						if (content.isNewEntity()) {
+							var SimilarityType = content.isAlreadyInDatabase();
+							if (SimilarityType.isSimilarityError()) {
+								content.notifySimilarityError(SimilarityType.getSimilarityErrorMessage());
+							} else if (SimilarityType.isSimilarityWarning()) {
+								final ConfirmDialog confirmDialog = new ConfirmDialog();
+								confirmDialog.setHeader(content.getTranslation("views.save.entity")); //$NON-NLS-1$
+								confirmDialog.setText(SimilarityType.getSimilarityErrorMessage()); //$NON-NLS-1$
+								confirmDialog.setCancelable(true);
+								confirmDialog.setCancelText(content.getTranslation("views.save.cancel")); //$NON-NLS-1$
+								confirmDialog.setConfirmText(content.getTranslation("views.save")); //$NON-NLS-1$
+								confirmDialog.addConfirmListener(event -> {
+									executeSaveProcess(content, saveInDatabase, saveDoneCallback, dialog);
+								});
+								confirmDialog.open();
+							} else {
+								executeSaveProcess(content, saveInDatabase, saveDoneCallback, dialog);
+							}
+						} else {
+							executeSaveProcess(content, saveInDatabase, saveDoneCallback, dialog);
+						}
+					} else {
+						content.notifyInvalidity();
+					}
+				},
+				validateCallback0,
+				deleteCallback);
+	}
+
+	public static <T extends IdentifiableEntity> void executeSaveProcess(AbstractEntityEditor<T> content, boolean saveInDatabase, SerializableBiConsumer<Dialog, T> saveDoneCallback, Dialog dialog) {
+		if (saveInDatabase) {
+			if (content.save()) {
+				dialog.close();
+				if (saveDoneCallback != null) {
+					saveDoneCallback.accept(dialog, content.getEditedEntity());
+				}
+			}
+		} else {
+			dialog.close();
+			if (saveDoneCallback != null) {
+				saveDoneCallback.accept(dialog, content.getEditedEntity());
+			}
+		}
+	}
+
+	private static <T extends IdentifiableEntity> @Nullable SerializableConsumer<Dialog> getDialogSerializableConsumer(AbstractEntityEditor<T> content, SerializableBiConsumer<Dialog, T> deleteDoneCallback) {
 		final SerializableConsumer<Dialog> deleteCallback;
 		if (deleteDoneCallback != null) {
 			deleteCallback = dialog -> {
@@ -715,21 +785,7 @@ public final class ComponentFactory {
 		} else {
 			deleteCallback = null;
 		}
-		doOpenEditionModalDialog(title, content, mapEnterKeyToSave,
-				dialog -> {
-					if (content.isValidData()) {
-						if (content.save()) {
-							dialog.close();
-							if (saveDoneCallback != null) {
-								saveDoneCallback.accept(dialog, content.getEditedEntity());
-							}
-						}
-					} else {
-						content.notifyInvalidity();
-					}
-				},
-				validateCallback0,
-				deleteCallback);
+		return deleteCallback;
 	}
 
 	/** Open a standard dialog box for editing an information.
@@ -742,21 +798,21 @@ public final class ComponentFactory {
 	 * @param validateCallback the callback for validating the information.
 	 * @param deleteCallback the callback for deleting the information.
 	 */
-	public static void doOpenEditionModalDialog(String title, Component content, boolean mapEnterKeyToSave,
+	public static void doOpenEditionModalDialog(String title, String saveTextPath, Component content, boolean mapEnterKeyToSave,
 			SerializableConsumer<Dialog> saveCallback,
 			SerializableConsumer<Dialog> validateCallback,
 			SerializableConsumer<Dialog> deleteCallback) {
 		final var dialog = new Dialog();
 		dialog.setModal(true);
-		dialog.setCloseOnEsc(true);
-		dialog.setCloseOnOutsideClick(true);
+		dialog.setCloseOnEsc(false);
+		dialog.setCloseOnOutsideClick(false);
 		dialog.setDraggable(true);
-		dialog.setResizable(true);			
+		dialog.setResizable(true);
 		dialog.setWidthFull();
 		dialog.setHeaderTitle(title);
 		dialog.add(content);
 
-		final var saveButton = new Button(content.getTranslation("views.save"), e -> saveCallback.accept(dialog)); //$NON-NLS-1$
+		final var saveButton = new Button(content.getTranslation(saveTextPath), e -> saveCallback.accept(dialog)); //$NON-NLS-1$
 		saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		if (mapEnterKeyToSave) {
 			saveButton.addClickShortcut(Key.ENTER);

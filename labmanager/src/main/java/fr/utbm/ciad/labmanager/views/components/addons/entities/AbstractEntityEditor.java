@@ -41,6 +41,7 @@ import fr.utbm.ciad.labmanager.services.AbstractEntityService.EntityDeletingCont
 import fr.utbm.ciad.labmanager.services.AbstractEntityService.EntityEditingContext;
 import fr.utbm.ciad.labmanager.views.ViewConstants;
 import fr.utbm.ciad.labmanager.views.components.addons.ComponentFactory;
+import fr.utbm.ciad.labmanager.views.components.addons.SimilarityError;
 import fr.utbm.ciad.labmanager.views.components.addons.details.DetailsWithErrorMark;
 import fr.utbm.ciad.labmanager.views.components.users.UserIdentityChangedObserver;
 import org.slf4j.Logger;
@@ -148,6 +149,10 @@ public abstract class AbstractEntityEditor<T extends IdentifiableEntity> extends
 	public boolean isValidData() {
 		return getEntityDataBinder().validate().isOk();
 	}
+
+	public SimilarityError isAlreadyInDatabase() {
+		return SimilarityError.NO_ERROR;
+	}
 	
 	/** Replies if the editor is launched by an user with base administration rights.
 	 * 
@@ -250,10 +255,10 @@ public abstract class AbstractEntityEditor<T extends IdentifiableEntity> extends
 	}
 
 	/** Create the content of the editor.
-	 * This function should invoke {@link #createAdministrationComponents(VerticalLayout, boolean, Consumer)}.
+	 * This function should invoke {@link #createAdministrationComponents(VerticalLayout, Consumer, Consumer)}.
 	 *
 	 * @param rootContainer the container.
-	 * @see #createAdministrationComponents(VerticalLayout, boolean, Consumer)
+	 * @see #createAdministrationComponents(VerticalLayout, Consumer, Consumer)
 	 */
 	protected abstract void createEditorContent(VerticalLayout rootContainer);
 
@@ -301,7 +306,7 @@ public abstract class AbstractEntityEditor<T extends IdentifiableEntity> extends
 	 * This function must be overridden by the child class that need to do a specific
 	 * saving process.
 	 * 
-	 * @see #doValidate(Object)
+	 * @see #doValidate(IdentifiableEntity)
 	 */
 	public final void validateByOrganizationalStructureManager() {
 		doValidate(getEditedEntity());
@@ -361,6 +366,14 @@ public abstract class AbstractEntityEditor<T extends IdentifiableEntity> extends
 	 */
 	public void notifyInvalidity() {
 		ComponentFactory.showWarningNotification(getTranslation("views.save_invalid_data")); //$NON-NLS-1$
+	}
+
+	public void notifySimilarityError(String message) {
+		ComponentFactory.showErrorNotification(message); //$NON-NLS-1$
+	}
+
+	public void notifySimilarityWarning(String message) {
+		ComponentFactory.showWarningNotification(message); //$NON-NLS-1$
 	}
 
 	/** Notify the user that the entity cannot be validated.
@@ -478,7 +491,7 @@ public abstract class AbstractEntityEditor<T extends IdentifiableEntity> extends
 	/** Invoked for deleting the entity without querying the user.
 	 *
 	 * @return {@code true} if the deletion was a success.
-	 * @see #doDeletion()
+	 * @see #doDelete(EntityDeletingContext) 
 	 */
 	public final boolean delete() {
 		try {
@@ -576,7 +589,7 @@ public abstract class AbstractEntityEditor<T extends IdentifiableEntity> extends
 	 * @param sectionId the identifier of the section in the editor.
 	 * @return the section container.
 	 * @see #createDetails(HasComponents, Component, String)
-	 * @see #initializeDetails(Details, String)
+	 * @see #initializeDetails(Details, String, boolean) 	
 	 */
 	protected DetailsWithErrorMark createDetailsWithErrorMark(HasComponents container, Component content, String sectionId) {
 		return createDetailsWithErrorMark(container, content, sectionId, false);
@@ -590,7 +603,7 @@ public abstract class AbstractEntityEditor<T extends IdentifiableEntity> extends
 	 * @param openByDefault indicates if the details must be open by default, i.e., when there is opening preference stored in the session.
 	 * @return the section container.
 	 * @see #createDetails(HasComponents, Component, String)
-	 * @see #initializeDetails(Details, String)
+	 * @see #initializeDetails(Details, String, boolean)
 	 */
 	protected DetailsWithErrorMark createDetailsWithErrorMark(HasComponents container, Component content, String sectionId, boolean openByDefault) {
 		final var details = new DetailsWithErrorMark(content);
@@ -608,7 +621,7 @@ public abstract class AbstractEntityEditor<T extends IdentifiableEntity> extends
 	 * @param sectionId the identifier of the section in the editor.
 	 * @return the section container.
 	 * @see #createDetailsWithErrorMark(HasComponents, Component, String)
-	 * @see #initializeDetails(Details, String)
+	 * @see #initializeDetails(Details, String, boolean) 
 	 */
 	protected Details createDetails(HasComponents container, Component content, String sectionId) {
 		return createDetails(container, content, sectionId, false);
@@ -622,7 +635,7 @@ public abstract class AbstractEntityEditor<T extends IdentifiableEntity> extends
 	 * @param openByDefault indicates if the details must be open by default, i.e., when there is opening preference stored in the session.
 	 * @return the section container.
 	 * @see #createDetailsWithErrorMark(HasComponents, Component, String)
-	 * @see #initializeDetails(Details, String)
+	 * @see #initializeDetails(Details, String, boolean) 
 	 */
 	protected Details createDetails(HasComponents container, Component content, String sectionId, boolean openByDefault) {
 		final var details = new Details("", content); //$NON-NLS-1$

@@ -834,7 +834,7 @@ public class MainLayout extends AppLayout implements LocaleChangeObserver, UserI
 			this.loginLink.setText(getTranslation("views.sign_in")); //$NON-NLS-1$
 		}
 		if (this.logoutLink != null) {
-			this.logoutLink.setText(getTranslation("views.sign_out")); //$NON-NLS-1$
+			this.logoutLink.setText(getTranslation("views.sign_out")); //$NON-NLS-1$ // TODO: A régler
 		}
 		if (this.languagesLink != null) {
 			this.languagesLink.setText(getTranslation("views.languages")); //$NON-NLS-1$

@@ -56,7 +56,7 @@ import fr.utbm.ciad.labmanager.services.member.PersonService;
 import fr.utbm.ciad.labmanager.services.supervision.SupervisionService;
 import fr.utbm.ciad.labmanager.utils.names.DefaultPersonNameParser;
 import fr.utbm.ciad.labmanager.utils.names.PersonNameComparator;
-import fr.utbm.ciad.labmanager.utils.names.SorensenDicePersonNameComparator;
+import fr.utbm.ciad.labmanager.utils.names.SorensenDice.SorensenDicePersonNameComparator;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -96,4 +96,9 @@ public interface PublicationRepository extends JpaRepository<Publication, Long>,
 	@Query("SELECT COUNT(p) AS publicationCount FROM Publication p WHERE p.type = :type AND p.publicationYear = :year")
 	Integer countPublicationsForTypeAndYear(@Param("type") PublicationType type, @Param("year") Integer year);
 
+
+	@NotNull
+	@Modifying
+	@Query("SELECT p FROM Publication p LEFT JOIN FETCH p.authorships")
+	List<Publication> findAll();
 }

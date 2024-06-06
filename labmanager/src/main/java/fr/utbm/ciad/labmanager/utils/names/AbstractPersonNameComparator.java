@@ -57,10 +57,8 @@ public abstract class AbstractPersonNameComparator implements PersonNameComparat
 	public void setSimilarityLevel(double similarityLevel) {
 		if (similarityLevel < 0.0) {
 			this.similaritylevel = 0.0;
-		} else if (similarityLevel > 1.0) {
-			this.similaritylevel = 1.0;
 		} else {
-			this.similaritylevel = similarityLevel;
+			this.similaritylevel = Math.min(similarityLevel, 1.0);
 		}
 	}
 
