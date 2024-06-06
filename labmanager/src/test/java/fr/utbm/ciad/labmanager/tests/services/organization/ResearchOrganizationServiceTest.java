@@ -49,6 +49,7 @@ import fr.utbm.ciad.labmanager.data.organization.ResearchOrganizationType;
 import fr.utbm.ciad.labmanager.services.organization.ResearchOrganizationService;
 import fr.utbm.ciad.labmanager.utils.country.CountryCode;
 import fr.utbm.ciad.labmanager.utils.io.filemanager.DownloadableFileManager;
+import fr.utbm.ciad.labmanager.utils.names.OrganizationNameComparator;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -82,6 +83,8 @@ public class ResearchOrganizationServiceTest {
 
 	private ResearchOrganizationRepository organizationRepository;
 
+	private OrganizationNameComparator organizationNameComparator;
+
 	private SessionFactory sessionFactory;
 
 	private ResearchOrganizationService test;
@@ -93,9 +96,11 @@ public class ResearchOrganizationServiceTest {
 		this.messages = mock(MessageSourceAccessor.class);
 		this.addressRepository = mock(OrganizationAddressRepository.class);
 		this.organizationRepository = mock(ResearchOrganizationRepository.class);
+		this.organizationNameComparator = mock(OrganizationNameComparator.class);
 		this.sessionFactory = mock(SessionFactory.class);
 		this.fileManager = mock(DownloadableFileManager.class);
 		this.test = new ResearchOrganizationService(this.addressRepository, this.organizationRepository, this.fileManager,
+				this.organizationNameComparator,
 				this.messages, new Constants(), this.sessionFactory);
 
 		// Prepare some organizations to be inside the repository

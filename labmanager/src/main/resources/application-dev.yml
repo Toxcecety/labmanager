@@ -58,6 +58,13 @@ spring:
       indent-output: true
 
 server:
+  port: ${labmanager.application-port}
+  ssl:
+    key-store-password: password
+    key-alias: springboot
+    key-password: password
+    key-store: springboot.p12
+    key-store-type: PKCS12
   servlet:
     context-path: /LabManager
   error:
@@ -86,13 +93,27 @@ vaadin:
   launch-browser: false
   # To improve the performance during development.
   # For more information https://vaadin.com/docs/flow/spring/tutorial-spring-configuration.html#special-configuration-parameters
-  whitelisted-packages: com.vaadin,org.vaadin,dev.hilla,com.example.application
+  allowed-packages: com.vaadin,org.vaadin,dev.hilla,com.example.application,com.storedobject
 
 labmanager:
-  debug: true
+  cas-servers:
+    utbm:
+      key: "13792c4f-5188-46da-922d-3f1cee3f85c8"
+      base: https://cas.utbm.fr
+      login: ${labmanager.cas-servers.utbm.base}/login
+      logout: ${labmanager.cas-servers.utbm.base}/logout
+      service: ${labmanager.application-url}/login/cas?organization=UTBM
+    ub:
+      key: "13792c4f-5188-46da-922d-3f1cee3f85c9"
+      base: https://casv6.u-bourgogne.fr
+      login: ${labmanager.cas-servers.ub.base}/cas/login
+      logout: ${labmanager.cas-servers.ub.base}/cas/logout
+      service: ${labmanager.application-url}/login/cas?organization=UB
   application-name: CIAD Lab Manager
   application-image: /images/ciadpicture.svg
   application-copyright: Copyright CIAD Laboratory, Université de Technologie de Belfort Montbéliard 2019-2024. This program is under the terms of the GNU Affero General Public License.
+  application-port: 8443
+  application-url: https://localhost:${labmanager.application-port}/LabManager
   default-organization: CIAD
   default-super-organization: UTBM
   default-lear-organization: UTBM

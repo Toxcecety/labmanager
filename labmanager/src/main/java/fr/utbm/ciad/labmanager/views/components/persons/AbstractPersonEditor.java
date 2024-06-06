@@ -66,10 +66,12 @@ import fr.utbm.ciad.labmanager.data.member.WebPageNaming;
 import fr.utbm.ciad.labmanager.data.user.User;
 import fr.utbm.ciad.labmanager.data.user.UserRole;
 import fr.utbm.ciad.labmanager.services.AbstractEntityService.EntityDeletingContext;
+import fr.utbm.ciad.labmanager.services.member.PersonService;
 import fr.utbm.ciad.labmanager.services.user.UserService.UserEditingContext;
 import fr.utbm.ciad.labmanager.utils.country.CountryCode;
 import fr.utbm.ciad.labmanager.views.ViewConstants;
 import fr.utbm.ciad.labmanager.views.components.addons.ComponentFactory;
+import fr.utbm.ciad.labmanager.views.components.addons.SimilarityError;
 import fr.utbm.ciad.labmanager.views.components.addons.converters.StringTrimer;
 import fr.utbm.ciad.labmanager.views.components.addons.details.DetailsWithErrorMark;
 import fr.utbm.ciad.labmanager.views.components.addons.details.DetailsWithErrorMarkStatusHandler;
@@ -94,6 +96,8 @@ import org.springframework.context.support.MessageSourceAccessor;
 public abstract class AbstractPersonEditor extends AbstractEntityEditor<Person> {
 
 	private static final long serialVersionUID = 4532244485914692596L;
+
+	private final PersonService personService;
 
 	private DetailsWithErrorMark personalInformationDetails;
 
@@ -187,18 +191,38 @@ public abstract class AbstractPersonEditor extends AbstractEntityEditor<Person> 
 	 * @param logger the logger to be used by this view.
 	 */
 	public AbstractPersonEditor(
-			UserEditingContext userContext, boolean relinkEntityWhenSaving,
+			UserEditingContext userContext, PersonService personService, boolean relinkEntityWhenSaving,
 			AuthenticatedUser authenticatedUser, MessageSourceAccessor messages, Logger logger) {
 		super(Person.class, authenticatedUser, messages, logger,
 				"views.persons.administration_details", //$NON-NLS-1$
 				"views.persons.administration.validated_person", //$NON-NLS-1$
 				userContext.getPersonContext(), relinkEntityWhenSaving);
 		this.userContext = userContext;
+		this.personService = personService;
 	}
 
 	@Override
 	public boolean isValidData() {
 		return super.isValidData() && getUserDataBinder().validate().isOk();
+	}
+
+	@Override
+	public SimilarityError isAlreadyInDatabase() {
+		var user = getEditedUser();
+		if (user != null) {
+			var person = user.getPerson();
+			if (person != null) {
+				long id = this.personService.getPersonIdBySimilarName(person.getLastName(), person.getFirstName());
+                if (id == 0) {
+					return SimilarityError.NO_ERROR;
+				} else if (id == person.getId()) {
+					return SimilarityError.NO_ERROR;
+				} else {
+					return SimilarityError.SAME_NAME;
+				}
+			}
+		}
+		return SimilarityError.NO_ERROR;
 	}
 
 	@Override
@@ -259,7 +283,8 @@ public abstract class AbstractPersonEditor extends AbstractEntityEditor<Person> 
 	/** Replies the binder of user data to the fields.
 	 *
 	 * @return the user data binder.
-	 * @see #getPersonDataBinder()
+	 * @see #getUserDataBinder()
+	 * @see #getEntityDataBinder()
 	 */
 	protected Binder<User> getUserDataBinder() {
 		return this.userBinder;

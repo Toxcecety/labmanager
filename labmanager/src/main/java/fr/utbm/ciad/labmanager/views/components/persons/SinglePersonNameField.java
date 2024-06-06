@@ -92,7 +92,7 @@ public class SinglePersonNameField extends AbstractSingleEntityNameField<Person>
 					final var user = userService.getUserFor(newPerson);
 					final var userContext = userService.startEditing(user, personContext);
 					final var editor = new EmbeddedPersonEditor(
-							userContext, authenticatedUser, personService.getMessageSourceAccessor());
+							userContext, personService, authenticatedUser, personService.getMessageSourceAccessor());
 					ComponentFactory.openEditionModalDialog(creationTitle, editor, true,
 							(dialog, changedPerson) -> saver.accept(changedPerson),
 							null);

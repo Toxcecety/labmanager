@@ -255,6 +255,7 @@ public class StandardJournalListView extends AbstractEntityListView<Journal> {
 	protected void openJournalEditor(Journal journal, String title) {
 		final var editor = new EmbeddedJournalEditor(
 				this.journalService.startEditing(journal),
+				this.journalService,
 				getAuthenticatedUser(), getMessageSourceAccessor());
 		final var newEntity = editor.isNewEntity();
 		final SerializableBiConsumer<Dialog, Journal> refreshAll = (dialog, entity) -> {

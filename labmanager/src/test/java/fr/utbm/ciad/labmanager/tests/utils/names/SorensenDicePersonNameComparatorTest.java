@@ -16,7 +16,7 @@
 
 package fr.utbm.ciad.labmanager.tests.utils.names;
 
-import fr.utbm.ciad.labmanager.utils.names.SorensenDicePersonNameComparator;
+import fr.utbm.ciad.labmanager.utils.names.SorensenDice.SorensenDicePersonNameComparator;
 import org.junit.jupiter.api.BeforeEach;
 
 /** Tests for {@link SorensenDicePersonNameComparator}.

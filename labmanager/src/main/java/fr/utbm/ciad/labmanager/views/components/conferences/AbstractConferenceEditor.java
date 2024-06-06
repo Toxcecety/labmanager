@@ -35,7 +35,9 @@ import com.vaadin.flow.i18n.LocaleChangeEvent;
 import fr.utbm.ciad.labmanager.components.security.AuthenticatedUser;
 import fr.utbm.ciad.labmanager.data.conference.Conference;
 import fr.utbm.ciad.labmanager.services.AbstractEntityService.EntityEditingContext;
+import fr.utbm.ciad.labmanager.services.conference.ConferenceService;
 import fr.utbm.ciad.labmanager.views.components.addons.ComponentFactory;
+import fr.utbm.ciad.labmanager.views.components.addons.SimilarityError;
 import fr.utbm.ciad.labmanager.views.components.addons.converters.StringTrimer;
 import fr.utbm.ciad.labmanager.views.components.addons.details.DetailsWithErrorMark;
 import fr.utbm.ciad.labmanager.views.components.addons.details.DetailsWithErrorMarkStatusHandler;
@@ -85,6 +87,8 @@ public abstract class AbstractConferenceEditor extends AbstractEntityEditor<Conf
 
 	private TextField isbn;
 
+	private ConferenceService conferenceService;
+
 	/** Constructor.
 	 *
 	 * @param context the editing context for the conference.
@@ -94,12 +98,29 @@ public abstract class AbstractConferenceEditor extends AbstractEntityEditor<Conf
 	 * @param messages the accessor to the localized messages (Spring layer).
 	 * @param logger the logger to be used by this view.
 	 */
-	public AbstractConferenceEditor(EntityEditingContext<Conference> context, boolean relinkEntityWhenSaving,
+	public AbstractConferenceEditor(EntityEditingContext<Conference> context, boolean relinkEntityWhenSaving, ConferenceService conferenceService,
 			AuthenticatedUser authenticatedUser, MessageSourceAccessor messages, Logger logger) {
 		super(Conference.class, authenticatedUser, messages, logger,
 				"views.conferences.administration_details", //$NON-NLS-1$
 				"views.conferences.administration.validated_conference", //$NON-NLS-1$
 				context, relinkEntityWhenSaving);
+		this.conferenceService = conferenceService;
+	}
+
+	@Override
+	public SimilarityError isAlreadyInDatabase() {
+		var entity = getEditedEntity();
+		if (entity != null) {
+			var id = this.conferenceService.getConferenceIdBySimilarNameAndAcronyme(entity.getName(), entity.getAcronym());
+			if (id == 0) {
+				return SimilarityError.NO_ERROR;
+			} else if (id == entity.getId()) {
+				return SimilarityError.NO_ERROR;
+			} else {
+				return SimilarityError.SAME_NAME_AND_ACRONYM;
+			}
+		}
+		return SimilarityError.NO_ERROR;
 	}
 
 	@Override

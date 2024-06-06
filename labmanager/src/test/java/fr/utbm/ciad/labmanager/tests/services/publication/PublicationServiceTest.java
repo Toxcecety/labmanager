@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -89,6 +88,8 @@ import fr.utbm.ciad.labmanager.utils.io.od.OpenDocumentTextPublicationExporter;
 import fr.utbm.ciad.labmanager.utils.io.ris.RIS;
 import fr.utbm.ciad.labmanager.utils.names.DefaultPersonNameParser;
 import fr.utbm.ciad.labmanager.utils.names.PersonNameParser;
+import fr.utbm.ciad.labmanager.utils.names.PublicationNameComparator;
+import fr.utbm.ciad.labmanager.utils.names.SorensenDice.SorensenDicePublicationNameComparator;
 import org.arakhne.afc.progress.DefaultProgression;
 import org.arakhne.afc.progress.Progression;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure2;
@@ -135,6 +136,8 @@ public class PublicationServiceTest {
 	private ConferenceRepository conferenceRepository;
 
 	private PersonNameParser nameParser;
+
+	private PublicationNameComparator titleComparator;
 
 	private BibTeX bibtex;
 
@@ -184,6 +187,7 @@ public class PublicationServiceTest {
 		this.journalRepository = mock(JournalRepository.class);
 		this.conferenceRepository = mock(ConferenceRepository.class);
 		this.nameParser = new DefaultPersonNameParser();
+		this.titleComparator = new SorensenDicePublicationNameComparator();
 		this.bibtex = mock(BibTeX.class);
 		this.ris = mock(RIS.class);
 		this.html = mock(HtmlDocumentExporter.class);
@@ -203,7 +207,7 @@ public class PublicationServiceTest {
 		this.test = new PublicationService(this.publicationRepository, this.prePublicationFactory,
 				this.authorshipRepository,
 				this.personService, this.personRepository,
-				this.journalRepository, this.conferenceRepository, this.nameParser, this.bibtex, this.ris, this.html,
+				this.journalRepository, this.conferenceRepository, this.nameParser,this.titleComparator, this.bibtex, this.ris, this.html,
 				this.odt, this.json, this.fileManager, this.membershipService,
 				this.bookService, this.bookChapterService, this.conferencePaperService,
 				this.journalEditionService, this.journalPaperService, this.keyNoteService,

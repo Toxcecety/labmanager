@@ -65,6 +65,7 @@ import fr.utbm.ciad.labmanager.utils.io.network.NetConnection;
 import fr.utbm.ciad.labmanager.utils.io.scimago.OnlineScimagoPlatform;
 import fr.utbm.ciad.labmanager.utils.io.scimago.ScimagoPlatform;
 import fr.utbm.ciad.labmanager.utils.io.wos.WebOfSciencePlatform;
+import fr.utbm.ciad.labmanager.utils.names.JournalNameAndPublisherComparator;
 import fr.utbm.ciad.labmanager.utils.ranking.QuartileRanking;
 import org.arakhne.afc.progress.DefaultProgression;
 import org.hibernate.SessionFactory;
@@ -111,6 +112,8 @@ public class JournalServiceTest {
 
 	private NetConnection netConnection;
 
+	private JournalNameAndPublisherComparator journalNameAndPublisherComparator;
+
 	private JournalService test;
 
 	@BeforeEach
@@ -123,8 +126,9 @@ public class JournalServiceTest {
 		this.scimago = mock(ScimagoPlatform.class);
 		this.wos = mock(WebOfSciencePlatform.class);
 		this.netConnection = mock(NetConnection.class);
+		this.journalNameAndPublisherComparator = mock(JournalNameAndPublisherComparator.class);
 		this.test = new JournalService(this.journalRepository,
-				this.indicatorRepository, this.publicationRepository, this.scimago, this.wos, this.netConnection,
+				this.indicatorRepository, this.publicationRepository, this.scimago, this.wos, this.netConnection, this.journalNameAndPublisherComparator,
 				this.messages, new Constants(), this.sessionFactory);
 
 		// Prepare some journals to be inside the repository
@@ -665,7 +669,7 @@ public class JournalServiceTest {
 		this.scimago = new OnlineScimagoPlatform();
 		this.netConnection = new DirectNetConnection();
 		this.test = new JournalService(this.journalRepository, this.indicatorRepository,
-				this.publicationRepository, this.scimago, this.wos, this.netConnection,
+				this.publicationRepository, this.scimago, this.wos, this.netConnection, this.journalNameAndPublisherComparator,
 				this.messages, new Constants(), this.sessionFactory);
 
 		// The following id is for the Int. Journal of Artificial Intelligence
