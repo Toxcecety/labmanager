@@ -10,25 +10,23 @@ import fr.utbm.ciad.labmanager.data.member.Person;
 import fr.utbm.ciad.labmanager.services.member.PersonService;
 import fr.utbm.ciad.labmanager.views.components.addons.wizard.AbstractLabManagerWizard;
 import io.overcoded.vaadin.wizard.AbstractFormWizardStep;
-import io.overcoded.vaadin.wizard.WizardStep;
 import io.overcoded.vaadin.wizard.config.WizardConfigurationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
 
 
-public class PersonAdditionWizard extends AbstractLabManagerWizard<Person> {
+public class PersonEditorComponentWizard extends AbstractLabManagerWizard<Person> {
 
 
-    public PersonAdditionWizard(@Autowired PersonService personService, VerticalLayout personalInformationComponents, VerticalLayout contactInformationComponents, VerticalLayout researcherIdsComponents, VerticalLayout biographyComponents, VerticalLayout indexesComponents, VerticalLayout socialLinksComponents) {
+    public PersonEditorComponentWizard(@Autowired PersonService personService, VerticalLayout personalInformationComponents, VerticalLayout contactInformationComponents, VerticalLayout researcherIdsComponents, VerticalLayout biographyComponents, VerticalLayout indexesComponents, VerticalLayout socialLinksComponents) {
         this(personService,
                 defaultWizardConfiguration(null, false),
                 new Person(), personalInformationComponents, contactInformationComponents, researcherIdsComponents, biographyComponents, indexesComponents,socialLinksComponents);
     }
 
-    public PersonAdditionWizard(PersonService personService, VerticalLayout personalInformationComponents, VerticalLayout contactInformationComponents, VerticalLayout researcherIdsComponents, VerticalLayout biographyComponents, VerticalLayout indexesComponents, VerticalLayout socialLinksComponents, VerticalLayout administrationComponents) {
+    public PersonEditorComponentWizard(PersonService personService, VerticalLayout personalInformationComponents, VerticalLayout contactInformationComponents, VerticalLayout researcherIdsComponents, VerticalLayout biographyComponents, VerticalLayout indexesComponents, VerticalLayout socialLinksComponents, VerticalLayout administrationComponents) {
         this(personService,
                 defaultWizardConfiguration(null, false),
                 new Person(), personalInformationComponents, contactInformationComponents, researcherIdsComponents, biographyComponents, indexesComponents,socialLinksComponents,administrationComponents);
@@ -38,7 +36,7 @@ public class PersonAdditionWizard extends AbstractLabManagerWizard<Person> {
         return true;
     }
 
-    protected PersonAdditionWizard(PersonService personService, WizardConfigurationProperties properties, Person context, VerticalLayout personalInformationComponents, VerticalLayout contactInformationComponents, VerticalLayout researcherIdsComponents, VerticalLayout biographyComponents, VerticalLayout indexesComponents, VerticalLayout socialLinksComponents) {
+    protected PersonEditorComponentWizard(PersonService personService, WizardConfigurationProperties properties, Person context, VerticalLayout personalInformationComponents, VerticalLayout contactInformationComponents, VerticalLayout researcherIdsComponents, VerticalLayout biographyComponents, VerticalLayout indexesComponents, VerticalLayout socialLinksComponents) {
         super(properties, context, Arrays.asList(
                 new PersonalInformationComponents(context, personalInformationComponents),
                 new PersonContactInformation(context, contactInformationComponents),
@@ -48,7 +46,7 @@ public class PersonAdditionWizard extends AbstractLabManagerWizard<Person> {
                 new PersonSocialLinks(context, socialLinksComponents)));
     }
 
-    protected PersonAdditionWizard(PersonService personService, WizardConfigurationProperties properties, Person context, VerticalLayout personalInformationComponents, VerticalLayout contactInformationComponents, VerticalLayout researcherIdsComponents, VerticalLayout biographyComponents, VerticalLayout indexesComponents, VerticalLayout socialLinksComponents, VerticalLayout administrationComponents) {
+    protected PersonEditorComponentWizard(PersonService personService, WizardConfigurationProperties properties, Person context, VerticalLayout personalInformationComponents, VerticalLayout contactInformationComponents, VerticalLayout researcherIdsComponents, VerticalLayout biographyComponents, VerticalLayout indexesComponents, VerticalLayout socialLinksComponents, VerticalLayout administrationComponents) {
         super(properties, context, Arrays.asList(
                 new PersonalInformationComponents(context, personalInformationComponents),
                 new PersonContactInformation(context, contactInformationComponents),

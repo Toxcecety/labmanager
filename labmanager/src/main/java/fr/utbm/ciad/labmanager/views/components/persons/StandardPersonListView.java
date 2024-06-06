@@ -196,7 +196,7 @@ public class StandardPersonListView extends AbstractEntityListView<Person> {
 		final var personContext = this.personService.startEditing(person);
 		final var user = this.userService.getUserFor(person);
 		final var userContext = this.userService.startEditing(user, personContext);
-		final var editor = new EmbeddedPersonEditor(
+		final var editor = new EmbeddedPersonEditorWizard(
 				userContext, getAuthenticatedUser(), getMessageSourceAccessor(),personService);
 		final var newEntity = editor.isNewEntity();
 		final SerializableBiConsumer<Dialog, Person> refreshAll = (dialog, entity) -> refreshGrid();

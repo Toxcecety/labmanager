@@ -1,12 +1,9 @@
-package fr.utbm.ciad.labmanager.views.components;
+package fr.utbm.ciad.labmanager.views.components.persons;
 
 import com.vaadin.componentfactory.ToggleButton;
-import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.details.Details;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
@@ -18,7 +15,6 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
-import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import fr.utbm.ciad.labmanager.components.security.AuthenticatedUser;
@@ -31,32 +27,23 @@ import fr.utbm.ciad.labmanager.services.member.PersonService;
 import fr.utbm.ciad.labmanager.services.user.UserService;
 import fr.utbm.ciad.labmanager.utils.country.CountryCode;
 import fr.utbm.ciad.labmanager.views.ViewConstants;
-import fr.utbm.ciad.labmanager.views.appviews.MainLayout;
 import fr.utbm.ciad.labmanager.views.components.addons.ComponentFactory;
 import fr.utbm.ciad.labmanager.views.components.addons.converters.StringTrimer;
-import fr.utbm.ciad.labmanager.views.components.addons.details.DetailsWithErrorMark;
-import fr.utbm.ciad.labmanager.views.components.addons.details.DetailsWithErrorMarkStatusHandler;
 import fr.utbm.ciad.labmanager.views.components.addons.entities.AbstractEntityEditor;
 import fr.utbm.ciad.labmanager.views.components.addons.markdown.MarkdownField;
 import fr.utbm.ciad.labmanager.views.components.addons.phones.PhoneNumberField;
 import fr.utbm.ciad.labmanager.views.components.addons.validators.NotEmptyStringValidator;
 import fr.utbm.ciad.labmanager.views.components.addons.validators.OrcidValidator;
 import fr.utbm.ciad.labmanager.views.components.addons.validators.UrlValidator;
-import fr.utbm.ciad.labmanager.views.components.persons.AbstractPersonEditor;
-import fr.utbm.ciad.labmanager.views.components.persons.PersonAdditionWizard;
-import io.overcoded.vaadin.wizard.AbstractFormWizardStep;
-import io.overcoded.vaadin.wizard.config.WizardConfigurationProperties;
-import jakarta.annotation.security.RolesAllowed;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.MessageSourceAccessor;
 
-import java.util.Arrays;
 import java.util.function.Consumer;
 
 import static fr.utbm.ciad.labmanager.views.ViewConstants.*;
 
-public class PersonEditorWizard extends AbstractEntityEditor<Person> {
+public class PersonEditor extends AbstractEntityEditor<Person> {
 
     private TextField lastname;
 
@@ -124,11 +111,11 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
 
     private ComboBox<UserRole> userRole;
 
-    private final com.vaadin.flow.data.binder.Binder<User> userBinder = new Binder<>(User.class);
+    private final Binder<User> userBinder = new Binder<>(User.class);
 
     private final UserService.UserEditingContext userContext;
 
-    public PersonAdditionWizard personAdditionWizard;
+    public PersonEditorComponentWizard personAdditionWizard;
 
     /**
      * Constructor.
@@ -140,7 +127,7 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
      * @param messages               the accessor to the localized messages (Spring layer).
      * @param logger                 the logger to be used by this view.
      */
-    public PersonEditorWizard(UserService.UserEditingContext userContext, boolean relinkEntityWhenSaving, AuthenticatedUser authenticatedUser, MessageSourceAccessor messages, Logger logger, @Autowired PersonService personService) {
+    public PersonEditor(UserService.UserEditingContext userContext, boolean relinkEntityWhenSaving, AuthenticatedUser authenticatedUser, MessageSourceAccessor messages, Logger logger, @Autowired PersonService personService) {
         super(Person.class, authenticatedUser, messages, logger,
                 "views.persons.administration_details", //$NON-NLS-1$
                 "views.persons.administration.validated_person", //$NON-NLS-1$
@@ -174,10 +161,10 @@ public class PersonEditorWizard extends AbstractEntityEditor<Person> {
                     getUserDataBinder().forField(this.userRole).bind(User::getRole, User::setRole);
                 };
             }
-            personAdditionWizard = new PersonAdditionWizard(personService,createPersonalInformationComponents(),createContactInformationComponents(),createResearcherIdsComponents(),createBiographyComponents(),createIndexesComponents(),createSocialLinksComponents(),createAdministrationComponents( builderCallback, it -> it.bind(Person::isValidated, Person::setValidated)));
+            personAdditionWizard = new PersonEditorComponentWizard(personService,createPersonalInformationComponents(),createContactInformationComponents(),createResearcherIdsComponents(),createBiographyComponents(),createIndexesComponents(),createSocialLinksComponents(),createAdministrationComponents( builderCallback, it -> it.bind(Person::isValidated, Person::setValidated)));
 
         }else{
-            personAdditionWizard = new PersonAdditionWizard(personService,createPersonalInformationComponents(),createContactInformationComponents(),createResearcherIdsComponents(),createBiographyComponents(),createIndexesComponents(),createSocialLinksComponents());
+            personAdditionWizard = new PersonEditorComponentWizard(personService,createPersonalInformationComponents(),createContactInformationComponents(),createResearcherIdsComponents(),createBiographyComponents(),createIndexesComponents(),createSocialLinksComponents());
         }
     }
 

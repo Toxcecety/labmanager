@@ -177,6 +177,7 @@ public abstract class AbstractPersonEditor extends AbstractEntityEditor<Person> 
 
 	private final UserEditingContext userContext;
 
+
 	/** Constructor.
 	 *
 	 * @param userContext the editing context for the user.

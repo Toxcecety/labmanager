@@ -1,6 +1,6 @@
 /*
  * $Id$
- *
+ * 
  * Copyright (c) 2019-2024, CIAD Laboratory, Universite de Technologie de Belfort Montbeliard
  *
  * This program is free software: you can redistribute it and/or modify
@@ -24,34 +24,35 @@ import fr.utbm.ciad.labmanager.services.member.PersonService;
 import fr.utbm.ciad.labmanager.services.user.UserService.UserEditingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.MessageSourceAccessor;
 
 /** Editor of person information that may be embedded. This editor does not provide
  * the components for saving the information. It is the role of the component that
  * is embedding this editor to save the edited person.
- *
+ * 
  * @author $Author: sgalland$
  * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  * @since 4.0
  */
-public final class EmbeddedPersonEditor extends AbstractPersonEditor {
+public final class EmbeddedPersonEditorWizard extends PersonEditor {
 
-    private static final long serialVersionUID = 3928100811567654630L;
+	private static final long serialVersionUID = 3928100811567654630L;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EmbeddedPersonEditor.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(EmbeddedPersonEditorWizard.class);
 
-    /** Constructor.
-     *
-     * @param userContext the editing context for the user.
-     * @param authenticatedUser the connected user.
-     * @param messages the accessor to the localized messages (Spring layer).
-     */
-    public EmbeddedPersonEditor(UserEditingContext userContext, AuthenticatedUser authenticatedUser,
-                                MessageSourceAccessor messages) {
-        super(userContext, false, authenticatedUser, messages, LOGGER);
-        createEditorContentAndLinkBeans();
-    }
+	/** Constructor.
+	 *
+	 * @param userContext the editing context for the user.
+	 * @param authenticatedUser the connected user.
+	 * @param messages the accessor to the localized messages (Spring layer).
+	 */
+	public EmbeddedPersonEditorWizard(UserEditingContext userContext, AuthenticatedUser authenticatedUser,
+									  MessageSourceAccessor messages, @Autowired PersonService personService) {
+		super(userContext, false, authenticatedUser, messages, LOGGER, personService);
+		createEditorContentAndLinkBeans();
+	}
 
 }

@@ -36,7 +36,6 @@ import fr.utbm.ciad.labmanager.services.user.UserService;
 import fr.utbm.ciad.labmanager.views.appviews.MainLayout;
 import fr.utbm.ciad.labmanager.views.components.addons.ComponentFactory;
 import fr.utbm.ciad.labmanager.views.components.addons.wizard.AbstractLabManagerWizard;
-import fr.utbm.ciad.labmanager.views.components.persons.PersonAdditionWizard;
 import fr.utbm.ciad.labmanager.views.components.persons.StandardPersonListView;
 import jakarta.annotation.security.RolesAllowed;
 import org.slf4j.Logger;

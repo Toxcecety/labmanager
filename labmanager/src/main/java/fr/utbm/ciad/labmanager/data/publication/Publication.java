@@ -43,6 +43,7 @@ import fr.utbm.ciad.labmanager.data.member.Person;
 import fr.utbm.ciad.labmanager.data.scientificaxis.ScientificAxis;
 import fr.utbm.ciad.labmanager.utils.HashCodeUtils;
 import fr.utbm.ciad.labmanager.utils.io.json.JsonUtils;
+import fr.utbm.ciad.labmanager.views.components.addons.wizard.AbstractContextData;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.Entity;
@@ -77,7 +78,7 @@ import org.springframework.context.support.MessageSourceAccessor;
 @Table(name = "Publications")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "Publication_Type")
-public abstract class Publication implements Production, JsonSerializable, Comparable<Publication>, AttributeProvider {
+public abstract class Publication extends AbstractContextData implements Production, JsonSerializable, Comparable<Publication>, AttributeProvider {
 
 	private static final long serialVersionUID = -5980560007123809890L;
 
@@ -205,6 +206,7 @@ public abstract class Publication implements Production, JsonSerializable, Compa
 
 	@Transient
 	private String preferredStringId = null;
+
 
 	/** Constructor by copy.
 	 *

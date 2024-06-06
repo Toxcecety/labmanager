@@ -809,8 +809,8 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
 	 * @param publication the publication to edit.
 	 * @param title the title of the editor.
 	 */
-	protected void openPublicationEditor(Publication publication, String title) {
-		final var editor = new EmbeddedPublicationEditor(
+	protected void openPublicationWizardEditor(Publication publication, String title) {
+		final var editor = new EmbeddedPublicationEditorWizard(
 				this.publicationService.startEditing(publication),
 				getSupportedPublicationTypeArray(),
 				true,
