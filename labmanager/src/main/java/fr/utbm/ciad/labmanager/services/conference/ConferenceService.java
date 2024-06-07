@@ -48,6 +48,7 @@ import fr.utbm.ciad.labmanager.services.DeletionStatus;
 import fr.utbm.ciad.labmanager.utils.HasAsynchronousUploadService;
 import fr.utbm.ciad.labmanager.utils.io.coreportal.CorePortal;
 import fr.utbm.ciad.labmanager.utils.io.coreportal.CorePortal.CorePortalConference;
+import fr.utbm.ciad.labmanager.utils.names.ConferenceNameComparator;
 import fr.utbm.ciad.labmanager.utils.ranking.CoreRanking;
 import org.arakhne.afc.progress.DefaultProgression;
 import org.arakhne.afc.progress.Progression;
@@ -83,6 +84,8 @@ public class ConferenceService extends AbstractEntityService<Conference> {
 
 	private final CorePortal corePortal;
 
+	private final ConferenceNameComparator conferenceNameComparator;
+
 	/** Constructor for injector.
 	 * This constructor is defined for being invoked by the IOC injector.
 	 *
@@ -98,6 +101,7 @@ public class ConferenceService extends AbstractEntityService<Conference> {
 			@Autowired ConferenceRepository conferenceRepository,
 			@Autowired ConferenceQualityAnnualIndicatorsRepository indicatorsRepository,
 			@Autowired CorePortal corePortal,
+			@Autowired ConferenceNameComparator conferenceNameComparator,
 			@Autowired MessageSourceAccessor messages,
 			@Autowired Constants constants,
 			@Autowired SessionFactory sessionFactory) {
@@ -105,6 +109,7 @@ public class ConferenceService extends AbstractEntityService<Conference> {
 		this.conferenceRepository = conferenceRepository;
 		this.indicatorsRepository = indicatorsRepository;
 		this.corePortal = corePortal;
+		this.conferenceNameComparator = conferenceNameComparator;
 	}
 
 	/** Replies all the conferences for the database.
@@ -222,6 +227,25 @@ public class ConferenceService extends AbstractEntityService<Conference> {
 		final var opt = this.conferenceRepository.findById(Long.valueOf(identifier));
 		if (opt.isPresent()) {
 			return opt.get();
+		}
+		return null;
+	}
+
+	public long getConferenceIdBySimilarNameAndAcronyme(String name, String acronyme) {
+		Conference conference = getConferenceBySimilarNameAndAcronyme(name, acronyme);
+		if (conference != null) {
+			return conference.getId();
+		}
+		return 0;
+	}
+
+	public Conference getConferenceBySimilarNameAndAcronyme(String name, String acronyme) {
+		if (!Strings.isNullOrEmpty(name) && !Strings.isNullOrEmpty(acronyme)) {
+			for (Conference conference : this.conferenceRepository.findAll()) {
+				if (this.conferenceNameComparator.isSimilar(name, acronyme, conference.getName(), conference.getAcronym())) {
+					return conference;
+				}
+			}
 		}
 		return null;
 	}

@@ -24,10 +24,7 @@ import static org.mockito.Mockito.when;
 import fr.utbm.ciad.labmanager.data.publication.Publication;
 import fr.utbm.ciad.labmanager.data.publication.PublicationComparator;
 import fr.utbm.ciad.labmanager.data.publication.PublicationType;
-import fr.utbm.ciad.labmanager.utils.names.SorensenDicePersonNameComparator;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.internal.util.StringUtil;
 
 /** Abstract tests for {@link PublicationComparator}.
  * 

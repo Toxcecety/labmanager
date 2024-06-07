@@ -19,17 +19,6 @@
 
 package fr.utbm.ciad.labmanager.views.components.publications;
 
-import java.io.*;
-import java.nio.charset.Charset;
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
 import com.google.common.base.Strings;
 import com.helger.commons.io.stream.StringInputStream;
 import com.vaadin.flow.component.Component;
@@ -73,9 +62,11 @@ import fr.utbm.ciad.labmanager.utils.io.od.OpenDocumentConstants;
 import fr.utbm.ciad.labmanager.utils.io.ris.RISConstants;
 import fr.utbm.ciad.labmanager.views.ViewConstants;
 import fr.utbm.ciad.labmanager.views.components.addons.ComponentFactory;
+import fr.utbm.ciad.labmanager.views.components.addons.SimilarityError;
 import fr.utbm.ciad.labmanager.views.components.addons.badges.BadgeRenderer;
 import fr.utbm.ciad.labmanager.views.components.addons.badges.BadgeState;
 import fr.utbm.ciad.labmanager.views.components.addons.download.DownloadExtension;
+import fr.utbm.ciad.labmanager.views.components.addons.entities.AbstractEntityEditor;
 import fr.utbm.ciad.labmanager.views.components.addons.entities.AbstractEntityListView;
 import fr.utbm.ciad.labmanager.views.components.addons.wizard.AbstractLabManagerWizard;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -91,6 +82,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.vaadin.lineawesome.LineAwesomeIcon;
+
+import java.io.*;
+import java.nio.charset.Charset;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /** Abstract implementation of a list all the publications whatever the type of publication.
  * 
@@ -530,9 +529,9 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
 	 * It creates an upload component for users to upload files, which are then processed by the provided import function.
 	 * The dialog also includes "Cancel" and "Import" buttons for user interactions.
 	 *
-	 * @param dialogTitle       The title of the import dialog, displayed at the top of the dialog.
-	 * @param importFunction    A function that takes a {@link Reader} and returns a list of {@link Publication} objects.
-	 *                          This function defines how the uploaded files are read and processed into publications.
+	 * @param dialogTitle    The title of the import dialog, displayed at the top of the dialog.
+	 * @param importFunction A function that takes a {@link Reader} and returns a list of {@link Publication} objects.
+	 *                       This function defines how the uploaded files are read and processed into publications.
 	 */
 	protected void setupImportDialog(String dialogTitle, Function<Reader, List<Publication>> importFunction) {
 		Upload upload = getUploadDialog(importFunction);
@@ -557,9 +556,9 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
 	 * to not allow auto-uploading of files. It also sets up a listener to process the uploaded files
 	 * using the provided import function once all files have been uploaded.
 	 *
-	 * @param importFunction    A function that takes a {@link Reader} and returns a list of {@link Publication} objects.
-	 *                          This function is used to read and process the uploaded files into publications.
-	 * @return                  The configured {@link Upload} component ready to be added to the import dialog.
+	 * @param importFunction A function that takes a {@link Reader} and returns a list of {@link Publication} objects.
+	 *                       This function is used to read and process the uploaded files into publications.
+	 * @return The configured {@link Upload} component ready to be added to the import dialog.
 	 */
 	private @NotNull Upload getUploadDialog(Function<Reader, List<Publication>> importFunction) {
 		MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
@@ -569,25 +568,159 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
 
 		upload.addAllFinishedListener(
 				event -> {
-					buffer
-							.getFiles()
-							.forEach(file ->
-							{
-								try (InputStream fileData = buffer.getInputStream(file);
-									 Reader reader = new BufferedReader(new InputStreamReader(fileData))) {
+					List<Publication> publications = processFiles(buffer, importFunction);
 
-									// Read the publications from the file
-									List<Publication> publications = importFunction.apply(reader);
-									for (int i = 0; i < publications.size(); i++) {
-										this.addEntity(publications.get(i), file, i+1, publications.size());
-									}
-								} catch (Exception e) {
-									throw new RuntimeException(e);
+					Dialog gridImportDialog = new Dialog();
+					gridImportDialog.setWidthFull();
+					gridImportDialog.setHeight("auto");
+					gridImportDialog.setHeaderTitle(getTranslation("views.import.dialog.title"));
+
+					Grid<AbstractEntityEditor<Publication>> publicationGrid = new Grid<>();
+
+					// Adding columns
+					// Title column
+					publicationGrid
+							.addColumn(editor -> editor
+									.getEditedEntity()
+									.getTitle())
+							.setHeader(getTranslation("views.import.grid.column.title"));
+					// Authors column
+					publicationGrid
+							.addColumn(publication -> publication
+									.getEditedEntity()
+									.getAuthors()
+									.stream()
+									.map(Person::getFullName)
+									.collect(Collectors.joining(", ")))
+							.setHeader(getTranslation("views.import.grid.column.authors"));
+					// Type column
+					publicationGrid
+							.addColumn(publication -> publication
+									.getEditedEntity()
+									.getType()
+									.getCategory(false))
+							.setHeader(getTranslation("views.import.grid.column.category"))
+							.setAutoWidth(true)
+							.setFlexGrow(0);
+					// Status column
+					publicationGrid
+							.addColumn(createStatusComponentRenderer())
+							.setHeader(getTranslation("views.import.grid.column.checked"))
+							.setAutoWidth(true)
+							.setFlexGrow(0);
+					// Edition button column
+					publicationGrid
+							.addComponentColumn(editor -> {
+								Button editButton = new Button(getTranslation("views.import.grid.edition.edit"));
+								editButton.addClickListener(e -> {
+									this.addEntity(
+											editor,
+											editor.getEditedEntity().getTitle(),
+											false,
+											(dialog, entity) ->
+											{
+												editor.getEditedEntity().setValidated(true);
+												publicationGrid.getDataProvider().refreshAll();
+											}
+									);
+								});
+								return editButton;
+							})
+							.setHeader(getTranslation("views.import.grid.column.edit"))
+							.setAutoWidth(true)
+							.setFlexGrow(0);
+
+					List<AbstractEntityEditor<Publication>> editors = publications.stream()
+							.map(this::createPublicationEditor)
+							.toList();
+
+					publicationGrid.setItems(editors);
+
+					Button closeButton = new Button(getTranslation("views.import.dialog.close"), e -> gridImportDialog.close());
+					Button saveAllButton = new Button(getTranslation("views.import.dialog.save"), e -> {
+						publicationGrid.getListDataView().getItems().forEach(editor -> {
+							try {
+								if (editor.getEditedEntity().isValidated()) {
+									editor.getEditedEntity().setValidated(false);
+									editor.save();
 								}
-							});
+							} catch (Exception ex) {
+								getLogger().error("Error while saving publication", ex);
+							}
+						});
+						gridImportDialog.close();
+						refreshGrid();
+					});
+					gridImportDialog.add(publicationGrid);
+					gridImportDialog.getFooter().add(closeButton, saveAllButton);
+
+					// Open the dialog
+					gridImportDialog.open();
+
 					this.importDialog.close();
 				});
 		return upload;
+	}
+
+	/**
+	 * List all the publications contained in the given file.
+	 *
+	 * @param buffer         the buffer that contains the file.
+	 * @param importFunction the function that is used to import the publications.
+	 * @return the list of publications.
+	 */
+	private List<Publication> processFiles(MultiFileMemoryBuffer buffer, Function<Reader, List<Publication>> importFunction) {
+		List<Publication> publications = new ArrayList<>(Collections.emptyList());
+		buffer.getFiles().forEach(file -> {
+			try (InputStream fileData = buffer.getInputStream(file);
+				 Reader reader = new BufferedReader(new InputStreamReader(fileData))) {
+
+				// Read the publications from the file
+				publications.addAll(importFunction.apply(reader));
+
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		});
+		return publications;
+	}
+
+	/**
+	 * This is a SerializableBiConsumer functional interface implementation that updates the status of a publication.
+	 * It takes a Span and an AbstractEntityEditor of Publication as inputs.
+	 * The status of the publication is determined based on whether it is validated or not and whether it has similarity errors or warnings.
+	 * The theme and text of the span are updated accordingly.
+	 */
+	private static final SerializableBiConsumer<Span, AbstractEntityEditor<Publication>> statusComponentUpdater = (Span span, AbstractEntityEditor<Publication> Editor) -> {
+		SimilarityError error = Editor.isAlreadyInDatabase();
+		String theme;
+		String text;
+		if (Editor.getEditedEntity().isValidated()) {
+			theme = "badge success";
+			text = span.getTranslation("views.import.grid.checked.checked");
+		} else {
+			if (error.isSimilarityError() || error.isSimilarityWarning()) {
+				theme = "badge error";
+				text = span.getTranslation("views.import.grid.checked.not_checked");
+			} else {
+				Editor.getEditedEntity().setValidated(true);
+				theme = "badge success";
+				text = span.getTranslation("views.import.grid.checked.checked");
+			}
+		}
+		span.getElement().setAttribute("theme", theme);
+		span.setText(text);
+	};
+
+	/**
+	 * This method creates a ComponentRenderer for a Span and an AbstractEntityEditor of Publication.
+	 * It uses the statusComponentUpdater defined above to update the status of the publication.
+	 * The ComponentRenderer is used to render the status of the publication in the UI.
+	 *
+	 * @return A ComponentRenderer that can be used to render the status of a publication.
+	 */
+	private static ComponentRenderer<Span, AbstractEntityEditor<Publication>> createStatusComponentRenderer() {
+		return new ComponentRenderer<>(Span::new, statusComponentUpdater);
 	}
 
 	/**
@@ -598,12 +731,12 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
 	 */
 	protected void openImportBibtexDialog() {
 		setupImportDialog(getTranslation("views.import.bibtex"), reader -> {
-            try {
-                return publicationService.readPublicationsFromBibTeX(reader, true, false, true, true, true);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
+			try {
+				return publicationService.readPublicationsFromBibTeX(reader, true, false, true, true, true);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		});
 	}
 
 	/**
@@ -613,12 +746,12 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
 	 */
 	protected void openImportRisDialog() {
 		setupImportDialog(getTranslation("views.import.ris"), reader -> {
-            try {
-                return publicationService.readPublicationsFromRIS(reader, true, false, true, true, true, null);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
+			try {
+				return publicationService.readPublicationsFromRIS(reader, true, false, true, true, true, null);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		});
 	}
 
 
@@ -788,29 +921,70 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
 				getSupportedPublicationTypes().findFirst().get(),
 				EMPTY, EMPTY, EMPTY, now, now.getYear(), EMPTY, EMPTY,
 				EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, PublicationLanguage.getDefault());
-		openPublicationEditor(emptyPublication, getTranslation("views.publication.add_publication")); //$NON-NLS-1$
+		openPublicationEditor(emptyPublication, getTranslation("views.publication.add_publication"), true); //$NON-NLS-1$
 	}
 
-    protected void addEntity(Publication entity) {
-        openPublicationEditor(entity, getTranslation("views.publication.add_publication")); //$NON-NLS-1$
+    protected void addEntity(Publication entity, String fileName, boolean saveInDatabase, SerializableBiConsumer<Dialog, Publication> refreshAll) {
+        openPublicationEditor(entity, getTranslation("views.publication.import_publication", fileName), saveInDatabase, refreshAll); //$NON-NLS-1$
     }
 
-    protected void addEntity(Publication entity,String fileName, int index, int size) {
-        openPublicationEditor(entity, getTranslation("views.publication.import_publication", index, size, fileName)); //$NON-NLS-1$
-    }
+	protected void addEntity(AbstractEntityEditor<Publication> editor, String fileName, boolean saveInDatabase, SerializableBiConsumer<Dialog, Publication> refreshAll) {
+		openPublicationEditor(editor, getTranslation("views.publication.import_publication", fileName), saveInDatabase, refreshAll); //$NON-NLS-1$
+	}
 
     @Override
     protected void edit(Publication publication) {
-        openPublicationEditor(publication, getTranslation("views.publication.edit_publication", publication.getTitle())); //$NON-NLS-1$
+        openPublicationEditor(publication, getTranslation("views.publication.edit_publication", publication.getTitle()), true); //$NON-NLS-1$
     }
 
-	/** Show the editor of a publication.
+	/**
+	 * Show the editor of a publication.
+	 *
+	 * @param publication    the publication to edit.
+	 * @param title          the title of the editor.
+	 * @param saveInDatabase indicates if the editor should save the publication in the database.
+	 */
+	protected void openPublicationEditor(Publication publication, String title, boolean saveInDatabase) {
+		openPublicationEditor(publication, title, saveInDatabase, (dialog, entity) -> refreshGrid());
+	}
+
+	/**
+	 * Show the editor of a publication.
+	 *
+	 * @param publication    the publication to edit.
+	 * @param title          the title of the editor.
+	 * @param saveInDatabase indicates if the editor should save the publication in the database.
+	 * @param refreshAll     the function to call for refreshing all the data.
+	 */
+	protected void openPublicationEditor(Publication publication, String title, boolean saveInDatabase, SerializableBiConsumer<Dialog, Publication> refreshAll) {
+		openPublicationEditor(createPublicationEditor(publication), title, saveInDatabase, refreshAll);
+	}
+
+	/**
+	 * Show the editor of a publication.
+	 *
+	 * @param editor         the editor to show.
+	 * @param title          the title of the editor.
+	 * @param saveInDatabase indicates if the editor should save the publication in the database.
+	 * @param refreshAll     the function to call for refreshing all the data.
+	 */
+	protected void openPublicationEditor(AbstractEntityEditor<Publication> editor, String title, boolean saveInDatabase, SerializableBiConsumer<Dialog, Publication> refreshAll) {
+		final var newEntity = editor.isNewEntity();
+		ComponentFactory.openEditionModalDialog(title, "views.check", editor, false,
+				saveInDatabase,
+				// Refresh the "old" item, even if its has been changed in the JPA database
+				refreshAll,
+				newEntity ? null : refreshAll);
+	}
+
+	/**
+	 * Create an AbstractEntityEditor for the given publication.
 	 *
 	 * @param publication the publication to edit.
-	 * @param title the title of the editor.
+	 * @return the editor.
 	 */
-	protected void openPublicationEditor(Publication publication, String title) {
-		final var editor = new EmbeddedPublicationEditor(
+	private AbstractEntityEditor<Publication> createPublicationEditor(Publication publication) {
+		return new EmbeddedPublicationEditor(
 				this.publicationService.startEditing(publication),
 				getSupportedPublicationTypeArray(),
 				true,
@@ -828,12 +1002,6 @@ public abstract class AbstractPublicationListView extends AbstractEntityListView
 				this.personFieldHelperLabelKey,
 				this.personNullErrorKey,
 				this.personDuplicateErrorKey);
-		final var newEntity = editor.isNewEntity();
-		final SerializableBiConsumer<Dialog, Publication> refreshAll = (dialog, entity) -> refreshGrid();
-		ComponentFactory.openEditionModalDialog(title, editor, false,
-				// Refresh the "old" item, even if its has been changed in the JPA database
-				refreshAll,
-				newEntity ? null : refreshAll);
 	}
 
 	@Override

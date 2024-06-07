@@ -55,7 +55,7 @@ public interface OrganizationNameComparator {
 	 */
 	void setSimilarityLevel(double similarityLevel);
 
-	/** Check name similarity between the names of two organizations.
+	/** Check name similarity between the names and the acronyms of two organizations.
 	 * 
 	 * @param acronym1 the first acronym.
 	 * @param name1 the first name.

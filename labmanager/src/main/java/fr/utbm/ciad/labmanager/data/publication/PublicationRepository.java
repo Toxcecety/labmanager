@@ -19,14 +19,14 @@
 
 package fr.utbm.ciad.labmanager.data.publication;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
+import jakarta.validation.constraints.NotNull;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 /** JPA repository for a publication.
  * 
@@ -44,9 +44,6 @@ public interface PublicationRepository extends JpaRepository<Publication, Long>,
 	 * @return the list of publications.
 	 */
 	List<Publication> findAllByAuthorshipsPersonId(long personId);
-
-	@Query("SELECT p FROM Publication p LEFT JOIN FETCH p.authorships a WHERE p.id = :id")
-	Optional<Publication> findByIdJoinAuthorships(long id);
 
 	/** Replies the list of publications for the person with the given webpage identifier.
 	 *
@@ -77,6 +74,20 @@ public interface PublicationRepository extends JpaRepository<Publication, Long>,
 	 */
 	List<Publication> findAllByTitleIgnoreCase(String title);
 
+	/** Replies the list of publication counts for each year.
+	 *
+	 * @return the list of publications counts.
+	 */
+	@Query("SELECT DISTINCT p.publicationYear FROM Publication p")
+	List<Integer> findDistinctPublicationYears();
+
+	/** Replies the list of publication types.
+	 *
+	 * @return the list of publication types.
+	 */
+	@Query("SELECT DISTINCT p.type FROM Publication p")
+	List<PublicationType> findAllDistinctPublicationTypes();
+
 	/** Replies the list of publications for the given year.
 	 *
 	 * @param year the year of publication.
@@ -85,4 +96,18 @@ public interface PublicationRepository extends JpaRepository<Publication, Long>,
 	 */
 	List<Publication> findAllByPublicationYear(Integer year);
 
+	/** Replies the count of publications for the given type and year.
+	 *
+	 * @param type the type of the publication.
+	 * @param year the year of the publication.
+	 * @return the count of publications.
+	 */
+	@Query("SELECT COUNT(p) AS publicationCount FROM Publication p WHERE p.type = :type AND p.publicationYear = :year")
+	Integer countPublicationsForTypeAndYear(@Param("type") PublicationType type, @Param("year") Integer year);
+
+
+	@NotNull
+	@Modifying
+	@Query("SELECT p FROM Publication p LEFT JOIN FETCH p.authorships")
+	List<Publication> findAll();
 }

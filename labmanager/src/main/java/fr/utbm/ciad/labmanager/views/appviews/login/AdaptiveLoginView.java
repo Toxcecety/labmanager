@@ -42,8 +42,8 @@ import org.springframework.beans.factory.annotation.Value;
  * @since 4.0
  */
 @AnonymousAllowed
-@PageTitle("Login")
-@Route(value = "login")
+@PageTitle("AdaptiveLogin")
+@Route(value = "adaptiveLogin")
 public class AdaptiveLoginView extends LoginOverlay implements BeforeEnterObserver {
 
 	private static final long serialVersionUID = 4873621745334362590L;

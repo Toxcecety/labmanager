@@ -31,15 +31,12 @@ import java.util.function.Consumer;
 
 import com.google.common.base.Strings;
 import fr.utbm.ciad.labmanager.configuration.Constants;
-import fr.utbm.ciad.labmanager.data.organization.OrganizationAddress;
-import fr.utbm.ciad.labmanager.data.organization.OrganizationAddressRepository;
-import fr.utbm.ciad.labmanager.data.organization.ResearchOrganization;
-import fr.utbm.ciad.labmanager.data.organization.ResearchOrganizationRepository;
-import fr.utbm.ciad.labmanager.data.organization.ResearchOrganizationType;
+import fr.utbm.ciad.labmanager.data.organization.*;
 import fr.utbm.ciad.labmanager.services.AbstractEntityService;
 import fr.utbm.ciad.labmanager.services.DeletionStatus;
 import fr.utbm.ciad.labmanager.utils.country.CountryCode;
 import fr.utbm.ciad.labmanager.utils.io.filemanager.DownloadableFileManager;
+import fr.utbm.ciad.labmanager.utils.names.OrganizationNameComparator;
 import jakarta.transaction.Transactional;
 import org.arakhne.afc.vmutil.FileSystem;
 import org.hibernate.Hibernate;
@@ -70,6 +67,8 @@ public class ResearchOrganizationService extends AbstractEntityService<ResearchO
 
 	private DownloadableFileManager fileManager;
 
+	private OrganizationNameComparator organizationComparator;
+
 	/** Constructor for injector.
 	 * This constructor is defined for being invoked by the IOC injector.
 	 *
@@ -84,6 +83,7 @@ public class ResearchOrganizationService extends AbstractEntityService<ResearchO
 			@Autowired OrganizationAddressRepository addressRepository,
 			@Autowired ResearchOrganizationRepository organizationRepository,
 			@Autowired DownloadableFileManager fileManager,
+			@Autowired OrganizationNameComparator organizationComparator,
 			@Autowired MessageSourceAccessor messages,
 			@Autowired Constants constants,
 			@Autowired SessionFactory sessionFactory) {			
@@ -91,6 +91,7 @@ public class ResearchOrganizationService extends AbstractEntityService<ResearchO
 		this.addressRepository = addressRepository;
 		this.organizationRepository = organizationRepository;
 		this.fileManager = fileManager;
+		this.organizationComparator = organizationComparator;
 	}
 
 	/** Replies the file manager used by this service.
@@ -261,6 +262,26 @@ public class ResearchOrganizationService extends AbstractEntityService<ResearchO
 	 */
 	public Optional<ResearchOrganization> getResearchOrganizationByAcronymOrName(String text) {
 		return this.organizationRepository.findDistinctByAcronymOrName(text, text);
+	}
+
+	public long getResearchOrganizationIdBySimilarAcronymOrName(String acronyme, String name) {
+		var orga = getResearchOrganizationBySimilarAcronymOrName(acronyme, name);
+		if (orga != null) {
+			return orga.getId();
+		} else {
+			return 0;
+		}
+	}
+
+	public ResearchOrganization getResearchOrganizationBySimilarAcronymOrName(String acronyme, String name) {
+		if (!Strings.isNullOrEmpty(acronyme) || !Strings.isNullOrEmpty(name)) {
+			for (final var orga : this.organizationRepository.findAll()) {
+				if (this.organizationComparator.isSimilar(acronyme, name, orga.getAcronym(), orga.getName())) {
+					return orga;
+				}
+			}
+		}
+		return null;
 	}
 
 	/** Create a research organization.

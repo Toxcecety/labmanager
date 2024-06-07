@@ -1,6 +1,6 @@
 /*
  * $Id$
- * 
+ *
  * Copyright (c) 2019-2024, CIAD Laboratory, Universite de Technologie de Belfort Montbeliard
  *
  * This program is free software: you can redistribute it and/or modify
@@ -43,7 +43,7 @@ import org.springframework.context.support.MessageSourceAccessor;
  *
  * <p>The order of the items of this enumeration reflects the order of the types from the most
  * important (ordinal equals to 0} to the less important (highest ordinal value).
- * 
+ *
  * @author $Author: sgalland$
  * @author $Author: tmartine$
  * @version $Name$ $Revision$ $Date$
@@ -916,5 +916,3 @@ public enum PublicationType {
 	}
 
 }
-
-

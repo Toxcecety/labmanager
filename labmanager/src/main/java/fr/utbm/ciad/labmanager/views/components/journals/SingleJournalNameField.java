@@ -93,7 +93,7 @@ public class SingleJournalNameField extends AbstractSingleEntityNameField<Journa
 				(newJournal, saver) -> {
 					final var journalContext = journalService.startEditing(newJournal);
 					final var editor = new EmbeddedJournalEditor(
-							journalContext, authenticatedUser, journalService.getMessageSourceAccessor());
+							journalContext, journalService, authenticatedUser, journalService.getMessageSourceAccessor());
 					ComponentFactory.openEditionModalDialog(creationTitle, editor, true,
 							(dialog, changedJournal) -> saver.accept(changedJournal),
 							null);

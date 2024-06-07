@@ -22,6 +22,7 @@ package fr.utbm.ciad.labmanager.views.components.conferences;
 import fr.utbm.ciad.labmanager.components.security.AuthenticatedUser;
 import fr.utbm.ciad.labmanager.data.conference.Conference;
 import fr.utbm.ciad.labmanager.services.AbstractEntityService.EntityEditingContext;
+import fr.utbm.ciad.labmanager.services.conference.ConferenceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.MessageSourceAccessor;
@@ -48,9 +49,9 @@ public final class EmbeddedConferenceEditor extends AbstractConferenceEditor {
 	 * @param authenticatedUser the connected user.
 	 * @param messages the accessor to the localized messages (Spring layer).
 	 */
-	public EmbeddedConferenceEditor(EntityEditingContext<Conference> context,
+	public EmbeddedConferenceEditor(EntityEditingContext<Conference> context, ConferenceService conferenceService,
 			AuthenticatedUser authenticatedUser, MessageSourceAccessor messages) {
-		super(context, false, authenticatedUser, messages, LOGGER);
+		super(context, false, conferenceService, authenticatedUser, messages, LOGGER);
 		createEditorContentAndLinkBeans();
 	}
 
