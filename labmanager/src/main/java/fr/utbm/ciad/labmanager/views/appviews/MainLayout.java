@@ -132,8 +132,6 @@ public class MainLayout extends AppLayout implements LocaleChangeObserver, UserI
 
 	private SideNavItem allpersons;
 
-	private SideNavItem allpersons2;
-
 	private SideNavItem positions;
 	
 	private SideNavItem scientificActivitySection;
@@ -264,10 +262,6 @@ public class MainLayout extends AppLayout implements LocaleChangeObserver, UserI
 			if (this.accessChecker.hasAccess(PersonsListView.class)) {
 				this.allpersons = new SideNavItem(null, PersonsListView.class, LineAwesomeIcon.USERS_SOLID.create());
 				this.positionSection.addItem(this.allpersons);
-			}
-			if (this.accessChecker.hasAccess(PersonsListView.class)) {
-				this.allpersons2 = new SideNavItem(null, PersonsCardView.class, LineAwesomeIcon.USERS_SOLID.create());
-				this.positionSection.addItem(this.allpersons2);
 			}
 			if (this.accessChecker.hasAccess(MembershipsListView.class)) {
 				this.positions = new SideNavItem("", MembershipsListView.class, LineAwesomeIcon.ID_CARD_ALT_SOLID.create()); //$NON-NLS-1$
@@ -701,9 +695,6 @@ public class MainLayout extends AppLayout implements LocaleChangeObserver, UserI
 		}
 		if (this.allpersons != null) {
 			this.allpersons.setLabel(getTranslation("views.navitem.all_persons")); //$NON-NLS-1$
-		}
-		if (this.allpersons2 != null) {
-			this.allpersons2.setLabel(getTranslation("views.navitem.all_persons2")); //$NON-NLS-1$
 		}
 		if (this.positions != null) {
 			this.positions.setLabel(getTranslation("views.navitem.positions")); //$NON-NLS-1$

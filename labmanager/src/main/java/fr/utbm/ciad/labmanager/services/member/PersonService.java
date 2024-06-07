@@ -236,25 +236,43 @@ public class PersonService extends AbstractEntityService<Person> {
 	public Page<Person> getPersonsByName(String name, Pageable pageable) {
 		return this.personRepository.findByName(name, pageable);
 	}
+	public Page<Person> getPersonsByName(String name, String organization, Pageable pageable) {
+		return this.personRepository.findByName(name, organization, pageable);
+	}
 
 	public long countPersonsByName(String name) {
 		return this.personRepository.countFindByName(name);
+	}
+	public long countPersonsByName(String name, String organization) {
+		return this.personRepository.countFindByName(name, organization);
 	}
 
 	public Page<Person> getPersonsByOrcid(String orcid, Pageable pageable) {
 		return this.personRepository.findByOrcid(orcid, pageable);
 	}
+	public Page<Person> getPersonsByOrcid(String orcid, String organization, Pageable pageable) {
+		return this.personRepository.findByOrcid(orcid, organization, pageable);
+	}
 
 	public long countPersonsByOrcid(String orcid) {
 		return this.personRepository.countFindByOrcid(orcid);
+	}
+	public long countPersonsByOrcid(String orcid, String organization) {
+		return this.personRepository.countFindByOrcid(orcid, organization);
 	}
 
 	public Page<Person> getPersonsByOrganization(String organization, Pageable pageable) {
 		return this.personRepository.findByOrganization(organization, pageable);
 	}
+	public Page<Person> getPersonsByOrganization(String organization, String org,  Pageable pageable) {
+		return this.personRepository.findByOrganization(organization, org, pageable);
+	}
 
 	public long countPersonsByOrganization(String organization) {
 		return this.personRepository.countFindByOrganization(organization);
+	}
+	public long countPersonsByOrganization(String organization, String org) {
+		return this.personRepository.countFindByOrganization(organization, org);
 	}
 
 	/** Replies the person with the given identifier.

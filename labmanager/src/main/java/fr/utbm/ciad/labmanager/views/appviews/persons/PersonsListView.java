@@ -61,6 +61,8 @@ public class PersonsListView extends StandardPersonListView implements HasDynami
 
 	private MenuItem updateRankingsButton;
 
+	private MenuItem switchView;
+
 	/** Constructor.
 	 *
 	 * @param personService the service for accessing the person JPA.
@@ -97,9 +99,8 @@ public class PersonsListView extends StandardPersonListView implements HasDynami
 			menu = new MenuBar(); 
 			menu.addThemeVariants(MenuBarVariant.LUMO_ICON);
 		}
-		
 		this.updateRankingsButton = ComponentFactory.addIconItem(menu, LineAwesomeIcon.SYNC_ALT_SOLID, null, null, it -> openRankingsUpdateWizard());
-
+		this.switchView = ComponentFactory.addIconItem(menu, LineAwesomeIcon.TH_LIST_SOLID, "Switch view", null, it -> getUI().ifPresent(ui -> ui.navigate(PersonsCardView.class)));
 		return menu;
 	}
 

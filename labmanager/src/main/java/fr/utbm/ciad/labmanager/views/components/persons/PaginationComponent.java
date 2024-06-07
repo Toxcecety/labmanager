@@ -15,8 +15,8 @@ public class PaginationComponent extends Div {
 
     public PaginationComponent(long totalPages) {
         this.totalPages = totalPages;
-        nextButton = new Button("Next", click -> nextPage());
-        prevButton = new Button("Previous", click -> prevPage());
+        nextButton = new Button(getTranslation("views.pagination.next"), click -> nextPage());
+        prevButton = new Button(getTranslation("views.pagination.previous"), click -> prevPage());
         pageLabel = new Span("Page: " + (currentPage + 1));
         if (totalPages <= 1) {
             setVisible(false);
@@ -47,8 +47,8 @@ public class PaginationComponent extends Div {
     public void setCurrentPage(int pageNumber) {
         this.currentPage = pageNumber;
         pageLabel.setText("Page: " + (currentPage + 1));
-        nextButton.setEnabled(currentPage != totalPages);
-        prevButton.setEnabled(currentPage != 0);
+        nextButton.setEnabled(currentPage+1 != totalPages);
+        prevButton.setEnabled(currentPage+1 != 1);
     }
 
     public void setTotalPages(long totalPages) {
@@ -58,7 +58,7 @@ public class PaginationComponent extends Div {
         } else {
             setVisible(true);
         }
-        nextButton.setEnabled(currentPage != totalPages);
+        nextButton.setEnabled(currentPage+1 != totalPages);
     }
 
     public void addPageChangeListener(ComponentEventListener<PageChangeEvent> listener) {

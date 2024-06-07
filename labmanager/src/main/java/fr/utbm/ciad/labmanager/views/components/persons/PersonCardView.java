@@ -1,9 +1,11 @@
 package fr.utbm.ciad.labmanager.views.components.persons;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.function.SerializableBiConsumer;
 import fr.utbm.ciad.labmanager.components.security.AuthenticatedUser;
 import fr.utbm.ciad.labmanager.data.member.ChronoMembershipComparator;
+import fr.utbm.ciad.labmanager.data.member.MembershipComparator;
 import fr.utbm.ciad.labmanager.data.member.Person;
 import fr.utbm.ciad.labmanager.services.member.MembershipService;
 import fr.utbm.ciad.labmanager.services.member.PersonService;
@@ -14,6 +16,8 @@ import org.springframework.context.support.MessageSourceAccessor;
 
 public class PersonCardView extends AbstractPersonCardView<Person> {
     private final PersonService personService;
+    private final MembershipService membershipService;
+    private final ChronoMembershipComparator membershipComparator;
     private final UserService userService;
     private final AuthenticatedUser authenticatedUser;
     private final MessageSourceAccessor messages;
@@ -25,6 +29,8 @@ public class PersonCardView extends AbstractPersonCardView<Person> {
                 .setOfficeRoom(person.getOfficeRoom())
                 .setLabels(membershipService.getActiveMembershipsForPerson(person, membershipComparator)), person);
         this.personService = personService;
+        this.membershipService = membershipService;
+        this.membershipComparator = membershipComparator;
         this.userService = userService;
         this.authenticatedUser = authenticatedUser;
         this.messages = messages;
@@ -37,25 +43,46 @@ public class PersonCardView extends AbstractPersonCardView<Person> {
         final var editor = new EmbeddedPersonEditor(
                 userContext, authenticatedUser, messages);
         final var newEntity = editor.isNewEntity();
-        final SerializableBiConsumer<Dialog, Person> refreshAll = (dialog, entity) -> refreshGrid();
-        final SerializableBiConsumer<Dialog, Person> refreshOne = (dialog, entity) -> refreshItem(entity);
+        final SerializableBiConsumer<Dialog, Person> refreshAll = (dialog, entity) -> refreshPage();
+        final SerializableBiConsumer<Dialog, Person> refreshOne = (dialog, entity) -> refreshCard(entity);
         ComponentFactory.openEditionModalDialog(title, editor, true,
                 // Refresh the "old" item, even if it has been changed in the JPA database
                 newEntity ? refreshAll : refreshOne,
                 newEntity ? null : refreshAll);
     }
 
+    public void updateCardData(Person person) {
+        // Fetch the updated data for the person
+        Person updatedPerson = personService.getPersonById(person.getId());
+
+        // Use the CardBuilder to rebuild the card with the updated data
+        CardBuilder cardBuilder = new CardBuilder()
+                .setImageUrl(updatedPerson.getPhotoURL() != null  ? updatedPerson.getPhotoURL().toString() : null)
+                .setName(updatedPerson.getFullName())
+                .setEmail(updatedPerson.getEmail())
+                .setOfficePhone(updatedPerson.getOfficePhone())
+                .setMobilePhone(updatedPerson.getMobilePhone())
+                .setOfficeRoom(updatedPerson.getOfficeRoom())
+                .setLabels(membershipService.getActiveMembershipsForPerson(updatedPerson, membershipComparator));
+    }
+
     @Override
     protected void onClickEvent(Person entity) {
-        openPersonEditor(entity, getTranslation("views.persons.edit_person", entity.getFullName()));
+        if (isAdminRole()){
+            openPersonEditor(entity, getTranslation("views.persons.edit_person", entity.getFullName()));
+        }
     }
 
-    @Override
-    protected void refreshItem(Person entity) {
+    protected void refreshCard(Person entity) {
+        updateCardData(entity);
     }
 
-    @Override
-    protected void refreshGrid() {
+    protected void refreshPage() {
+        UI.getCurrent().getPage().reload();
+    }
 
+    protected boolean isAdminRole() {
+        return this.authenticatedUser != null && this.authenticatedUser.get().isPresent()
+                && this.authenticatedUser.get().get().getRole().hasBaseAdministrationRights();
     }
 }

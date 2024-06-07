@@ -30,7 +30,6 @@ import java.io.InputStream;
 import java.util.List;
 
 public abstract class AbstractPersonCardView<T> extends ListItem {
-
     public AbstractPersonCardView(CardBuilder builder, T entity) {
         String imageUrl = builder.imageUrl;
         String name = builder.name;
@@ -124,10 +123,6 @@ public abstract class AbstractPersonCardView<T> extends ListItem {
     }
 
     protected abstract void onClickEvent(T entity);
-
-    protected abstract void refreshItem(T entity);
-
-    protected abstract void refreshGrid();
 
     private Div createInfoItem(VaadinIcon iconType, String info) {
         Div infoItem = new Div();
