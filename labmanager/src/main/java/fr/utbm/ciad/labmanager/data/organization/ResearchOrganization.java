@@ -47,6 +47,7 @@ import fr.utbm.ciad.labmanager.data.teaching.TeachingActivity;
 import fr.utbm.ciad.labmanager.utils.HashCodeUtils;
 import fr.utbm.ciad.labmanager.utils.country.CountryCode;
 import fr.utbm.ciad.labmanager.utils.io.json.JsonUtils;
+import fr.utbm.ciad.labmanager.views.components.addons.wizard.AbstractContextData;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -74,7 +75,7 @@ import org.springframework.context.support.MessageSourceAccessor;
  */
 @Entity
 @Table(name = "ResearchOrgs")
-public class ResearchOrganization implements Serializable, JsonSerializable, Comparable<ResearchOrganization>, AttributeProvider, IdentifiableEntity {
+public class ResearchOrganization extends AbstractContextData implements Serializable, JsonSerializable, Comparable<ResearchOrganization>, AttributeProvider, IdentifiableEntity {
 
 	private static final long serialVersionUID = -450531251083286848L;
 

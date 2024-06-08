@@ -74,15 +74,16 @@ public class JournalEditor extends AbstractEntityEditor<Journal> {
                 "views.journals.administration_details", //$NON-NLS-1$
                 "views.journals.administration.validated_organization", //$NON-NLS-1$
                 context, relinkEntityWhenSaving);
-        if (isBaseAdmin()) {
-            journalEditorComponentWizard = new JournalEditorComponentWizard(createDescriptionDetails(), createRankingDetails(), createPublisherDetails(), createAdministrationComponents((Consumer<FormLayout>) null, it -> it.bind(Journal::isValidated, Journal::setValidated)));
-        }
-        journalEditorComponentWizard = new JournalEditorComponentWizard(createDescriptionDetails(), createRankingDetails(), createPublisherDetails());
 
     }
 
     @Override
     protected void createEditorContent(VerticalLayout rootContainer) {
+        if (isBaseAdmin()) {
+            journalEditorComponentWizard = new JournalEditorComponentWizard(createDescriptionDetails(), createRankingDetails(), createPublisherDetails(), createAdministrationComponents((Consumer<FormLayout>) null, it -> it.bind(Journal::isValidated, Journal::setValidated)));
+        }
+        journalEditorComponentWizard = new JournalEditorComponentWizard(createDescriptionDetails(), createRankingDetails(), createPublisherDetails());
+
         rootContainer.add(journalEditorComponentWizard);
     }
 

@@ -298,6 +298,7 @@ public abstract class AbstractOrganizationEditor extends AbstractEntityEditor<Re
 		getEntityDataBinder().forField(this.superStructures).bind(ResearchOrganization::getSuperOrganizations, ResearchOrganization::setSuperOrganizations);
 	}
 
+
 	/** Invoked for creating a new organization.
 	 *
 	 * @param saver the callback that is invoked when the organization is saved as JPA entity.

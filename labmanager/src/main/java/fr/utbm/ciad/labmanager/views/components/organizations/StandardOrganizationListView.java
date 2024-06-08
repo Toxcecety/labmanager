@@ -224,13 +224,35 @@ public class StandardOrganizationListView extends AbstractEntityListView<Researc
 
 	@Override
 	protected void addEntity() {
-		openOrganizationEditor(new ResearchOrganization(), getTranslation("views.organizations.add_organization")); //$NON-NLS-1$
+		openOrganizationEditorWizard(new ResearchOrganization(), getTranslation("views.organizations.add_organization")); //$NON-NLS-1$
 	}
 
 	@Override
 	protected void edit(ResearchOrganization organisation) {
 		openOrganizationEditor(organisation, getTranslation("views.organizations.edit_organization", organisation.getAcronymOrName())); //$NON-NLS-1$
 	}
+
+	/** Show the editor of an address.
+	 *
+	 * @param address the address to edit.
+	 * @param title the title of the editor.
+	 */
+	protected void openOrganizationEditorWizard(ResearchOrganization organization, String title) {
+		final var editor = new EmbeddedOrganizationEditorWizard(
+				this.organizationService.startEditing(organization),
+				this.fileManager,
+				getAuthenticatedUser(), getMessageSourceAccessor(),
+				this.organizationService,
+				this.addressService);
+		final var newEntity = editor.isNewEntity();
+		final SerializableBiConsumer<Dialog, ResearchOrganization> refreshAll = (dialog, entity) -> refreshGrid();
+		final SerializableBiConsumer<Dialog, ResearchOrganization> refreshOne = (dialog, entity) -> refreshItem(entity);
+		ComponentFactory.openEditionModalDialog(title, editor, false,
+				// Refresh the "old" item, even if its has been changed in the JPA database
+				newEntity ? refreshAll : refreshOne,
+				newEntity ? null : refreshAll);
+	}
+
 
 	/** Show the editor of an address.
 	 *
