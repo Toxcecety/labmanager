@@ -187,12 +187,44 @@ public class StandardConferenceListView extends AbstractEntityListView<Conferenc
 
 	@Override
 	protected void addEntity() {
-		openConferenceEditor(new Conference(), getTranslation("views.conferences.add_conference")); //$NON-NLS-1$
+		openConferenceEditorWizard(new Conference(), getTranslation("views.conferences.add_conference")); //$NON-NLS-1$
 	}
 
 	@Override
 	protected void edit(Conference conference) {
 		openConferenceEditor(conference, getTranslation("views.conferences.edit_conference", conference.getName())); //$NON-NLS-1$
+	}
+
+	/** Show the editor of a conference.
+	 *
+	 * @param conference the conference to edit.
+	 * @param title the title of the editor.
+	 */
+	protected void openConferenceEditorWizard(Conference conference, String title) {
+		final var editor = new EmbeddedConferenceEditorWizard(
+				this.conferenceService.startEditing(conference),
+				getAuthenticatedUser(), getMessageSourceAccessor());
+		final var newEntity = editor.isNewEntity();
+		final SerializableBiConsumer<Dialog, Conference> refreshAll = (dialog, entity) -> {
+			// The number of papers should be loaded because it was not loaded before
+			this.conferenceService.inSession(session -> {
+				session.load(entity, Long.valueOf(entity.getId()));
+				initializeEntityFromJPA(entity);
+			});
+			refreshGrid();
+		};
+		final SerializableBiConsumer<Dialog, Conference> refreshOne = (dialog, entity) -> {
+			// The number of papers should be loaded because it was not loaded before
+			this.conferenceService.inSession(session -> {
+				session.load(entity, Long.valueOf(entity.getId()));
+				initializeEntityFromJPA(entity);
+			});
+			refreshItem(entity);
+		};
+		ComponentFactory.openEditionModalDialog(title, editor, false,
+				// Refresh the "old" item, even if its has been changed in the JPA database
+				newEntity ? refreshAll : refreshOne,
+				newEntity ? null : refreshAll);
 	}
 
 	/** Show the editor of a conference.

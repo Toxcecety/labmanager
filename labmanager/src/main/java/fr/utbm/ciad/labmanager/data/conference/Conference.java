@@ -43,6 +43,7 @@ import fr.utbm.ciad.labmanager.data.publication.AbstractConferenceBasedPublicati
 import fr.utbm.ciad.labmanager.utils.HashCodeUtils;
 import fr.utbm.ciad.labmanager.utils.io.json.JsonUtils;
 import fr.utbm.ciad.labmanager.utils.ranking.CoreRanking;
+import fr.utbm.ciad.labmanager.views.components.addons.wizard.AbstractContextData;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -74,7 +75,7 @@ import org.springframework.context.support.MessageSourceAccessor;
  */
 @Entity
 @Table(name = "Conferences")
-public class Conference implements Serializable, JsonSerializable, AttributeProvider, IdentifiableEntity {
+public class Conference extends AbstractContextData implements Serializable, JsonSerializable, AttributeProvider, IdentifiableEntity {
 
 	private static final long serialVersionUID = -2286554831898694393L;
 
