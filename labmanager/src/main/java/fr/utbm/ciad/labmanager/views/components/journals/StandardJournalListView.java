@@ -279,7 +279,7 @@ public class StandardJournalListView extends AbstractEntityListView<Journal> {
 				newEntity ? null : refreshAll);
 	}
 
-	/** Show the editor of an journal.
+	/** Show the wizard editor of an journal.
 	 *
 	 * @param journal the journal to edit.
 	 * @param title the title of the editor.

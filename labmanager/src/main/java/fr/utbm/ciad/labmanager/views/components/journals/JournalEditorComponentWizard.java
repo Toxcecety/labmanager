@@ -17,13 +17,35 @@ import io.overcoded.vaadin.wizard.config.WizardConfigurationProperties;
 import java.util.Arrays;
 import java.util.List;
 
+/** Wizard for adding a journal.
+ *
+ * @author $Author: sgalland$
+ * @author $Author: erenon$
+ * @version $Name$ $Revision$ $Date$
+ * @mavengroupid $GroupId$
+ * @mavenartifactid $ArtifactId$
+ * @since 4.1
+ */
 public class JournalEditorComponentWizard extends AbstractLabManagerWizard<Journal> {
 
+    /** Constructor.
+     *
+     * @param descriptionDetailComponents the description detail components.
+     * @param rankingInformationComponents the ranking information components.
+     * @param publisherInformationComponents the publisher information components.
+     */
     public JournalEditorComponentWizard(VerticalLayout descriptionDetailComponents, VerticalLayout rankingInformationComponents, VerticalLayout publisherInformationComponents) {
         this(defaultWizardConfiguration(null, false),
                 new Journal(), descriptionDetailComponents, rankingInformationComponents, publisherInformationComponents);
     }
 
+    /** Constructor.
+     *
+     * @param descriptionDetailComponents the description detail components.
+     * @param rankingInformationComponents the ranking information components.
+     * @param publisherInformationComponents the publisher information components.
+     * @param administrationComponents the administration detail components.
+     */
     public JournalEditorComponentWizard(VerticalLayout descriptionDetailComponents, VerticalLayout rankingInformationComponents, VerticalLayout publisherInformationComponents, VerticalLayout administrationComponents) {
         this(defaultWizardConfiguration(null, false),
                 new Journal(), descriptionDetailComponents, rankingInformationComponents, publisherInformationComponents,administrationComponents);
@@ -33,6 +55,14 @@ public class JournalEditorComponentWizard extends AbstractLabManagerWizard<Journ
         return true;
     }
 
+    /** Constructor.
+     *
+     * @param properties the wizard configuration properties.
+     * @param context the context.
+     * @param descriptionDetailComponents the description detail components.
+     * @param rankingInformationComponents the ranking information components.
+     * @param publisherInformationComponents the publisher information components.
+     */
     protected JournalEditorComponentWizard(WizardConfigurationProperties properties, Journal context, VerticalLayout descriptionDetailComponents, VerticalLayout rankingInformationComponents, VerticalLayout publisherInformationComponents) {
         super(properties, context, Arrays.asList(
                 new DescriptionDetailComponent(context,descriptionDetailComponents),
@@ -41,6 +71,15 @@ public class JournalEditorComponentWizard extends AbstractLabManagerWizard<Journ
                 ));
     }
 
+    /** Constructor.
+     *
+     * @param properties the wizard configuration properties.
+     * @param context the context.
+     * @param descriptionDetailComponents the description detail components.
+     * @param rankingInformationComponents the ranking information components.
+     * @param publisherInformationComponents the publisher information components.
+     * @param administrationComponents the administration detail components.
+     */
     protected JournalEditorComponentWizard(WizardConfigurationProperties properties, Journal context,VerticalLayout descriptionDetailComponents, VerticalLayout rankingInformationComponents, VerticalLayout publisherInformationComponents, VerticalLayout administrationComponents) {
         super(properties, context, Arrays.asList(
                 new DescriptionDetailComponent(context,descriptionDetailComponents),
@@ -50,6 +89,16 @@ public class JournalEditorComponentWizard extends AbstractLabManagerWizard<Journ
                 ));
     }
 
+
+    /** Wizard step to input description details.
+     *
+     * @author $Author: sgalland$
+     * @author $Author: erenon$
+     * @version $Name$ $Revision$ $Date$
+     * @mavengroupid $GroupId$
+     * @mavenartifactid $ArtifactId$
+     * @since 4.1
+     */
     protected static class DescriptionDetailComponent extends AbstractFormWizardStep<Journal> {
 
         private VerticalLayout content;
@@ -95,6 +144,15 @@ public class JournalEditorComponentWizard extends AbstractLabManagerWizard<Journ
 
     }
 
+    /** Wizard step to input ranking details.
+     *
+     * @author $Author: sgalland$
+     * @author $Author: erenon$
+     * @version $Name$ $Revision$ $Date$
+     * @mavengroupid $GroupId$
+     * @mavenartifactid $ArtifactId$
+     * @since 4.1
+     */
     protected static class RankingInformationComponent extends AbstractFormWizardStep<Journal> {
 
         private VerticalLayout content;
@@ -127,6 +185,15 @@ public class JournalEditorComponentWizard extends AbstractLabManagerWizard<Journ
 
     }
 
+    /** Wizard step to input publisher informations.
+     *
+     * @author $Author: sgalland$
+     * @author $Author: erenon$
+     * @version $Name$ $Revision$ $Date$
+     * @mavengroupid $GroupId$
+     * @mavenartifactid $ArtifactId$
+     * @since 4.1
+     */
     protected static class PublisherInformationComponent extends AbstractFormWizardStep<Journal> {
 
         private VerticalLayout content;
@@ -170,6 +237,15 @@ public class JournalEditorComponentWizard extends AbstractLabManagerWizard<Journ
 
     }
 
+    /** Wizard step to input administration details.
+     *
+     * @author $Author: sgalland$
+     * @author $Author: erenon$
+     * @version $Name$ $Revision$ $Date$
+     * @mavengroupid $GroupId$
+     * @mavenartifactid $ArtifactId$
+     * @since 4.1
+     */
     protected static class JournalAdministration extends AbstractFormWizardStep<Journal> {
 
         private VerticalLayout content;

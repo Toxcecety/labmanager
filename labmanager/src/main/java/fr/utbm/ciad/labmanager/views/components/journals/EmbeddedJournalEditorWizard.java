@@ -10,7 +10,7 @@ import org.springframework.context.support.MessageSourceAccessor;
 
 /** Editor of journal information that may be embedded. This editor does not provide
  * the components for saving the information. It is the role of the component that
- * is embedding this editor to save the edited journal.
+ * is embedding this editor to save the edited journal. It is a wizard
  *
  * @author $Author: sgalland$
  * @author $Author: erenon$

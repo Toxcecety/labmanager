@@ -30,6 +30,16 @@ import java.util.function.Consumer;
 
 import static fr.utbm.ciad.labmanager.views.ViewConstants.*;
 
+/** Implementation for the editor of the information related to a journal. It is directly linked for
+ * using it with a wizard.
+ *
+ * @author $Author: sgalland$
+ * @author $Author: erenon$
+ * @version $Name$ $Revision$ $Date$
+ * @mavengroupid $GroupId$
+ * @mavenartifactid $ArtifactId$
+ * @since 4.1
+ */
 public class JournalEditor extends AbstractEntityEditor<Journal> {
 
     private TextField name;
@@ -77,6 +87,12 @@ public class JournalEditor extends AbstractEntityEditor<Journal> {
 
     }
 
+    /** Create the content of the editor.
+     * This function should invoke {@link #createAdministrationComponents(VerticalLayout, boolean, Consumer)}.
+     *
+     * @param rootContainer the container.
+     * @see #createAdministrationComponents(VerticalLayout, boolean, Consumer)
+     */
     @Override
     protected void createEditorContent(VerticalLayout rootContainer) {
         if (isBaseAdmin()) {
@@ -89,7 +105,7 @@ public class JournalEditor extends AbstractEntityEditor<Journal> {
 
     /** Create the section for editing the description of the journal.
      *
-     * @param rootContainer the container.
+     * @return The content.
      */
     protected VerticalLayout createDescriptionDetails() {
         VerticalLayout verticalLayout = new VerticalLayout();
@@ -147,7 +163,7 @@ public class JournalEditor extends AbstractEntityEditor<Journal> {
 
     /** Create the section for editing the publishing information of the journal.
      *
-     * @param rootContainer the container.
+     * @return The content.
      */
     protected VerticalLayout createPublisherDetails() {
         VerticalLayout verticalLayout = new VerticalLayout();
@@ -198,7 +214,7 @@ public class JournalEditor extends AbstractEntityEditor<Journal> {
 
     /** Create the section for editing the ranking information of the journal.
      *
-     * @param rootContainer the container.
+     * @return The content.
      */
     protected VerticalLayout createRankingDetails() {
         VerticalLayout verticalLayout = new VerticalLayout();
