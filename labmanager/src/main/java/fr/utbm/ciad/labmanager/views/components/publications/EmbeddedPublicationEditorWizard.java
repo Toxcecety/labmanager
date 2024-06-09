@@ -36,13 +36,13 @@ import org.springframework.context.support.MessageSourceAccessor;
 
 /** Editor of publication information that may be embedded. This editor does not provide
  * the components for saving the information. It is the role of the component that
- * is embedding this editor to save the edited publication.
+ * is embedding this editor to save the edited publication. This editor is used for a wizard.
  * 
  * @author $Author: sgalland$
  * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
- * @since 4.0
+ * @since 4.1
  */
 public final class EmbeddedPublicationEditorWizard extends PublicationEditor {
 

@@ -56,6 +56,16 @@ import java.util.function.Consumer;
 import static fr.utbm.ciad.labmanager.views.ViewConstants.*;
 import static fr.utbm.ciad.labmanager.views.ViewConstants.DBLP_ICON;
 
+/** Implementation for the editor of the information related to a publication. It is directly linked for
+ * using it with a wizard.
+ *
+ * @author $Author: sgalland$
+ * @author $Author: erenon$
+ * @version $Name$ $Revision$ $Date$
+ * @mavengroupid $GroupId$
+ * @mavenartifactid $ArtifactId$
+ * @since 4.1
+ */
 public class PublicationEditor extends AbstractEntityEditor<Publication> {
     private static final long serialVersionUID = 6119323451118628960L;
 
@@ -131,6 +141,28 @@ public class PublicationEditor extends AbstractEntityEditor<Publication> {
 
     private PublicationEditorComponentWizard publicationEditorComponentWizard;
 
+    /** Constructor.
+     *
+     * @param context the context for editing the entity.
+     * @param supportedTypes list of publication types that are supported by the editor. Only the publications of a type from this list could be edited.
+     * @param relinkEntityWhenSaving indicates if the entity should be relinked when it is saved.
+     * @param enableTypeSelector indicates if the type selector is enabled or disabled.
+     * @param fileManager the manager of files at the server-side.
+     * @param publicationService the service for accessing the JPA entities for publications.
+     * @param personService the service for accessing the JPA entities for persons.
+     * @param userService the service for accessing the JPA entities for users.
+     * @param journalService the service for accessing the JPA entities for journal.
+     * @param conferenceService the service for accessing the JPA entities for conference.
+     * @param axisService service for accessing to the JPA entities of scientific axes.
+     * @param authenticatedUser the connected user.
+     * @param messages the accessor to the localized messages (Spring layer).
+     * @param logger the logger to use.
+     * @param personCreationLabelKey the key that is used for retrieving the text for creating a new person and associating it to the publication.
+     * @param personFieldLabelKey the key that is used for retrieving the text for the label of the author/editor field.
+     * @param personFieldHelperLabelKey the key that is used for retrieving the text for the helper of the author/editor field.
+     * @param personNullErrorKey the key that is used for retrieving the text of the author/editor null error.
+     * @param personDuplicateErrorKey the key that is used for retrieving the text of the author/editor duplicate error.
+     */
     public PublicationEditor(AbstractEntityService.EntityEditingContext<Publication> context,
                              PublicationType[] supportedTypes,
                              boolean relinkEntityWhenSaving, boolean enableTypeSelector, DownloadableFileManager fileManager, PublicationService publicationService,
@@ -171,6 +203,22 @@ public class PublicationEditor extends AbstractEntityEditor<Publication> {
         }
 
 
+
+        // Must be the latest initialization for ensuring that all the class's fields are initialized before creating the dynamic field builder
+        this.fieldBuilder = createDynamicFieldBuilder();
+    }
+
+    protected PublicationFieldBuilder createDynamicFieldBuilder() {
+        return new PublicationFieldBuilder();
+    }
+
+    /** Create the content of the editor.
+     * This function should invoke {@link #createAdministrationComponents(VerticalLayout, boolean, Consumer)}.
+     *
+     * @param rootContainer the container.
+     * @see #createAdministrationComponents(VerticalLayout, boolean, Consumer)
+     */
+    protected void createEditorContent(VerticalLayout rootContainer) {
         if (isBaseAdmin()) {
             publicationEditorComponentWizard = new PublicationEditorComponentWizard(createTypeSelector(),createGeneralDetails(),createIdentificationDetails(),createContentDetails(),createResourceDetails(),createReferenceDetails(), createAdministrationComponents(
                     content -> {
@@ -183,18 +231,6 @@ public class PublicationEditor extends AbstractEntityEditor<Publication> {
         }else{
             publicationEditorComponentWizard = new PublicationEditorComponentWizard(createTypeSelector(),createGeneralDetails(),createIdentificationDetails(),createContentDetails(),createResourceDetails(),createReferenceDetails());
         }
-
-
-        // Must be the latest initialization for ensuring that all the class's fields are initialized before creating the dynamic field builder
-        this.fieldBuilder = createDynamicFieldBuilder();
-    }
-
-    protected PublicationFieldBuilder createDynamicFieldBuilder() {
-        return new PublicationFieldBuilder();
-    }
-
-
-    protected void createEditorContent(VerticalLayout rootContainer) {
         rootContainer.add(publicationEditorComponentWizard);
 
         // initialize the form with the fields that corresponds to the publication type
@@ -217,7 +253,7 @@ public class PublicationEditor extends AbstractEntityEditor<Publication> {
 
     /** Create the publication type selector at the top of the form.
      *
-     * @param rootContainer the container.
+     * @return The content.
      */
     protected VerticalLayout createTypeSelector() {
         VerticalLayout verticalLayout = new VerticalLayout();
@@ -244,7 +280,7 @@ public class PublicationEditor extends AbstractEntityEditor<Publication> {
 
     /** Create the section for editing the general details.
      *
-     * @param rootContainer the container.
+     * @return The content.
      */
     protected VerticalLayout createGeneralDetails() {
         VerticalLayout verticalLayout = new VerticalLayout();
@@ -302,7 +338,7 @@ public class PublicationEditor extends AbstractEntityEditor<Publication> {
 
     /** Create the section for editing the identification details.
      *
-     * @param rootContainer the container.
+     * @return The content.
      */
     protected VerticalLayout createIdentificationDetails() {
         VerticalLayout verticalLayout = new VerticalLayout();
@@ -381,7 +417,7 @@ public class PublicationEditor extends AbstractEntityEditor<Publication> {
 
     /** Create the section for editing the content details.
      *
-     * @param rootContainer the container.
+     * @return The content.
      */
     protected VerticalLayout createContentDetails() {
         VerticalLayout verticalLayout = new VerticalLayout();
@@ -424,7 +460,7 @@ public class PublicationEditor extends AbstractEntityEditor<Publication> {
 
     /** Create the section for editing the resource details.
      *
-     * @param rootContainer the container.
+     * @return The content.
      */
     protected VerticalLayout createResourceDetails() {
         VerticalLayout verticalLayout = new VerticalLayout();
@@ -473,7 +509,7 @@ public class PublicationEditor extends AbstractEntityEditor<Publication> {
 
     /** Create the section for editing the reference details.
      *
-     * @param rootContainer the container.
+     * @return The content.
      */
     protected VerticalLayout createReferenceDetails() {
         VerticalLayout verticalLayout = new VerticalLayout();

@@ -22,48 +22,105 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Arrays;
 import java.util.List;
 
-
+/** Wizard for adding a publication.
+ *
+ * @author $Author: sgalland$
+ * @author $Author: erenon$
+ * @version $Name$ $Revision$ $Date$
+ * @mavengroupid $GroupId$
+ * @mavenartifactid $ArtifactId$
+ * @since 4.1
+ */
 public class PublicationEditorComponentWizard extends AbstractLabManagerWizard<Publication> {
 
-
-    public PublicationEditorComponentWizard(VerticalLayout productionTypeComponents, VerticalLayout minimalInformationComponent, VerticalLayout worldwideIdentificationComponent, VerticalLayout contentInformationComponent, VerticalLayout associatedRessourcesComponent, VerticalLayout referenceInformationComponent) {
+    /** Constructor.
+     *
+     * @param productionTypeComponents the components for the production type.
+     * @param minimalInformationComponent the components for the minimal information.
+     * @param worldwideIdentificationComponent the components for the worldwide identification.
+     * @param contentInformationComponent the components for the content information.
+     * @param associatedResourcesComponent the components for the associated resources.
+     * @param referenceInformationComponent the components for the reference information.
+     */
+    public PublicationEditorComponentWizard(VerticalLayout productionTypeComponents, VerticalLayout minimalInformationComponent, VerticalLayout worldwideIdentificationComponent, VerticalLayout contentInformationComponent, VerticalLayout associatedResourcesComponent, VerticalLayout referenceInformationComponent) {
         this(defaultWizardConfiguration(null, false),
-                new PublicationImp(), productionTypeComponents, minimalInformationComponent, worldwideIdentificationComponent, contentInformationComponent, associatedRessourcesComponent,referenceInformationComponent);
+                new PublicationImp(), productionTypeComponents, minimalInformationComponent, worldwideIdentificationComponent, contentInformationComponent, associatedResourcesComponent,referenceInformationComponent);
     }
 
-    public PublicationEditorComponentWizard(VerticalLayout productionTypeComponents, VerticalLayout minimalInformationComponent, VerticalLayout worldwideIdentificationComponent, VerticalLayout contentInformationComponent, VerticalLayout associatedRessourcesComponent, VerticalLayout referenceInformationComponent, VerticalLayout administrationComponents) {
+    /** Constructor.
+     *
+     * @param productionTypeComponents the components for the production type.
+     * @param minimalInformationComponent the components for the minimal information.
+     * @param worldwideIdentificationComponent the components for the worldwide identification.
+     * @param contentInformationComponent the components for the content information.
+     * @param associatedResourcesComponent the components for the associated resources.
+     * @param referenceInformationComponent the components for the reference information.
+     * @param administrationComponents the components for the administration information.
+     */
+    public PublicationEditorComponentWizard(VerticalLayout productionTypeComponents, VerticalLayout minimalInformationComponent, VerticalLayout worldwideIdentificationComponent, VerticalLayout contentInformationComponent, VerticalLayout associatedResourcesComponent, VerticalLayout referenceInformationComponent, VerticalLayout administrationComponents) {
         this(defaultWizardConfiguration(null, false),
-                new PublicationImp(), productionTypeComponents, minimalInformationComponent, worldwideIdentificationComponent, contentInformationComponent, associatedRessourcesComponent,referenceInformationComponent,administrationComponents);
+                new PublicationImp(), productionTypeComponents, minimalInformationComponent, worldwideIdentificationComponent, contentInformationComponent, associatedResourcesComponent,referenceInformationComponent,administrationComponents);
     }
 
     public boolean isNewEntity(){
         return true;
     }
 
-    protected PublicationEditorComponentWizard(WizardConfigurationProperties properties, PublicationImp context, VerticalLayout personalInformationComponents, VerticalLayout contactInformationComponents, VerticalLayout researcherIdsComponents, VerticalLayout biographyComponents, VerticalLayout indexesComponents, VerticalLayout socialLinksComponents) {
+    /** Constructor.
+     *
+     * @param properties the properties of the wizard.
+     * @param context the context for editing the entity.
+     * @param productionTypeComponents the components for the production type.
+     * @param minimalInformationComponent the components for the minimal information.
+     * @param worldwideIdentificationComponent the components for the worldwide identification.
+     * @param contentInformationComponent the components for the content information.
+     * @param associatedResourcesComponent the components for the associated resources.
+     * @param referenceInformationComponent the components for the reference information.
+     */
+    protected PublicationEditorComponentWizard(WizardConfigurationProperties properties, PublicationImp context, VerticalLayout productionTypeComponents, VerticalLayout minimalInformationComponent, VerticalLayout worldwideIdentificationComponent, VerticalLayout contentInformationComponent, VerticalLayout associatedResourcesComponent, VerticalLayout referenceInformationComponent) {
         super(properties, context, Arrays.asList(
-                new ProductionTypeComponents(context,personalInformationComponents),
-                new MinimalInformationComponent(context, contactInformationComponents),
-                new WorldwideIdentificationComponent(context, researcherIdsComponents),
-                new ContentInformationComponent(context, biographyComponents),
-                new AssociatedRessourcesComponent(context, indexesComponents),
-                new ReferenceInformationComponent(context, socialLinksComponents
+                new ProductionTypeComponents(context,productionTypeComponents),
+                new MinimalInformationComponent(context, minimalInformationComponent),
+                new WorldwideIdentificationComponent(context, worldwideIdentificationComponent),
+                new ContentInformationComponent(context, contentInformationComponent),
+                new AssociatedResourcesComponent(context, associatedResourcesComponent),
+                new ReferenceInformationComponent(context, referenceInformationComponent
                 )));
     }
 
-    protected PublicationEditorComponentWizard(WizardConfigurationProperties properties, PublicationImp context, VerticalLayout personalInformationComponents, VerticalLayout contactInformationComponents, VerticalLayout researcherIdsComponents, VerticalLayout biographyComponents, VerticalLayout indexesComponents, VerticalLayout socialLinksComponents, VerticalLayout administrationComponents) {
+    /** Constructor.
+     *
+     * @param properties the properties of the wizard.
+     * @param context the context for editing the entity.
+     * @param productionTypeComponents the components for the production type.
+     * @param minimalInformationComponent the components for the minimal information.
+     * @param worldwideIdentificationComponent the components for the worldwide identification.
+     * @param contentInformationComponent the components for the content information.
+     * @param associatedResourcesComponent the components for the associated resources.
+     * @param referenceInformationComponent the components for the reference information.
+     * @param administrationComponents the components for the administration information.
+     */
+    protected PublicationEditorComponentWizard(WizardConfigurationProperties properties, PublicationImp context, VerticalLayout productionTypeComponents, VerticalLayout minimalInformationComponent, VerticalLayout worldwideIdentificationComponent, VerticalLayout contentInformationComponent, VerticalLayout associatedResourcesComponent, VerticalLayout referenceInformationComponent, VerticalLayout administrationComponents) {
         super(properties, context, Arrays.asList(
-                new ProductionTypeComponents(context,personalInformationComponents),
-                new MinimalInformationComponent(context, contactInformationComponents),
-                new WorldwideIdentificationComponent(context, researcherIdsComponents),
-                new ContentInformationComponent(context, biographyComponents),
-                new AssociatedRessourcesComponent(context, indexesComponents),
-                new ReferenceInformationComponent(context, socialLinksComponents),
+                new ProductionTypeComponents(context,productionTypeComponents),
+                new MinimalInformationComponent(context, minimalInformationComponent),
+                new WorldwideIdentificationComponent(context, worldwideIdentificationComponent),
+                new ContentInformationComponent(context, contentInformationComponent),
+                new AssociatedResourcesComponent(context, associatedResourcesComponent),
+                new ReferenceInformationComponent(context, referenceInformationComponent),
                 new PublicationAdministration(context, administrationComponents
                 )));
     }
 
-
+    /** Wizard step to input personal production type details.
+     *
+     * @author $Author: sgalland$
+     * @author $Author: erenon$
+     * @version $Name$ $Revision$ $Date$
+     * @mavengroupid $GroupId$
+     * @mavenartifactid $ArtifactId$
+     * @since 4.1
+     */
     protected static class ProductionTypeComponents extends AbstractFormWizardStep<Publication> {
 
         private VerticalLayout content;
@@ -97,6 +154,15 @@ public class PublicationEditorComponentWizard extends AbstractLabManagerWizard<P
 
     }
 
+    /** Wizard step to input minimal information details.
+     *
+     * @author $Author: sgalland$
+     * @author $Author: erenon$
+     * @version $Name$ $Revision$ $Date$
+     * @mavengroupid $GroupId$
+     * @mavenartifactid $ArtifactId$
+     * @since 4.1
+     */
     protected static class MinimalInformationComponent extends AbstractFormWizardStep<Publication> {
 
         private VerticalLayout content;
@@ -160,6 +226,15 @@ public class PublicationEditorComponentWizard extends AbstractLabManagerWizard<P
 
     }
 
+    /** Wizard step to input worldwide identification details.
+     *
+     * @author $Author: sgalland$
+     * @author $Author: erenon$
+     * @version $Name$ $Revision$ $Date$
+     * @mavengroupid $GroupId$
+     * @mavenartifactid $ArtifactId$
+     * @since 4.1
+     */
     protected static class WorldwideIdentificationComponent extends AbstractFormWizardStep<Publication> {
 
         private VerticalLayout content;
@@ -191,6 +266,16 @@ public class PublicationEditorComponentWizard extends AbstractLabManagerWizard<P
 
 
     }
+
+    /** Wizard step to input content information details.
+     *
+     * @author $Author: sgalland$
+     * @author $Author: erenon$
+     * @version $Name$ $Revision$ $Date$
+     * @mavengroupid $GroupId$
+     * @mavenartifactid $ArtifactId$
+     * @since 4.1
+     */
     protected static class ContentInformationComponent extends AbstractFormWizardStep<Publication> {
 
         private VerticalLayout content;
@@ -232,13 +317,21 @@ public class PublicationEditorComponentWizard extends AbstractLabManagerWizard<P
             form.add(content);
         }
 
-
     }
 
-    protected static class AssociatedRessourcesComponent extends AbstractFormWizardStep<Publication> {
+    /** Wizard step to input associated resource details.
+     *
+     * @author $Author: sgalland$
+     * @author $Author: erenon$
+     * @version $Name$ $Revision$ $Date$
+     * @mavengroupid $GroupId$
+     * @mavenartifactid $ArtifactId$
+     * @since 4.1
+     */
+    protected static class AssociatedResourcesComponent extends AbstractFormWizardStep<Publication> {
 
         private VerticalLayout content;
-        public AssociatedRessourcesComponent(Publication context, VerticalLayout content) {
+        public AssociatedResourcesComponent(Publication context, VerticalLayout content) {
             super(context, content.getTranslation("views.publication.resources_informations "), 5);
             this.content = content;
         }
@@ -267,6 +360,15 @@ public class PublicationEditorComponentWizard extends AbstractLabManagerWizard<P
 
     }
 
+    /** Wizard step to input reference information details.
+     *
+     * @author $Author: sgalland$
+     * @author $Author: erenon$
+     * @version $Name$ $Revision$ $Date$
+     * @mavengroupid $GroupId$
+     * @mavenartifactid $ArtifactId$
+     * @since 4.1
+     */
     protected static class ReferenceInformationComponent extends AbstractFormWizardStep<Publication> {
 
         private VerticalLayout content;
@@ -299,6 +401,15 @@ public class PublicationEditorComponentWizard extends AbstractLabManagerWizard<P
 
     }
 
+    /** Wizard step to input administration details.
+     *
+     * @author $Author: sgalland$
+     * @author $Author: erenon$
+     * @version $Name$ $Revision$ $Date$
+     * @mavengroupid $GroupId$
+     * @mavenartifactid $ArtifactId$
+     * @since 4.1
+     */
     protected static class PublicationAdministration extends AbstractFormWizardStep<Publication> {
 
         private VerticalLayout content;
