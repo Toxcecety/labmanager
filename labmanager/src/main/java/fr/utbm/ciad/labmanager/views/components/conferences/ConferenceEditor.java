@@ -30,6 +30,16 @@ import java.util.function.Consumer;
 import static fr.utbm.ciad.labmanager.views.ViewConstants.CORE_PORTAL_BASE_URL;
 import static fr.utbm.ciad.labmanager.views.ViewConstants.CORE_PORTAL_ICON;
 
+/** Implementation for the editor of the information related to a scientific conference. It is directly linked for
+ * using it with a wizard.
+ *
+ * @author $Author: sgalland$
+ * @author $Author: erenon$
+ * @version $Name$ $Revision$ $Date$
+ * @mavengroupid $GroupId$
+ * @mavenartifactid $ArtifactId$
+ * @since 4.1
+ */
 public class ConferenceEditor extends AbstractEntityEditor<Conference> {
     private static final long serialVersionUID = 6750040717745583722L;
 
@@ -69,6 +79,13 @@ public class ConferenceEditor extends AbstractEntityEditor<Conference> {
                 "views.conferences.administration.validated_conference", //$NON-NLS-1$
                 context, relinkEntityWhenSaving);
     }
+
+    /** Create the content of the editor.
+     * This function should invoke {@link #createAdministrationComponents(VerticalLayout, boolean, Consumer)}.
+     *
+     * @param rootContainer the container.
+     * @see #createAdministrationComponents(VerticalLayout, boolean, Consumer)
+     */
     @Override
     protected void createEditorContent(VerticalLayout rootContainer) {
         if (isBaseAdmin()) {
@@ -88,7 +105,7 @@ public class ConferenceEditor extends AbstractEntityEditor<Conference> {
 
     /** Create the section for editing the description of the conference.
      *
-     * @param rootContainer the container.
+     * @return The content.
      */
     protected VerticalLayout createDescriptionDetails() {
         VerticalLayout verticalLayout = new VerticalLayout();
@@ -155,7 +172,7 @@ public class ConferenceEditor extends AbstractEntityEditor<Conference> {
 
     /** Create the section for editing the ranking information of the conference.
      *
-     * @param rootContainer the container.
+     * @return The content.
      */
     protected VerticalLayout createRankingDetails() {
         VerticalLayout verticalLayout = new VerticalLayout();
@@ -183,7 +200,7 @@ public class ConferenceEditor extends AbstractEntityEditor<Conference> {
 
     /** Create the section for editing the publishing information of the conference.
      *
-     * @param rootContainer the container.
+     * @return The content.
      */
     protected VerticalLayout createPublisherDetails() {
         VerticalLayout verticalLayout = new VerticalLayout();

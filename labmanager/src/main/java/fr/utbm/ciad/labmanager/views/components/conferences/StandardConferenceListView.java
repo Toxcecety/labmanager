@@ -195,7 +195,7 @@ public class StandardConferenceListView extends AbstractEntityListView<Conferenc
 		openConferenceEditor(conference, getTranslation("views.conferences.edit_conference", conference.getName())); //$NON-NLS-1$
 	}
 
-	/** Show the editor of a conference.
+	/** Show the wizard editor of a conference.
 	 *
 	 * @param conference the conference to edit.
 	 * @param title the title of the editor.

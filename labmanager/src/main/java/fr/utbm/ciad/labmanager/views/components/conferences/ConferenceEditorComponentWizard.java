@@ -18,22 +18,53 @@ import io.overcoded.vaadin.wizard.config.WizardConfigurationProperties;
 import java.util.Arrays;
 import java.util.List;
 
+
+/** Wizard for adding a conference.
+ *
+ * @author $Author: sgalland$
+ * @author $Author: erenon$
+ * @version $Name$ $Revision$ $Date$
+ * @mavengroupid $GroupId$
+ * @mavenartifactid $ArtifactId$
+ * @since 4.1
+ */
 public class ConferenceEditorComponentWizard extends AbstractLabManagerWizard<Conference> {
 
+    /** Constructor.
+     *
+     * @param descriptionDetailComponents the description detail components.
+     * @param rankingDetailComponents the ranking detail components.
+     * @param publisherDetailComponents the publisher detail components.
+     */
     public ConferenceEditorComponentWizard(VerticalLayout descriptionDetailComponents, VerticalLayout rankingDetailComponents, VerticalLayout publisherDetailComponents) {
-            this(defaultWizardConfiguration(null, false),
-                    new Conference(), descriptionDetailComponents, rankingDetailComponents, publisherDetailComponents);
-        }
+        this(defaultWizardConfiguration(null, false),
+                new Conference(), descriptionDetailComponents, rankingDetailComponents, publisherDetailComponents);
+    }
 
+    /** Constructor.
+     *
+     * @param descriptionDetailComponents the description detail components.
+     * @param rankingDetailComponents the ranking detail components.
+     * @param publisherDetailComponents the publisher detail components.
+     * @param administrationComponents the administration detail components.
+     */
     public ConferenceEditorComponentWizard(VerticalLayout descriptionDetailComponents, VerticalLayout rankingDetailComponents, VerticalLayout publisherDetailComponents, VerticalLayout administrationComponents) {
-            this(defaultWizardConfiguration(null, false),
-                    new Conference(), descriptionDetailComponents, rankingDetailComponents, publisherDetailComponents, administrationComponents);
-        }
+        this(defaultWizardConfiguration(null, false),
+                new Conference(), descriptionDetailComponents, rankingDetailComponents, publisherDetailComponents, administrationComponents);
+    }
 
     public boolean isNewEntity() {
-            return true;
-        }
+        return true;
+    }
 
+    /** Constructor.
+     *
+     * @param properties the properties of the wizard. This is used for configuring the wizard.
+     * @param context the editing context for the conference.
+     * @param descriptionDetailComponents the description detail components.
+     * @param rankingDetailComponents the ranking detail components
+     * @param publisherDetailComponents the publisher detail components
+     */
     protected ConferenceEditorComponentWizard(WizardConfigurationProperties properties, Conference context, VerticalLayout descriptionDetailComponents, VerticalLayout rankingDetailComponents, VerticalLayout publisherDetailComponents) {
         super(properties, context, Arrays.asList(
                     new DescriptionDetailComponent(context, descriptionDetailComponents),
@@ -42,6 +73,15 @@ public class ConferenceEditorComponentWizard extends AbstractLabManagerWizard<Co
             ));
         }
 
+    /** Constructor.
+     *
+     * @param properties the properties of the wizard. This is used for configuring the wizard.
+     * @param context the editing context for the conference.
+     * @param descriptionDetailComponents the description detail components.
+     * @param rankingDetailComponents the ranking detail components
+     * @param publisherDetailComponents the publisher detail components
+     * @param administrationComponents the administration detail components
+     */
     protected ConferenceEditorComponentWizard(WizardConfigurationProperties properties, Conference context, VerticalLayout descriptionDetailComponents, VerticalLayout rankingDetailComponents, VerticalLayout publisherDetailComponents, VerticalLayout administrationComponents) {
         super(properties, context, Arrays.asList(
                 new DescriptionDetailComponent(context, descriptionDetailComponents),
@@ -49,8 +89,18 @@ public class ConferenceEditorComponentWizard extends AbstractLabManagerWizard<Co
                 new PublisherDetailComponent(context, publisherDetailComponents),
                 new ConferenceAdministration(context, administrationComponents)
             ));
-        }
+    }
 
+
+    /** Wizard step to input description details.
+     *
+     * @author $Author: sgalland$
+     * @author $Author: erenon$
+     * @version $Name$ $Revision$ $Date$
+     * @mavengroupid $GroupId$
+     * @mavenartifactid $ArtifactId$
+     * @since 4.1
+     */
     protected static class DescriptionDetailComponent extends AbstractFormWizardStep<Conference> {
 
         private VerticalLayout content;
@@ -103,6 +153,15 @@ public class ConferenceEditorComponentWizard extends AbstractLabManagerWizard<Co
 
     }
 
+    /** Wizard step to input ranking details.
+     *
+     * @author $Author: sgalland$
+     * @author $Author: erenon$
+     * @version $Name$ $Revision$ $Date$
+     * @mavengroupid $GroupId$
+     * @mavenartifactid $ArtifactId$
+     * @since 4.1
+     */
     protected static class RankingDetailComponent extends AbstractFormWizardStep<Conference> {
 
         private VerticalLayout content;
@@ -134,6 +193,15 @@ public class ConferenceEditorComponentWizard extends AbstractLabManagerWizard<Co
 
     }
 
+    /** Wizard step to input publisher details.
+     *
+     * @author $Author: sgalland$
+     * @author $Author: erenon$
+     * @version $Name$ $Revision$ $Date$
+     * @mavengroupid $GroupId$
+     * @mavenartifactid $ArtifactId$
+     * @since 4.1
+     */
     protected static class PublisherDetailComponent extends AbstractFormWizardStep<Conference> {
 
         private VerticalLayout content;
@@ -165,6 +233,15 @@ public class ConferenceEditorComponentWizard extends AbstractLabManagerWizard<Co
 
     }
 
+    /** Wizard step to input administration details.
+     *
+     * @author $Author: sgalland$
+     * @author $Author: erenon$
+     * @version $Name$ $Revision$ $Date$
+     * @mavengroupid $GroupId$
+     * @mavenartifactid $ArtifactId$
+     * @since 4.1
+     */
     protected static class ConferenceAdministration extends AbstractFormWizardStep<Conference> {
 
         private VerticalLayout content;
