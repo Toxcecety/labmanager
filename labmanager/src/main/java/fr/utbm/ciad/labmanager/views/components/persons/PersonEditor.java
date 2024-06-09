@@ -43,6 +43,16 @@ import java.util.function.Consumer;
 
 import static fr.utbm.ciad.labmanager.views.ViewConstants.*;
 
+/** Implementation for the editor of the information related to a person. It is directly linked for
+ * using it with a wizard.
+ *
+ * @author $Author: sgalland$
+ * @author $Author: erenon$
+ * @version $Name$ $Revision$ $Date$
+ * @mavengroupid $GroupId$
+ * @mavenartifactid $ArtifactId$
+ * @since 4.1
+ */
 public class PersonEditor extends AbstractEntityEditor<Person> {
 
     private TextField lastname;
@@ -134,6 +144,16 @@ public class PersonEditor extends AbstractEntityEditor<Person> {
                 userContext.getPersonContext(), relinkEntityWhenSaving);
         this.userContext = userContext;
 
+    }
+
+    /** Create the content of the editor.
+     * This function should invoke {@link #createAdministrationComponents(VerticalLayout, boolean, Consumer)}.
+     *
+     * @param rootContainer the container.
+     * @see #createAdministrationComponents(VerticalLayout, boolean, Consumer)
+     */
+    @Override
+    protected void createEditorContent(VerticalLayout rootContainer) {
         if (isBaseAdmin()) {
             Consumer<FormLayout> builderCallback = null;
             if (isAdvancedAdmin()) {
@@ -161,15 +181,11 @@ public class PersonEditor extends AbstractEntityEditor<Person> {
                     getUserDataBinder().forField(this.userRole).bind(User::getRole, User::setRole);
                 };
             }
-            personAdditionWizard = new PersonEditorComponentWizard(personService,createPersonalInformationComponents(),createContactInformationComponents(),createResearcherIdsComponents(),createBiographyComponents(),createIndexesComponents(),createSocialLinksComponents(),createAdministrationComponents( builderCallback, it -> it.bind(Person::isValidated, Person::setValidated)));
+            personAdditionWizard = new PersonEditorComponentWizard(createPersonalInformationComponents(),createContactInformationComponents(),createResearcherIdsComponents(),createBiographyComponents(),createIndexesComponents(),createSocialLinksComponents(),createAdministrationComponents( builderCallback, it -> it.bind(Person::isValidated, Person::setValidated)));
 
         }else{
-            personAdditionWizard = new PersonEditorComponentWizard(personService,createPersonalInformationComponents(),createContactInformationComponents(),createResearcherIdsComponents(),createBiographyComponents(),createIndexesComponents(),createSocialLinksComponents());
+            personAdditionWizard = new PersonEditorComponentWizard(createPersonalInformationComponents(),createContactInformationComponents(),createResearcherIdsComponents(),createBiographyComponents(),createIndexesComponents(),createSocialLinksComponents());
         }
-    }
-
-    @Override
-    protected void createEditorContent(VerticalLayout rootContainer) {
         rootContainer.add(personAdditionWizard);
     }
 
@@ -208,6 +224,10 @@ public class PersonEditor extends AbstractEntityEditor<Person> {
                 getEditedEntity().getFullName(), error.getLocalizedMessage());
     }
 
+    /** Create the section for editing the description of the person.
+     *
+     * @return The content.
+     */
     protected VerticalLayout createPersonalInformationComponents() {
         VerticalLayout verticalLayout = new VerticalLayout();
         verticalLayout.setSizeFull();
@@ -269,7 +289,7 @@ public class PersonEditor extends AbstractEntityEditor<Person> {
 
     /** Create the components for entering the contact informations.
      *
-     * @param receiver the receiver of the component
+     * @return The content.
      */
     protected VerticalLayout createContactInformationComponents() {
         VerticalLayout verticalLayout = new VerticalLayout();
@@ -324,7 +344,7 @@ public class PersonEditor extends AbstractEntityEditor<Person> {
      * <li>Identifier for Google Scholar</li>
      * </ul>
      *
-     * @param receiver the receiver of the component
+     * @return The content.
      */
     protected VerticalLayout createResearcherIdsComponents() {
         VerticalLayout verticalLayout = new VerticalLayout();
@@ -374,7 +394,7 @@ public class PersonEditor extends AbstractEntityEditor<Person> {
 
     /** Create the components for entering the researcher biography.
      *
-     * @param receiver the receiver of the component
+     * @return The content.
      */
     protected VerticalLayout createBiographyComponents() {
         VerticalLayout verticalLayout = new VerticalLayout();
@@ -434,10 +454,8 @@ public class PersonEditor extends AbstractEntityEditor<Person> {
      * <li>Number of paper citations on Google Scholar</li>
      * </ul>
      *
-     * @param receiver the receiver of the component
-     * @return the details for the indexes.
+     * @return The content.
      */
-
     protected VerticalLayout createIndexesComponents() {
         VerticalLayout verticalLayout = new VerticalLayout();
         verticalLayout.setSizeFull();
@@ -518,7 +536,7 @@ public class PersonEditor extends AbstractEntityEditor<Person> {
      * <li>Facebook Identifier</li>
      * </ul>
      *
-     * @param receiver the receiver of the component
+     * @return The content.
      */
     protected VerticalLayout createSocialLinksComponents() {
         VerticalLayout verticalLayout = new VerticalLayout();

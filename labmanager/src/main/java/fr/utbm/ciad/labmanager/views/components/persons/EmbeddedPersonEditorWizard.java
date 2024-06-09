@@ -29,13 +29,13 @@ import org.springframework.context.support.MessageSourceAccessor;
 
 /** Editor of person information that may be embedded. This editor does not provide
  * the components for saving the information. It is the role of the component that
- * is embedding this editor to save the edited person.
+ * is embedding this editor to save the edited person. This editor is used in a wizard
  * 
  * @author $Author: sgalland$
  * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
- * @since 4.0
+ * @since 4.1
  */
 public final class EmbeddedPersonEditorWizard extends PersonEditor {
 
