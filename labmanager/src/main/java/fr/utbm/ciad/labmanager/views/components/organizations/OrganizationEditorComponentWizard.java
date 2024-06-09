@@ -16,13 +16,39 @@ import io.overcoded.vaadin.wizard.config.WizardConfigurationProperties;
 import java.util.Arrays;
 import java.util.List;
 
+/** Wizard for adding an organization.
+ *
+ * @author $Author: sgalland$
+ * @author $Author: erenon$
+ * @version $Name$ $Revision$ $Date$
+ * @mavengroupid $GroupId$
+ * @mavenartifactid $ArtifactId$
+ * @since 4.1
+ */
 public class OrganizationEditorComponentWizard extends AbstractLabManagerWizard<ResearchOrganization> {
 
+    /** Constructor.
+     *
+     * @param descriptionDetailComponents the description detail components.
+     * @param geographicalDetailComponents the geographical detail components.
+     * @param identificationDetailComponents the identification detail components.
+     * @param superStructureDetailComponents the super structure detail components.
+     * @param communicationDetailComponents the communication detail components.
+     */
     public OrganizationEditorComponentWizard(VerticalLayout descriptionDetailComponents, VerticalLayout geographicalDetailComponents, VerticalLayout identificationDetailComponents,VerticalLayout superStructureDetailComponents,VerticalLayout communicationDetailComponents) {
         this(defaultWizardConfiguration(null, false),
                 new ResearchOrganization(), descriptionDetailComponents, geographicalDetailComponents, identificationDetailComponents,superStructureDetailComponents,communicationDetailComponents);
     }
 
+    /** Constructor.
+     *
+     * @param descriptionDetailComponents the description detail components.
+     * @param geographicalDetailComponents the geographical detail components.
+     * @param identificationDetailComponents the identification detail components.
+     * @param superStructureDetailComponents the super structure detail components.
+     * @param communicationDetailComponents the communication detail components.
+     * @param administrationComponents the administration detail components.
+     */
     public OrganizationEditorComponentWizard(VerticalLayout descriptionDetailComponents, VerticalLayout geographicalDetailComponents, VerticalLayout identificationDetailComponents,VerticalLayout superStructureDetailComponents,VerticalLayout communicationDetailComponents, VerticalLayout administrationComponents) {
         this(defaultWizardConfiguration(null, false),
                 new ResearchOrganization(), descriptionDetailComponents, geographicalDetailComponents, identificationDetailComponents,superStructureDetailComponents,communicationDetailComponents, administrationComponents);
@@ -32,6 +58,16 @@ public class OrganizationEditorComponentWizard extends AbstractLabManagerWizard<
         return true;
     }
 
+    /** Constructor.
+     *
+     * @param properties the properties.
+     * @param context the context.
+     * @param descriptionDetailComponents the description detail components.
+     * @param geographicalDetailComponents the geographical detail components.
+     * @param identificationDetailComponents the identification detail components.
+     * @param superStructureDetailComponents the super structure detail components.
+     * @param communicationDetailComponents the communication detail components.
+     */
     protected OrganizationEditorComponentWizard(WizardConfigurationProperties properties, ResearchOrganization context, VerticalLayout descriptionDetailComponents, VerticalLayout geographicalDetailComponents, VerticalLayout identificationDetailComponents,VerticalLayout superStructureDetailComponents,VerticalLayout communicationDetailComponents) {
         super(properties, context, Arrays.asList(
                 new DescriptionDetailComponent(context, descriptionDetailComponents),
@@ -42,6 +78,17 @@ public class OrganizationEditorComponentWizard extends AbstractLabManagerWizard<
         ));
     }
 
+    /** Constructor.
+     *
+     * @param properties the properties.
+     * @param context the context.
+     * @param descriptionDetailComponents the description detail components.
+     * @param geographicalDetailComponents the geographical detail components.
+     * @param identificationDetailComponents the identification detail components.
+     * @param superStructureDetailComponents the super structure detail components.
+     * @param communicationDetailComponents the communication detail components.
+     * @param administrationComponents the administration detail components.
+     */
     protected OrganizationEditorComponentWizard(WizardConfigurationProperties properties, ResearchOrganization context, VerticalLayout descriptionDetailComponents, VerticalLayout geographicalDetailComponents, VerticalLayout identificationDetailComponents,VerticalLayout superStructureDetailComponents,VerticalLayout communicationDetailComponents, VerticalLayout administrationComponents) {
         super(properties, context, Arrays.asList(
                 new DescriptionDetailComponent(context, descriptionDetailComponents),
@@ -53,7 +100,15 @@ public class OrganizationEditorComponentWizard extends AbstractLabManagerWizard<
         ));
     }
 
-
+    /** Wizard step to input description details.
+     *
+     * @author $Author: sgalland$
+     * @author $Author: erenon$
+     * @version $Name$ $Revision$ $Date$
+     * @mavengroupid $GroupId$
+     * @mavenartifactid $ArtifactId$
+     * @since 4.1
+     */
     protected static class DescriptionDetailComponent extends AbstractFormWizardStep<ResearchOrganization> {
 
         private VerticalLayout content;
@@ -106,6 +161,15 @@ public class OrganizationEditorComponentWizard extends AbstractLabManagerWizard<
 
     }
 
+    /** Wizard step to input geographical details.
+     *
+     * @author $Author: sgalland$
+     * @author $Author: erenon$
+     * @version $Name$ $Revision$ $Date$
+     * @mavengroupid $GroupId$
+     * @mavenartifactid $ArtifactId$
+     * @since 4.1
+     */
     protected static class GeographicalDetailComponent extends AbstractFormWizardStep<ResearchOrganization> {
 
         private VerticalLayout content;
@@ -138,6 +202,15 @@ public class OrganizationEditorComponentWizard extends AbstractLabManagerWizard<
 
     }
 
+    /** Wizard step to input identification details.
+     *
+     * @author $Author: sgalland$
+     * @author $Author: erenon$
+     * @version $Name$ $Revision$ $Date$
+     * @mavengroupid $GroupId$
+     * @mavenartifactid $ArtifactId$
+     * @since 4.1
+     */
     protected static class IdentificationDetailComponent extends AbstractFormWizardStep<ResearchOrganization> {
 
         private VerticalLayout content;
@@ -170,6 +243,15 @@ public class OrganizationEditorComponentWizard extends AbstractLabManagerWizard<
 
     }
 
+    /** Wizard step to input super-structure details.
+     *
+     * @author $Author: sgalland$
+     * @author $Author: erenon$
+     * @version $Name$ $Revision$ $Date$
+     * @mavengroupid $GroupId$
+     * @mavenartifactid $ArtifactId$
+     * @since 4.1
+     */
     protected static class SuperStructureDetailComponent extends AbstractFormWizardStep<ResearchOrganization> {
 
         private VerticalLayout content;
@@ -202,6 +284,15 @@ public class OrganizationEditorComponentWizard extends AbstractLabManagerWizard<
 
     }
 
+    /** Wizard step to input communication details.
+     *
+     * @author $Author: sgalland$
+     * @author $Author: erenon$
+     * @version $Name$ $Revision$ $Date$
+     * @mavengroupid $GroupId$
+     * @mavenartifactid $ArtifactId$
+     * @since 4.1
+     */
     protected static class CommunicationDetailComponent extends AbstractFormWizardStep<ResearchOrganization> {
 
         private VerticalLayout content;
@@ -234,6 +325,15 @@ public class OrganizationEditorComponentWizard extends AbstractLabManagerWizard<
 
     }
 
+    /** Wizard step to input administration details.
+     *
+     * @author $Author: sgalland$
+     * @author $Author: erenon$
+     * @version $Name$ $Revision$ $Date$
+     * @mavengroupid $GroupId$
+     * @mavenartifactid $ArtifactId$
+     * @since 4.1
+     */
     protected static class OrganizationAdministration extends AbstractFormWizardStep<ResearchOrganization> {
 
         private VerticalLayout content;

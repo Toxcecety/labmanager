@@ -232,7 +232,7 @@ public class StandardOrganizationListView extends AbstractEntityListView<Researc
 		openOrganizationEditor(organisation, getTranslation("views.organizations.edit_organization", organisation.getAcronymOrName())); //$NON-NLS-1$
 	}
 
-	/** Show the editor of an address.
+	/** Show the wizard editor of an address.
 	 *
 	 * @param address the address to edit.
 	 * @param title the title of the editor.

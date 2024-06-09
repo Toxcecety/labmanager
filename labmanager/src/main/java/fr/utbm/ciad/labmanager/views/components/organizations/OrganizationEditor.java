@@ -46,6 +46,16 @@ import java.util.function.Consumer;
 import static fr.utbm.ciad.labmanager.views.ViewConstants.DBLP_BASE_URL;
 import static fr.utbm.ciad.labmanager.views.ViewConstants.DBLP_ICON;
 
+/** Implementation for the editor of the information related to an organization. It is directly linked for
+ * using it with a wizard.
+ *
+ * @author $Author: sgalland$
+ * @author $Author: erenon$
+ * @version $Name$ $Revision$ $Date$
+ * @mavengroupid $GroupId$
+ * @mavenartifactid $ArtifactId$
+ * @since 4.1
+ */
 public class OrganizationEditor extends AbstractEntityEditor<ResearchOrganization> {
 
     private static final long serialVersionUID = -4405231976086480507L;
@@ -85,17 +95,15 @@ public class OrganizationEditor extends AbstractEntityEditor<ResearchOrganizatio
     /**
      * Constructor.
      *
-     * @param entityType                         the type of the edited entity.
+     * @param context                            the context for editing the entity.
+     * @param fileManager                        the manager of files at the server-side.
      * @param authenticatedUser                  the connected user.
      * @param messages                           the accessor to the localized messages (Spring layer).
      * @param logger                             the logger to be used by this view.
-     * @param administationSectionTranslationKey the key in the translation file that corresponds to
-     *                                           the label of the administration section.
-     * @param validationTranslationKey           the key in the translation file that corresponds to the
-     *                                           label of the validation checkbox.
-     * @param editingContext                     the context that is used for representing the edited entity and all the associated files and entities.
      * @param relinkEntityWhenSaving             indicates if the editor must be relink to the edited entity when it is saved. This new link may
      *                                           be required if the editor is not closed after saving in order to obtain a correct editing of the entity.
+     * @param organizationService                the service for accessing the organizations.
+     * @param addressService                     the service for accessing the organization addresses.
      */
     public OrganizationEditor(AbstractEntityService.EntityEditingContext<ResearchOrganization> context, boolean relinkEntityWhenSaving,
                                       DownloadableFileManager fileManager, AuthenticatedUser authenticatedUser,
@@ -111,6 +119,12 @@ public class OrganizationEditor extends AbstractEntityEditor<ResearchOrganizatio
 
     }
 
+    /** Create the content of the editor.
+     * This function should invoke {@link #createAdministrationComponents(VerticalLayout, boolean, Consumer)}.
+     *
+     * @param rootContainer the container.
+     * @see #createAdministrationComponents(VerticalLayout, boolean, Consumer)
+     */
     @Override
     protected void createEditorContent(VerticalLayout rootContainer) {
         if (isBaseAdmin()) {
@@ -136,7 +150,7 @@ public class OrganizationEditor extends AbstractEntityEditor<ResearchOrganizatio
 
     /** Create the section for editing the description of the organization.
      *
-     * @param rootContainer the container.
+     * @return The content.
      */
     protected VerticalLayout createDescriptionDetails() {
         VerticalLayout verticalLayout = new VerticalLayout();
@@ -178,7 +192,7 @@ public class OrganizationEditor extends AbstractEntityEditor<ResearchOrganizatio
 
     /** Create the section for editing the geograpihcal information of the organization.
      *
-     * @param rootContainer the container.
+     * @return The content.
      */
     protected VerticalLayout createGeographicalDetails() {
         VerticalLayout verticalLayout = new VerticalLayout();
@@ -220,7 +234,7 @@ public class OrganizationEditor extends AbstractEntityEditor<ResearchOrganizatio
 
     /** Create the section for editing the identification of the organization.
      *
-     * @param rootContainer the container.
+     * @return The content.
      */
     protected VerticalLayout createIdentificationDetails() {
         VerticalLayout verticalLayout = new VerticalLayout();
@@ -250,7 +264,7 @@ public class OrganizationEditor extends AbstractEntityEditor<ResearchOrganizatio
 
     /** Create the section for editing the super structure of the organization.
      *
-     * @param rootContainer the container.
+     * @return The content.
      */
     protected VerticalLayout createSuperStructureDetails() {
         VerticalLayout verticalLayout = new VerticalLayout();
@@ -318,7 +332,7 @@ public class OrganizationEditor extends AbstractEntityEditor<ResearchOrganizatio
 
     /** Create the section for editing the communication of the organization.
      *
-     * @param rootContainer the container.
+     * @return The content.
      */
     protected VerticalLayout createCommunicationDetails() {
         VerticalLayout verticalLayout = new VerticalLayout();
