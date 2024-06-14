@@ -37,7 +37,9 @@ import fr.utbm.ciad.labmanager.components.security.AuthenticatedUser;
 import fr.utbm.ciad.labmanager.data.journal.Journal;
 import fr.utbm.ciad.labmanager.data.member.Person;
 import fr.utbm.ciad.labmanager.services.AbstractEntityService.EntityEditingContext;
+import fr.utbm.ciad.labmanager.services.journal.JournalService;
 import fr.utbm.ciad.labmanager.views.components.addons.ComponentFactory;
+import fr.utbm.ciad.labmanager.views.components.addons.SimilarityError;
 import fr.utbm.ciad.labmanager.views.components.addons.converters.StringTrimer;
 import fr.utbm.ciad.labmanager.views.components.addons.details.DetailsWithErrorMark;
 import fr.utbm.ciad.labmanager.views.components.addons.details.DetailsWithErrorMarkStatusHandler;
@@ -49,6 +51,8 @@ import fr.utbm.ciad.labmanager.views.components.addons.validators.NotEmptyString
 import fr.utbm.ciad.labmanager.views.components.addons.validators.UrlValidator;
 import org.slf4j.Logger;
 import org.springframework.context.support.MessageSourceAccessor;
+
+import java.util.List;
 
 /** Abstract implementation for the editor of the information related to a scientific journal.
  * 
@@ -93,6 +97,8 @@ public abstract class AbstractJournalEditor extends AbstractEntityEditor<Journal
 
 	private JournalAnnualRankingField rankings;
 
+	private JournalService journalService;
+
 	/** Constructor.
 	 *
 	 * @param context the editing context for the conference.
@@ -102,12 +108,29 @@ public abstract class AbstractJournalEditor extends AbstractEntityEditor<Journal
 	 * @param messages the accessor to the localized messages (Spring layer).
 	 * @param logger the logger to be used by this view.
 	 */
-	public AbstractJournalEditor(EntityEditingContext<Journal> context, boolean relinkEntityWhenSaving,
+	public AbstractJournalEditor(EntityEditingContext<Journal> context, boolean relinkEntityWhenSaving, JournalService journalService,
 			AuthenticatedUser authenticatedUser, MessageSourceAccessor messages, Logger logger) {
 		super(Journal.class, authenticatedUser, messages, logger,
 				"views.journals.administration_details", //$NON-NLS-1$
 				"views.journals.administration.validated_organization", //$NON-NLS-1$
 				context, relinkEntityWhenSaving);
+		this.journalService = journalService;
+	}
+
+	@Override
+	public SimilarityError isAlreadyInDatabase() {
+		var entity = getEditedEntity();
+		if (entity != null) {
+			long id = this.journalService.getJournalIdBySimilarNameAndSimilarPublisher(entity.getJournalName(), entity.getPublisher());
+			if (id == 0) {
+				return SimilarityError.NO_ERROR;
+			} else if (id == entity.getId()) {
+				return SimilarityError.NO_ERROR;
+			} else {
+				return SimilarityError.SAME_TITLE_AND_PUBLISHER;
+			}
+		}
+		return SimilarityError.NO_ERROR;
 	}
 
 	@Override

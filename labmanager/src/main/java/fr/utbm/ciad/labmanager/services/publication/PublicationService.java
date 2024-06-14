@@ -48,14 +48,7 @@ import fr.utbm.ciad.labmanager.data.journal.Journal;
 import fr.utbm.ciad.labmanager.data.journal.JournalRepository;
 import fr.utbm.ciad.labmanager.data.member.Person;
 import fr.utbm.ciad.labmanager.data.member.PersonRepository;
-import fr.utbm.ciad.labmanager.data.publication.Authorship;
-import fr.utbm.ciad.labmanager.data.publication.AuthorshipRepository;
-import fr.utbm.ciad.labmanager.data.publication.ConferenceBasedPublication;
-import fr.utbm.ciad.labmanager.data.publication.JournalBasedPublication;
-import fr.utbm.ciad.labmanager.data.publication.Publication;
-import fr.utbm.ciad.labmanager.data.publication.PublicationLanguage;
-import fr.utbm.ciad.labmanager.data.publication.PublicationRepository;
-import fr.utbm.ciad.labmanager.data.publication.PublicationType;
+import fr.utbm.ciad.labmanager.data.publication.*;
 import fr.utbm.ciad.labmanager.data.publication.type.Book;
 import fr.utbm.ciad.labmanager.data.publication.type.BookChapter;
 import fr.utbm.ciad.labmanager.data.publication.type.ConferencePaper;
@@ -90,6 +83,7 @@ import fr.utbm.ciad.labmanager.utils.io.json.JsonExporter;
 import fr.utbm.ciad.labmanager.utils.io.od.OpenDocumentTextPublicationExporter;
 import fr.utbm.ciad.labmanager.utils.io.ris.RIS;
 import fr.utbm.ciad.labmanager.utils.names.PersonNameParser;
+import fr.utbm.ciad.labmanager.utils.names.PublicationNameComparator;
 import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.arakhne.afc.progress.DefaultProgression;
@@ -104,6 +98,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -170,6 +165,8 @@ public class PublicationService extends AbstractPublicationService {
 
 	private ThesisService thesisService;
 
+	private PublicationNameComparator titleComparator;
+
 	/** Constructor for injector.
 	 * This constructor is defined for being invoked by the IOC injector.
 	 *
@@ -211,6 +208,7 @@ public class PublicationService extends AbstractPublicationService {
 			@Autowired JournalRepository journalRepository,
 			@Autowired ConferenceRepository conferenceRepository,
 			@Autowired PersonNameParser nameParser,
+			@Autowired PublicationNameComparator titleComparator,
 			@Autowired BibTeX bibtex,
 			@Autowired RIS ris,
 			@Autowired HtmlDocumentExporter html,
@@ -240,6 +238,7 @@ public class PublicationService extends AbstractPublicationService {
 		this.journalRepository = journalRepository;
 		this.conferenceRepository = conferenceRepository;
 		this.nameParser = nameParser;
+		this.titleComparator = titleComparator;
 		this.bibtex = bibtex;
 		this.ris = ris;
 		this.html = html;
@@ -473,6 +472,61 @@ public class PublicationService extends AbstractPublicationService {
 		return this.publicationRepository.findAllByTitleIgnoreCase(title);
 	}
 
+	/** Replies the database identifier for the publication with a similar title to the given title.
+	 * If there is multiple publications with similar titles, the first one is replied.
+	 * <p>The title matching is based on similarity of titles.
+	 * For using a strict equality test on names, see {@link #getPublicationsByTitle(String)}.
+	 *
+	 * @param title the title of the publication.
+	 * @return the identifier of the publication, or {@code 0} if not found.
+	 */
+	public long getPublicationIdBySimilarTitle(String title) {
+		final var publication = getPublicationBySimilarTitle(title);
+		if (publication != null) {
+			return publication.getId();
+		}
+		return 0;
+	}
+
+	/** Replies the publication with a similar title to the given title.
+	 * If there is multiple publications with similar titles, the first one is replied.
+	 * <p>The title matching is based on similarity of titles.
+	 * For using a strict equality test on names, see {@link #getPublicationsByTitle(String)}.
+	 *
+	 * @param title the title of the publication.
+	 * @return the publication, or {@code null} if not found.
+	 */
+	public Publication getPublicationBySimilarTitle(String title) {
+		if (!Strings.isNullOrEmpty(title)) {
+			for (final var publication : this.publicationRepository.findAll()) {
+				if (this.titleComparator.isSimilar(title, publication.getTitle())) {
+					return publication;
+				}
+			}
+		}
+		return null;
+	}
+
+	public List<Long> getPublicationsIdBySimilarTitle(String title) {
+		var publications = getPublicationsBySimilarTitle(title);
+		if (publications.isEmpty()) {
+			return null;
+		}
+		return publications.stream().map(Publication::getId).collect(Collectors.toList());
+	}
+
+	public List<Publication> getPublicationsBySimilarTitle(String title) {
+		List<Publication> publications = new ArrayList<>();
+		if (!Strings.isNullOrEmpty(title)) {
+			for (final var publication : this.publicationRepository.findAll()) {
+				if (this.titleComparator.isSimilar(title, publication.getTitle())) {
+					publications.add(publication);
+				}
+			}
+		}
+		return publications;
+	}
+
 	/** Replies the publications for the given year.
 	 *
 	 * @param year the year of publication.
@@ -501,20 +555,62 @@ public class PublicationService extends AbstractPublicationService {
 		return this.authorshipRepository.findByPublicationId(publicationId);
 	}
 
-	/** Link a person and a publication.
-	 * The person is added at the given position in the list of the authors.
-	 * If this list contains authors with a rank greater than or equals to the given rank,
-	 * the ranks of these authors is incremented.
+	/** Replies the years.
 	 *
-	 * @param personId the identifier of the person.
-	 * @param publicationId the identifier of the publication.
-	 * @param rank the position of the person in the list of authors. To be sure to add the authorship at the end,
-	 *     pass {@link Integer#MAX_VALUE}.
-	 * @param updateOtherAuthorshipRanks indicates if the authorships ranks are re-arranged in order to be consistent.
-	 *     If it is {@code false}, the given rank as argument is put into the authorship without change.
-	 * @return the added authorship
-	 */
-	public Authorship addAuthorship(long personId, long publicationId, int rank, boolean updateOtherAuthorshipRanks) {
+	 * @return the years.
+	 * */
+	public List<Integer> getAllYears(){
+		return this.publicationRepository.findDistinctPublicationYears();
+	}
+
+	/** Replies the publication types.
+	 *
+	 * @return the years.
+	 * */
+	public List<PublicationType> getAllType(){
+		return this.publicationRepository.findAllDistinctPublicationTypes();
+	}
+
+	/** Replies the publication types.
+	 *
+	 * @return the count of the type.
+	 * */
+	public Integer getCountPublicationByTypeByYear(PublicationType type, Integer year){
+		return this.publicationRepository.countPublicationsForTypeAndYear(type,year);
+	}
+
+	/** Replies the publication categories.
+	 *
+	 * @return the list of publication categories.
+	 * */
+	public List<String> getAllCategories(){
+		List<PublicationType> publicationTypes = getAllType();
+		List<String> publicationCategories = new ArrayList<>();
+		for(PublicationType publicationType : publicationTypes){
+			if(!publicationCategories.contains(publicationType.getCategory(true).toString())){
+				publicationCategories.add(publicationType.getCategory(true).toString());
+			}
+		}
+		return publicationCategories;
+	}
+
+    /**
+     * Link a person and a publication.
+     * The person is added at the given position in the list of the authors.
+     * If this list contains authors with a rank greater than or equals to the given rank,
+     * the ranks of these authors is incremented.
+     *
+     * @param personId                   the identifier of the person.
+     * @param publicationId              the identifier of the publication.
+     * @param rank                       the position of the person in the list of authors. To be sure to add the authorship at the end,
+     *                                   pass {@link Integer#MAX_VALUE}.
+     * @param updateOtherAuthorshipRanks indicates if the authorships ranks are re-arranged in order to be consistent.
+     *                                   If it is {@code false}, the given rank as argument is put into the authorship without change.
+     * @return the added authorship
+     */
+
+
+    public Authorship addAuthorship(long personId, long publicationId, int rank, boolean updateOtherAuthorshipRanks) {
 		final var optPerson = this.personRepository.findById(Long.valueOf(personId));
 		if (optPerson.isPresent()) {
 			final var optPub = this.publicationRepository.findById(Long.valueOf(publicationId));

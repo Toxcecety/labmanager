@@ -62,8 +62,8 @@ public class PersonsListView extends StandardPersonListView implements HasDynami
 	private final PersonService personService;
 
 	private MenuItem updateRankingsButton;
-
 	private MenuItem editNew;
+	private MenuItem switchView;
 
 
 	/** Constructor.
@@ -103,11 +103,9 @@ public class PersonsListView extends StandardPersonListView implements HasDynami
 			menu = new MenuBar(); 
 			menu.addThemeVariants(MenuBarVariant.LUMO_ICON);
 		}
-		
 		this.updateRankingsButton = ComponentFactory.addIconItem(menu, LineAwesomeIcon.SYNC_ALT_SOLID, null, null, it -> openRankingsUpdateWizard());
-
 		this.editNew = ComponentFactory.addIconItem(menu, LineAwesomeIcon.SYNC_ALT_SOLID, null, null, it -> openEditWizard());
-
+		this.switchView = ComponentFactory.addIconItem(menu, LineAwesomeIcon.TH_LIST_SOLID, "Switch view", null, it -> getUI().ifPresent(ui -> ui.navigate(PersonsCardView.class)));
 		return menu;
 	}
 

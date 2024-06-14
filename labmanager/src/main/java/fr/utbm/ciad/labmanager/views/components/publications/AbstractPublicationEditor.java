@@ -28,6 +28,7 @@ import static fr.utbm.ciad.labmanager.views.ViewConstants.HAL_ICON;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 
 import com.vaadin.componentfactory.ToggleButton;
@@ -49,13 +50,8 @@ import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import fr.utbm.ciad.labmanager.components.security.AuthenticatedUser;
-import fr.utbm.ciad.labmanager.data.publication.AbstractConferenceBasedPublication;
-import fr.utbm.ciad.labmanager.data.publication.AbstractJournalBasedPublication;
-import fr.utbm.ciad.labmanager.data.publication.ConferenceBasedPublication;
-import fr.utbm.ciad.labmanager.data.publication.JournalBasedPublication;
-import fr.utbm.ciad.labmanager.data.publication.Publication;
-import fr.utbm.ciad.labmanager.data.publication.PublicationLanguage;
-import fr.utbm.ciad.labmanager.data.publication.PublicationType;
+import fr.utbm.ciad.labmanager.data.member.Person;
+import fr.utbm.ciad.labmanager.data.publication.*;
 import fr.utbm.ciad.labmanager.data.publication.type.Book;
 import fr.utbm.ciad.labmanager.data.publication.type.BookChapter;
 import fr.utbm.ciad.labmanager.data.publication.type.ConferencePaper;
@@ -77,6 +73,7 @@ import fr.utbm.ciad.labmanager.services.scientificaxis.ScientificAxisService;
 import fr.utbm.ciad.labmanager.services.user.UserService;
 import fr.utbm.ciad.labmanager.utils.io.filemanager.DownloadableFileManager;
 import fr.utbm.ciad.labmanager.views.components.addons.ComponentFactory;
+import fr.utbm.ciad.labmanager.views.components.addons.SimilarityError;
 import fr.utbm.ciad.labmanager.views.components.addons.converters.StringToDoiConverter;
 import fr.utbm.ciad.labmanager.views.components.addons.converters.StringToKeywordsConverter;
 import fr.utbm.ciad.labmanager.views.components.addons.converters.StringTrimer;
@@ -259,6 +256,36 @@ public abstract class AbstractPublicationEditor extends AbstractEntityEditor<Pub
 
 		// Must be the latest initialization for ensuring that all the class's fields are initialized before creating the dynamic field builder
 		this.fieldBuilder = createDynamicFieldBuilder();
+	}
+
+	@Override
+	public SimilarityError isAlreadyInDatabase() {
+		var entity = getEditedEntity();
+		SimilarityError returned = SimilarityError.NO_ERROR;
+		if (entity != null) {
+			List<Publication> publications = this.publicationService.getPublicationsBySimilarTitle(entity.getTitle());
+			if (!publications.isEmpty()) {
+				returned = SimilarityError.SAME_TITLE_BUT_DIFFERENT_AUTHORS;
+				final List<Person> EditedEntityAuthors = entity.getAuthors();
+				for (Publication publication : publications) {
+					List<Person> finalAuthors = publication.getAuthors();
+					if (EditedEntityAuthors.size() == finalAuthors.size()) {
+						for (int i = 0; i < EditedEntityAuthors.size(); i++) {
+							if (!EditedEntityAuthors.get(i).equals(finalAuthors.get(i))) {
+								returned = SimilarityError.SAME_TITLE_BUT_DIFFERENT_AUTHORS;
+								break;
+							} else {
+								returned = SimilarityError.SAME_TITLE_AND_AUTHORS;
+							}
+						}
+						if (returned.isSimilarityError()) {
+							return returned;
+						}
+					}
+				}
+			}
+		}
+		return returned;
 	}
 
 	/** Create the instance of the dynamic field builder.
@@ -804,8 +831,6 @@ public abstract class AbstractPublicationEditor extends AbstractEntityEditor<Pub
 		}
 
 		/** Change the localized text according to the given locale
-		 *
-		 * @param locale the locale to use.
 		 */
 		public void localeChange() {
 			if (this.journal != null) {

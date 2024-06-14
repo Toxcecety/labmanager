@@ -95,7 +95,7 @@ public class PersonService extends AbstractEntityService<Person> {
 
 	private WebOfSciencePlatform wosPlatform;
 
-	private PersonNameComparator nameComparator;
+	private PersonNameComparator personNameComparator;
 
 	/** Constructor for injector.
 	 * This constructor is defined for being invoked by the IOC injector.
@@ -107,7 +107,7 @@ public class PersonService extends AbstractEntityService<Person> {
 	 * @param scopusPlatfom the tool for accessing the remote Scopus platform.
 	 * @param wosPlatfom the tool for accessing the remote WoS platform.
 	 * @param nameParser the parser of person names.
-	 * @param nameComparator the comparator of person names.
+	 * @param personNameComparator the comparator of person names.
 	 * @param structureService the service for accessing the associated structures.
 	 * @param invitationService the service for accessing the person invitations.
 	 * @param juryMembershipService the service for accessing the jury memberships.
@@ -127,7 +127,7 @@ public class PersonService extends AbstractEntityService<Person> {
 			@Autowired ScopusPlatform scopusPlatfom,
 			@Autowired WebOfSciencePlatform wosPlatfom,
 			@Autowired PersonNameParser nameParser,
-			@Autowired PersonNameComparator nameComparator,
+			@Autowired PersonNameComparator personNameComparator,
 			@Autowired MessageSourceAccessor messages,
 			@Autowired Constants constants,
 			@Autowired SessionFactory sessionFactory) {
@@ -139,7 +139,11 @@ public class PersonService extends AbstractEntityService<Person> {
 		this.scopusPlatform = scopusPlatfom;
 		this.wosPlatform = wosPlatfom;
 		this.nameParser = nameParser;
-		this.nameComparator = nameComparator;
+		this.personNameComparator = personNameComparator;
+	}
+
+	public Long countAllPersons() {
+		return this.personRepository.count();
 	}
 
 	/** Replies the name parser that is used by this service.
@@ -227,6 +231,48 @@ public class PersonService extends AbstractEntityService<Person> {
 			page.forEach(initializer);
 		}
 		return page;
+	}
+
+	public Page<Person> getPersonsByName(String name, Pageable pageable) {
+		return this.personRepository.findByName(name, pageable);
+	}
+	public Page<Person> getPersonsByName(String name, String organization, Pageable pageable) {
+		return this.personRepository.findByName(name, organization, pageable);
+	}
+
+	public long countPersonsByName(String name) {
+		return this.personRepository.countFindByName(name);
+	}
+	public long countPersonsByName(String name, String organization) {
+		return this.personRepository.countFindByName(name, organization);
+	}
+
+	public Page<Person> getPersonsByOrcid(String orcid, Pageable pageable) {
+		return this.personRepository.findByOrcid(orcid, pageable);
+	}
+	public Page<Person> getPersonsByOrcid(String orcid, String organization, Pageable pageable) {
+		return this.personRepository.findByOrcid(orcid, organization, pageable);
+	}
+
+	public long countPersonsByOrcid(String orcid) {
+		return this.personRepository.countFindByOrcid(orcid);
+	}
+	public long countPersonsByOrcid(String orcid, String organization) {
+		return this.personRepository.countFindByOrcid(orcid, organization);
+	}
+
+	public Page<Person> getPersonsByOrganization(String organization, Pageable pageable) {
+		return this.personRepository.findByOrganization(organization, pageable);
+	}
+	public Page<Person> getPersonsByOrganization(String organization, String org,  Pageable pageable) {
+		return this.personRepository.findByOrganization(organization, org, pageable);
+	}
+
+	public long countPersonsByOrganization(String organization) {
+		return this.personRepository.countFindByOrganization(organization);
+	}
+	public long countPersonsByOrganization(String organization, String org) {
+		return this.personRepository.countFindByOrganization(organization, org);
 	}
 
 	/** Replies the person with the given identifier.
@@ -667,7 +713,7 @@ public class PersonService extends AbstractEntityService<Person> {
 	 */
 	public long getPersonIdByName(String firstName, String lastName) {
 		final var res = this.personRepository.findByFirstNameAndLastName(firstName, lastName);
-		if (res.size() > 0) {
+		if (!res.isEmpty()) {
 			return res.iterator().next().getId();
 		}
 		return 0;
@@ -704,7 +750,7 @@ public class PersonService extends AbstractEntityService<Person> {
 	public Person getPersonBySimilarName(String firstName, String lastName) {
 		if (!Strings.isNullOrEmpty(firstName) || !Strings.isNullOrEmpty(lastName)) {
 			for (final var person : this.personRepository.findAll()) {
-				if (this.nameComparator.isSimilar(firstName, lastName, person.getFirstName(), person.getLastName())) {
+				if (this.personNameComparator.isSimilar(firstName, lastName, person.getFirstName(), person.getLastName())) {
 					return person;
 				}
 			}

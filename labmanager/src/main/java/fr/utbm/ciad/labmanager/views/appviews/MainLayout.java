@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
@@ -55,6 +56,7 @@ import fr.utbm.ciad.labmanager.utils.country.CountryCode;
 import fr.utbm.ciad.labmanager.views.ViewConstants;
 import fr.utbm.ciad.labmanager.views.appviews.about.AboutView;
 import fr.utbm.ciad.labmanager.views.appviews.assocstructures.AssociatedStructuresListView;
+import fr.utbm.ciad.labmanager.views.appviews.charts.ChartsView;
 import fr.utbm.ciad.labmanager.views.appviews.conferences.ConferencesListView;
 import fr.utbm.ciad.labmanager.views.appviews.culture.ScientificCultureActionsListView;
 import fr.utbm.ciad.labmanager.views.appviews.database.DatabaseInputOutputView;
@@ -67,6 +69,7 @@ import fr.utbm.ciad.labmanager.views.appviews.memberships.MembershipsListView;
 import fr.utbm.ciad.labmanager.views.appviews.organizations.AddressesListView;
 import fr.utbm.ciad.labmanager.views.appviews.organizations.OrganizationsListView;
 import fr.utbm.ciad.labmanager.views.appviews.persons.MyProfileView;
+import fr.utbm.ciad.labmanager.views.appviews.persons.PersonsCardView;
 import fr.utbm.ciad.labmanager.views.appviews.persons.PersonsListView;
 import fr.utbm.ciad.labmanager.views.appviews.projects.PatentsListView;
 import fr.utbm.ciad.labmanager.views.appviews.projects.ProjectsListView;
@@ -199,6 +202,9 @@ public class MainLayout extends AppLayout implements LocaleChangeObserver, UserI
 
 	private SideNavItem about;
 
+	private SideNavItem statisticSection;
+
+	private SideNavItem charts;
 
 	/** Constructor.
 	 *
@@ -473,6 +479,17 @@ public class MainLayout extends AppLayout implements LocaleChangeObserver, UserI
 	 *
 	 * @return the created navigation panel.
 	 */
+	protected void createStatisticNavigation(SideNav nav) {
+		this.statisticSection = new SideNavItem(""); //$NON-NLS-1$
+		this.charts = new SideNavItem("", ChartsView.class, LineAwesomeIcon.CHART_BAR.create()); //$NON-NLS-1$
+		this.statisticSection.addItem(this.charts);
+		nav.addItem(this.statisticSection);
+	}
+
+	/** Create the menus in the navigation panel.
+	 *
+	 * @return the created navigation panel.
+	 */
 	protected SideNav createNavigationPanelContent() {
 		final var nav = new SideNav();
 		createWelcomeNavigation(nav);
@@ -486,6 +503,7 @@ public class MainLayout extends AppLayout implements LocaleChangeObserver, UserI
 		createExportNavigation(nav);
 		createDatabaseNavigation(nav);
 		createDocumentationNavigation(nav);
+		createStatisticNavigation(nav);
 		return nav;
 	}
 
@@ -607,7 +625,7 @@ public class MainLayout extends AppLayout implements LocaleChangeObserver, UserI
 		// Logout
 		//
 		this.logoutLink = mainMenu.addItem("", e -> { //$NON-NLS-1$
-			this.authenticatedUser.logout();
+			UI.getCurrent().getPage().executeJs("window.location.href = 'https://localhost:8443/LabManager/logout'");
 		});
 	}
 
@@ -808,6 +826,12 @@ public class MainLayout extends AppLayout implements LocaleChangeObserver, UserI
 			this.about.setLabel(getTranslation("views.navitem.about_app")); //$NON-NLS-1$
 		}
 
+		if (this.statisticSection != null) {
+			this.statisticSection.setLabel(getTranslation("views.navitem.statisticSection")); //$NON-NLS-1$
+		}
+		if (this.charts != null) {
+			this.charts.setLabel(getTranslation("views.navitem.charts")); //$NON-NLS-1$
+		}
 		if (this.loginLink != null) {
 			this.loginLink.setText(getTranslation("views.sign_in")); //$NON-NLS-1$
 		}

@@ -24,6 +24,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -94,6 +96,9 @@ public interface PersonRepository extends JpaRepository<Person, Long>, JpaSpecif
 	 */
 	List<Person> findByAuthorshipsPublicationIdOrderByAuthorshipsAuthorRank(long id);
 
+
+	long count();
+
 	@Query("SELECT p FROM Person p LEFT JOIN FETCH p.authorships m WHERE p.id = :id")
 	Optional<Person> findByIdJoinAuthorships(long id);
 
@@ -102,4 +107,41 @@ public interface PersonRepository extends JpaRepository<Person, Long>, JpaSpecif
 	@Query("SELECT p FROM Person p")
 	List<Person> findAll();
 
+	@Query("SELECT p FROM Person p JOIN p.memberships m WHERE LOWER(m.researchOrganization.acronym) LIKE LOWER(CONCAT('%', :organization, '%'))")
+	Page<Person> findAll(String organization, Pageable pageable);
+
+	@Query("SELECT p FROM Person p WHERE LOWER(p.firstName) LIKE LOWER(CONCAT('%', :name, '%')) OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :name, '%'))")
+	Page<Person> findByName(String name, Pageable pageable);
+	@Query("SELECT p FROM Person p JOIN p.memberships m WHERE LOWER(p.firstName) LIKE LOWER(CONCAT('%', :name, '%')) OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :name, '%')) AND LOWER(m.researchOrganization.acronym) LIKE LOWER(CONCAT('%', :organization, '%'))")
+	Page<Person> findByName(String name, String organization, Pageable pageable);
+
+	@Query("SELECT count(p) FROM Person p WHERE LOWER(p.firstName) LIKE LOWER(CONCAT('%', :name, '%')) OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :name, '%'))")
+	long countFindByName(String name);
+
+	@Query("SELECT count(p) FROM Person p JOIN p.memberships m WHERE LOWER(p.firstName) LIKE LOWER(CONCAT('%', :name, '%')) OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :name, '%'))  AND LOWER(m.researchOrganization.acronym) LIKE LOWER(CONCAT('%', :organization, '%'))")
+	long countFindByName(String name, String organization);
+
+	@Query("SELECT p FROM Person p WHERE LOWER(p.orcid) LIKE LOWER(CONCAT('%', :orcid, '%'))")
+	Page<Person> findByOrcid(String orcid, Pageable pageable);
+
+	@Query("SELECT p FROM Person p JOIN p.memberships m WHERE LOWER(p.orcid) LIKE LOWER(CONCAT('%', :orcid, '%')) AND LOWER(m.researchOrganization.acronym) LIKE LOWER(CONCAT('%', :organization, '%'))")
+	Page<Person> findByOrcid(String orcid, String organization, Pageable pageable);
+
+	@Query("SELECT count(p) FROM Person p WHERE LOWER(p.orcid) ILIKE LOWER(CONCAT('%', :orcid, '%'))")
+	long countFindByOrcid(String orcid);
+
+	@Query("SELECT count(p) FROM Person p JOIN p.memberships m WHERE LOWER(p.orcid) ILIKE LOWER(CONCAT('%', :orcid, '%')) AND LOWER(m.researchOrganization.acronym) LIKE LOWER(CONCAT('%', :organization, '%'))")
+	long countFindByOrcid(String orcid, String organization);
+
+	@Query("SELECT p FROM Person p JOIN p.memberships m WHERE LOWER(m.researchOrganization.acronym) LIKE LOWER(CONCAT('%', :orgName, '%'))")
+	Page<Person> findByOrganization(String orgName, Pageable pageable);
+
+	@Query("SELECT p FROM Person p JOIN p.memberships m WHERE LOWER(m.researchOrganization.acronym) LIKE LOWER(CONCAT('%', :orgName, '%')) AND LOWER(m.researchOrganization.acronym) LIKE LOWER(CONCAT('%', :organization, '%'))")
+	Page<Person> findByOrganization(String orgName, String organization, Pageable pageable);
+
+	@Query("SELECT count(p) FROM Person p JOIN p.memberships m WHERE LOWER(m.researchOrganization.acronym) LIKE LOWER(CONCAT('%', :orgName, '%'))")
+	long countFindByOrganization(String orgName);
+
+	@Query("SELECT count(p) FROM Person p JOIN p.memberships m WHERE LOWER(m.researchOrganization.acronym) LIKE LOWER(CONCAT('%', :orgName, '%')) AND LOWER(m.researchOrganization.acronym) LIKE LOWER(CONCAT('%', :organization, '%'))")
+	long countFindByOrganization(String orgName, String organization);
 }

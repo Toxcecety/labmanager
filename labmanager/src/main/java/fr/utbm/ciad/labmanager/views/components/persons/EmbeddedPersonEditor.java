@@ -42,6 +42,7 @@ public final class EmbeddedPersonEditor extends AbstractPersonEditor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EmbeddedPersonEditor.class);
 
+
     /** Constructor.
      *
      * @param userContext the editing context for the user.

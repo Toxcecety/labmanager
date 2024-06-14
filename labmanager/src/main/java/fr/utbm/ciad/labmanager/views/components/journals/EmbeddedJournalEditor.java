@@ -22,6 +22,8 @@ package fr.utbm.ciad.labmanager.views.components.journals;
 import fr.utbm.ciad.labmanager.components.security.AuthenticatedUser;
 import fr.utbm.ciad.labmanager.data.journal.Journal;
 import fr.utbm.ciad.labmanager.services.AbstractEntityService.EntityEditingContext;
+import fr.utbm.ciad.labmanager.services.journal.JournalService;
+import fr.utbm.ciad.labmanager.utils.names.JournalNameAndPublisherComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.MessageSourceAccessor;
@@ -48,9 +50,9 @@ public final class EmbeddedJournalEditor extends AbstractJournalEditor {
 	 * @param authenticatedUser the connected user.
 	 * @param messages the accessor to the localized messages (Spring layer).
 	 */
-	public EmbeddedJournalEditor(EntityEditingContext<Journal> context,
+	public EmbeddedJournalEditor(EntityEditingContext<Journal> context, JournalService journalService,
 			AuthenticatedUser authenticatedUser, MessageSourceAccessor messages) {
-		super(context, false, authenticatedUser, messages, LOGGER);
+		super(context, false, journalService, authenticatedUser, messages, LOGGER);
 		createEditorContentAndLinkBeans();
 	}
 
